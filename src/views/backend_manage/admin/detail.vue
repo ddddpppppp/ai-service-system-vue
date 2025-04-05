@@ -8,13 +8,14 @@ import eventBus from '@/utils/eventBus'
 import DetailForm from './components/DetailForm/index.vue'
 
 defineOptions({
-  name: 'BackendManageRoleDetail',
+  name: 'BackendManageAdminDetail',
 })
 
 const route = useRoute()
 const router = useRouter()
 
 const formRef = useTemplateRef('formRef')
+
 const btnDisabled = ref<boolean>(false)
 function onSubmit() {
   btnDisabled.value = true
@@ -31,13 +32,13 @@ function onCancel() {
 
 // 返回列表页
 function goBack() {
-  router.push({ name: 'backendManageRoleList' })
+  router.push({ name: 'backendManageAdminList' })
 }
 </script>
 
 <template>
   <div>
-    <FaPageHeader :title="!route.params.id ? '新增角色' : '编辑角色'">
+    <FaPageHeader :title="!route.params.id ? '新增员工' : '编辑员工'">
       <ElButton size="default" round @click="goBack">
         <template #icon>
           <FaIcon name="i-ep:arrow-left" />
@@ -53,7 +54,7 @@ function goBack() {
       </ElRow>
     </FaPageMain>
     <FaFixedActionBar>
-      <ElButton type="primary" :disabled="btnDisabled" size="large" @click="onSubmit">
+      <ElButton :disabled="btnDisabled" type="primary" size="large" @click="onSubmit">
         提交
       </ElButton>
       <ElButton size="large" @click="onCancel">

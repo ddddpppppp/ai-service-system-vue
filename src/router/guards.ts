@@ -7,6 +7,7 @@ import useRouteStore from '@/store/modules/route'
 import useSettingsStore from '@/store/modules/settings'
 import useTabbarStore from '@/store/modules/tabbar'
 import useUserStore from '@/store/modules/user'
+import storage from '@/utils/storage.ts'
 import { useNProgress } from '@vueuse/integrations/useNProgress'
 import { asyncRoutes, asyncRoutesByFilesystem } from './routes'
 import '@/assets/styles/nprogress.css'
@@ -103,7 +104,12 @@ function setupRoutes(router: Router) {
           }
           routeStore.setCurrentRemoveRoutes(removeRoutes)
         }
-        catch {}
+        catch {
+          storage.local.remove('token')
+          userStore.token = ''
+          userStore.logoutCleanStatus()
+          return next({ name: 'login' })
+        }
         // 动态路由生成并注册后，重新进入当前路由
         next({
           path: to.path,

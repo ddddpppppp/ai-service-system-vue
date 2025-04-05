@@ -7,11 +7,11 @@ import { diffTwoObj, mergeWithoutUndefinedProps } from '@/utils/object'
 import storage from '@/utils/storage'
 import { ElMessage } from 'element-plus'
 import { cloneDeep } from 'es-toolkit'
+import { toast } from 'vue-sonner'
 import useMenuStore from './menu'
 import useRouteStore from './route'
 import useSettingsStore from './settings'
 import useTabbarStore from './tabbar'
-import {toast} from "vue-sonner";
 
 const useUserStore = defineStore(
   // 唯一ID
@@ -264,6 +264,7 @@ const useUserStore = defineStore(
       login,
       logout,
       requestLogout,
+      logoutCleanStatus,
       getPermissions,
       editPassword,
       editInfo,

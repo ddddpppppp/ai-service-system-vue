@@ -97,8 +97,8 @@ defineExpose({
                 message: res.statusText,
                 center: true,
               })
-              resolve()
             }
+            resolve()
           })
         }
       })

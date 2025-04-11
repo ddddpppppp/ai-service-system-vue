@@ -31,7 +31,7 @@ function onCancel() {
 
 // 返回列表页
 function goBack() {
-  router.push({ name: 'backendManageRoleList' })
+  router.push({ name: 'backendManageRole' })
 }
 </script>
 

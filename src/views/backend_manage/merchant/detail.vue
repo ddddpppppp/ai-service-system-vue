@@ -32,7 +32,7 @@ function onCancel() {
 
 // 返回列表页
 function goBack() {
-  router.push({ name: 'backendManageMerchantList' })
+  router.push({ name: 'backendManageMerchant' })
 }
 </script>
 

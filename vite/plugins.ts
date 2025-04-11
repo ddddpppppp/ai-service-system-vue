@@ -16,15 +16,19 @@ import AppLoading from 'vite-plugin-app-loading'
 import Archiver from 'vite-plugin-archiver'
 import banner from 'vite-plugin-banner'
 import { compression } from 'vite-plugin-compression2'
+import electron from 'vite-plugin-electron/simple'
 import { envParse, parseLoadedEnv } from 'vite-plugin-env-parse'
 import { vitePluginFakeServer } from 'vite-plugin-fake-server'
 import Pages from 'vite-plugin-pages'
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
 import VueDevTools from 'vite-plugin-vue-devtools'
 import Layouts from 'vite-plugin-vue-meta-layouts'
+import pkg from '../package.json'
 
 export default function createVitePlugins(mode: string, isBuild = false) {
   const viteEnv = parseLoadedEnv(loadEnv(mode, process.cwd()))
+  const isServe = mode === 'serve'
+  const sourcemap = isServe || !!process.env.VSCODE_DEBUG
   const vitePlugins: (PluginOption | PluginOption[])[] = [
     vue(),
     vueJsx(),
@@ -177,7 +181,7 @@ export default function createVitePlugins(mode: string, isBuild = false) {
       apply: 'serve',
       async buildStart() {
         const { bold, green, magenta, bgGreen, underline } = picocolors
-        // eslint-disable-next-line no-console
+
         console.log(
           boxen(
             `${bold(green(`由 ${bgGreen('Fantastic-admin')} 驱动`))}\n\n${underline('https://fantastic-admin.hurui.me')}\n\n当前使用：${magenta('专业版')}`,
@@ -191,6 +195,54 @@ export default function createVitePlugins(mode: string, isBuild = false) {
         )
       },
     },
+
+    electron({
+      main: {
+        // Shortcut of `build.lib.entry`
+        entry: 'electron/main/index.ts',
+        onstart({ startup }) {
+          if (process.env.VSCODE_DEBUG) {
+            console.log(/* For `.vscode/.debug.script.mjs` */'[startup] Electron App')
+          }
+          else {
+            startup()
+          }
+        },
+        vite: {
+          build: {
+            sourcemap,
+            minify: isBuild,
+            outDir: 'dist-electron/main',
+            rollupOptions: {
+              // Some third-party Node.js libraries may not be built correctly by Vite, especially `C/C++` addons,
+              // we can use `external` to exclude them to ensure they work correctly.
+              // Others need to put them in `dependencies` to ensure they are collected into `app.asar` after the app is built.
+              // Of course, this is not absolute, just this way is relatively simple. :)
+              external: Object.keys('dependencies' in pkg ? pkg.dependencies : {}),
+            },
+          },
+        },
+      },
+      preload: {
+        // Shortcut of `build.rollupOptions.input`.
+        // Preload scripts may contain Web assets, so use the `build.rollupOptions.input` instead `build.lib.entry`.
+        input: 'electron/preload/index.ts',
+        vite: {
+          build: {
+            sourcemap: sourcemap ? 'inline' : undefined, // #332
+            minify: isBuild,
+            outDir: 'dist-electron/preload',
+            rollupOptions: {
+              external: Object.keys('dependencies' in pkg ? pkg.dependencies : {}),
+            },
+          },
+        },
+      },
+      // Ployfill the Electron and Node.js API for Renderer process.
+      // If you want use Node.js in Renderer process, the `nodeIntegration` needs to be enabled in the Main process.
+      // See 👉 https://github.com/electron-vite/vite-plugin-electron-renderer
+      // renderer: {},
+    }),
   ]
   return vitePlugins
 }

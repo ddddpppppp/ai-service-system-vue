@@ -8,7 +8,7 @@ import eventBus from '@/utils/eventBus'
 import DetailForm from './components/DetailForm/index.vue'
 
 defineOptions({
-  name: 'BackendManageAdminDetail',
+  name: 'BackendManageTriggerDetail',
 })
 
 const route = useRoute()
@@ -32,13 +32,13 @@ function onCancel() {
 
 // 返回列表页
 function goBack() {
-  router.push({ name: 'backendManageAdmin' })
+  router.push({ name: 'triggerConfig' })
 }
 </script>
 
 <template>
   <div>
-    <FaPageHeader :title="!route.params.id ? '新增员工' : '编辑员工'">
+    <FaPageHeader :title="!route.params.id ? '新增触发器' : '编辑触发器'">
       <ElButton size="default" round @click="goBack">
         <template #icon>
           <FaIcon name="i-ep:arrow-left" />

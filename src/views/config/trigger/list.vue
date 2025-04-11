@@ -4,12 +4,13 @@ meta:
 </route>
 
 <script setup lang="ts">
-import apiSetting from '@/api/modules/setting'
+import apiConfig from '@/api/modules/config'
 import eventBus from '@/utils/eventBus'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import VueJsonPretty from 'vue-json-pretty'
 
 defineOptions({
-  name: 'BackendManageAdminList',
+  name: 'ConfigTriggerList',
 })
 
 const router = useRouter()
@@ -66,7 +67,7 @@ function getDataList() {
     ...getParams(),
     ...(search.value.name && { name: search.value.name }),
   }
-  apiSetting.getAdminList(params).then((res: any) => {
+  apiConfig.getTriggerList(params).then((res: any) => {
     loading.value = false
     dataList.value = res.data.list
     pagination.value.total = res.data.total
@@ -90,7 +91,7 @@ function sortChange({ prop, order }: { prop: string, order: string }) {
 
 function onCreate() {
   router.push({
-    name: 'backendManageAdminDetail',
+    name: 'triggerConfigDetail',
     params: {
       id: 0,
     },
@@ -99,16 +100,16 @@ function onCreate() {
 
 function onEdit(row: any) {
   router.push({
-    name: 'backendManageAdminDetail',
+    name: 'triggerConfigDetail',
     params: {
-      id: row.uuid,
+      id: row.id,
     },
   })
 }
 
 function onDel(row: any) {
   ElMessageBox.confirm(`确认冻结「${row.name}」吗？`, '确认信息').then(() => {
-    apiSetting.delAdmin({ id: row.uuid }).then(() => {
+    apiConfig.delTrigger({ id: row.id }).then(() => {
       getDataList()
       ElMessage.success({
         message: '冻结成功',
@@ -122,40 +123,12 @@ function onDelBatch() {
   ElMessageBox.confirm(`确认批量冻结吗？`, '确认信息').then(() => {
     const ids: any[] = []
     batch.value.selectionDataList.forEach((item) => {
-      ids.push(item.uuid)
+      ids.push(item.id)
     })
-    apiSetting.delAdmin({ ids }).then(() => {
+    apiConfig.delTrigger({ ids }).then(() => {
       getDataList()
       ElMessage.success({
         message: '冻结成功',
-        center: true,
-      })
-    })
-  }).catch(() => {})
-}
-
-function onRecovery(row: any) {
-  ElMessageBox.confirm(`确认恢复「${row.name}」吗？`, '确认信息').then(() => {
-    apiSetting.delAdmin({ id: row.uuid }).then(() => {
-      getDataList()
-      ElMessage.success({
-        message: '恢复成功',
-        center: true,
-      })
-    })
-  }).catch(() => {})
-}
-
-function onRecoveryBatch() {
-  ElMessageBox.confirm(`确认批量恢复吗？`, '确认信息').then(() => {
-    const ids: any[] = []
-    batch.value.selectionDataList.forEach((item) => {
-      ids.push(item.uuid)
-    })
-    apiSetting.recoveryAdmin({ ids }).then(() => {
-      getDataList()
-      ElMessage.success({
-        message: '恢复成功',
         center: true,
       })
     })
@@ -165,13 +138,13 @@ function onRecoveryBatch() {
 
 <template>
   <div :class="{ 'absolute-container': tableAutoHeight }">
-    <FaPageHeader title="员工管理" class="mb-0" />
+    <FaPageHeader title="触发器管理" class="mb-0" />
     <FaPageMain :class="{ 'flex-1 overflow-auto': tableAutoHeight }" :main-class="{ 'flex-1 flex flex-col overflow-auto': tableAutoHeight }">
       <FaSearchBar :show-toggle="false">
         <template #default="{ fold, toggle }">
           <ElForm :model="search" size="default" label-width="100px" inline-message inline class="search-form">
             <ElFormItem label="名称">
-              <ElInput v-model="search.name" placeholder="请输入员工名称，支持模糊查询" clearable @keydown.enter="currentChange()" @clear="currentChange()" />
+              <ElInput v-model="search.name" placeholder="请输入触发器名称，支持模糊查询" clearable @keydown.enter="currentChange()" @clear="currentChange()" />
             </ElFormItem>
             <ElFormItem>
               <ElButton @click="searchReset(); currentChange()">
@@ -199,30 +172,32 @@ function onRecoveryBatch() {
           <template #icon>
             <FaIcon name="i-ep:plus" />
           </template>
-          新增员工
+          新增触发器
         </ElButton>
-<!--        <ElButton v-if="batch.enable" size="default" :disabled="!batch.selectionDataList.length" @click="onDelBatch">-->
-<!--          删除-->
-<!--        </ElButton>-->
-        <ElButtonGroup v-if="batch.enable">
-          <ElButton size="default" :disabled="!batch.selectionDataList.length" @click="onDelBatch">
-            冻结
-          </ElButton>
-          <ElButton size="default" :disabled="!batch.selectionDataList.length" @click="onRecoveryBatch">
-            恢复
-          </ElButton>
-        </ElButtonGroup>
+        <ElButton v-if="batch.enable" size="default" :disabled="!batch.selectionDataList.length" @click="onDelBatch">
+          删除
+        </ElButton>
+<!--        <ElButtonGroup v-if="batch.enable">-->
+<!--          <ElButton size="default" :disabled="!batch.selectionDataList.length" @click="onDelBatch">-->
+<!--            冻结-->
+<!--          </ElButton>-->
+<!--          <ElButton size="default" :disabled="!batch.selectionDataList.length" @click="onRecoveryBatch">-->
+<!--            恢复-->
+<!--          </ElButton>-->
+<!--        </ElButtonGroup>-->
       </ElSpace>
       <ElTable v-loading="loading" class="my-4" :data="dataList" stripe highlight-current-row border height="100%" @sort-change="sortChange" @selection-change="batch.selectionDataList = $event">
         <ElTableColumn v-if="batch.enable" type="selection" align="center" fixed />
-        <ElTableColumn prop="nickname" label="昵称" />
-        <ElTableColumn prop="username" label="登录账号" />
-        <ElTableColumn prop="roleName" label="角色" />
-        <ElTableColumn prop="statusName" label="状态">
+        <ElTableColumn prop="name" label="触发器名称" width="100" />
+        <ElTableColumn prop="statusName" label="规则" width="1200">
           <template #default="scope">
-            <ElButton :type="scope.row.statusClass" size="small">
-              {{ scope.row.statusName }}
-            </ElButton>
+            <VueJsonPretty
+class="vue-json-bg"
+              :data="scope.row.triggersObject"
+              deep="1"
+              show-length
+              highlight-mouseover
+            />
           </template>
         </ElTableColumn>
         <ElTableColumn prop="createdAt" label="生成时间" />
@@ -233,11 +208,8 @@ function onRecoveryBatch() {
             <ElButton type="primary" size="small" plain @click="onEdit(scope.row)">
               编辑
             </ElButton>
-            <ElButton v-if="scope.row.status === 1" type="danger" size="small" plain @click="onDel(scope.row)">
-              冻结
-            </ElButton>
-            <ElButton v-else type="primary" size="small" plain @click="onRecovery(scope.row)">
-              恢复
+            <ElButton type="danger" size="small" plain @click="onDel(scope.row)">
+              删除
             </ElButton>
           </template>
         </ElTableColumn>
@@ -277,5 +249,11 @@ function onRecoveryBatch() {
 .el-divider {
   width: calc(100% + 40px);
   margin-inline: -20px;
+}
+
+.vue-json-bg {
+  padding: 1rem;
+  background-color: #f4f4f4;
+  border-radius: 5px;
 }
 </style>

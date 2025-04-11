@@ -13,6 +13,7 @@ interface ImportMetaEnv {
    */
   readonly VITE_APP_API_BASEURL: string
   /**
+   * VITE_APP_API_BASEURL = https://php.aiservice.work
    * 调试工具，可设置 eruda 或 vconsole，如果不需要开启则留空
    */
   readonly VITE_APP_DEBUG_TOOL: string
@@ -28,4 +29,6 @@ interface ImportMetaEnv {
    * 是否开启开发者工具
    */
   readonly VITE_OPEN_DEVTOOLS: boolean
+  readonly VITE_DEV_SERVER_URL: string
+  readonly VITE_DEV_SERVER_PORT: number
 }

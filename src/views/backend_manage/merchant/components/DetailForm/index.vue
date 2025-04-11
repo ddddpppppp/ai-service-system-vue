@@ -25,7 +25,6 @@ const form = ref({
   username: '',
   password: '',
 })
-const roleList = ref([])
 let usernameDisabled = false
 const formRules = ref<FormRules>({
   avatar: [

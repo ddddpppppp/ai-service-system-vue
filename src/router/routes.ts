@@ -5,8 +5,11 @@ import pinia from '@/store'
 import useSettingsStore from '@/store/modules/settings'
 import generatedRoutes from 'virtual:generated-pages'
 import { setupLayouts } from 'virtual:meta-layouts'
-// import MultilevelMenuExample from './modules/multilevel.menu.example'
 import BackendManage from './modules/backend_manage.ts'
+import Config from './modules/config.ts'
+import Data from './modules/data.ts'
+// import MultilevelMenuExample from './modules/multilevel.menu.example'
+import WorkTable from './modules/work_table.ts'
 
 // 固定路由（默认路由）
 const constantRoutes: RouteRecordRaw[] = [
@@ -40,7 +43,7 @@ const systemRoutes: RouteRecordRaw[] = [
     children: [
       {
         path: '',
-        component: () => import('@/views/index.vue'),
+        component: () => import('@/views/work_table/dashboard/dashboard.vue'),
         meta: {
           title: $t(useSettingsStore(pinia).settings.home.title),
           icon: 'i-ant-design:home-twotone',
@@ -64,11 +67,38 @@ const systemRoutes: RouteRecordRaw[] = [
 const asyncRoutes: Route.recordMainRaw[] = [
   {
     meta: {
+      title: '工作台',
+      icon: 'i-uim:airplay',
+    },
+    children: [
+      ...WorkTable,
+    ],
+  },
+  {
+    meta: {
+      title: '数据',
+      icon: 'i-uim:chart',
+    },
+    children: [
+      ...Data,
+    ],
+  },
+  {
+    meta: {
       title: '管理',
       icon: 'i-uim:box',
     },
     children: [
       ...BackendManage,
+    ],
+  },
+  {
+    meta: {
+      title: '配置',
+      icon: 'i-uim:microsoft',
+    },
+    children: [
+      ...Config,
     ],
   },
 ]

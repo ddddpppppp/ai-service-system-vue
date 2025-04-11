@@ -6,3 +6,5 @@ dist-ssr
 .eslintcache
 .stylelintcache
 .idea
+release
+dist-electron

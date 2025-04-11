@@ -1,6 +1,6 @@
 <route lang="yaml">
 meta:
-  title: 主页
+  title: Dashborad
   icon: ant-design:home-twotone
 </route>
 

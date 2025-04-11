@@ -19,7 +19,7 @@ export default defineConfig(({ mode, command }) => {
   return {
     // 开发服务器选项 https://cn.vitejs.dev/config/server-options
     server: {
-      open: true,
+      open: false,
       host: true,
       port: 9000,
       proxy: {

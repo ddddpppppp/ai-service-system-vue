@@ -108,7 +108,7 @@ function onEdit(row: any) {
 
 function onDel(row: any) {
   ElMessageBox.confirm(`确认冻结「${row.name}」吗？`, '确认信息').then(() => {
-    apiSetting.delMerchant({ id: row.id }).then(() => {
+    apiSetting.delMerchant({ id: row.uuid }).then(() => {
       getDataList()
       ElMessage.success({
         message: '冻结成功',
@@ -122,7 +122,7 @@ function onDelBatch() {
   ElMessageBox.confirm(`确认批量冻结吗？`, '确认信息').then(() => {
     const ids: any[] = []
     batch.value.selectionDataList.forEach((item) => {
-      ids.push(item.id)
+      ids.push(item.uuid)
     })
     apiSetting.delMerchant({ ids }).then(() => {
       getDataList()
@@ -136,7 +136,7 @@ function onDelBatch() {
 
 function onRecovery(row: any) {
   ElMessageBox.confirm(`确认恢复「${row.name}」吗？`, '确认信息').then(() => {
-    apiSetting.delMerchant({ id: row.id }).then(() => {
+    apiSetting.delMerchant({ id: row.uuid }).then(() => {
       getDataList()
       ElMessage.success({
         message: '恢复成功',
@@ -150,7 +150,7 @@ function onRecoveryBatch() {
   ElMessageBox.confirm(`确认批量恢复吗？`, '确认信息').then(() => {
     const ids: any[] = []
     batch.value.selectionDataList.forEach((item) => {
-      ids.push(item.id)
+      ids.push(item.uuid)
     })
     apiSetting.recoveryMerchant({ ids }).then(() => {
       getDataList()

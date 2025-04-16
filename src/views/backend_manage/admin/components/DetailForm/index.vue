@@ -77,6 +77,7 @@ defineExpose({
     return new Promise<void>((resolve) => {
       formRef.value?.validate((valid) => {
         if (valid) {
+          loading.value = true
           apiSetting.editAdmin({ form: form.value }).then((res: any) => {
             loading.value = false
             if (res.status === 1) {

@@ -22,7 +22,7 @@
 import type { UploadProps } from 'element-plus'
 import { ElMessage } from 'element-plus'
 import { useI18n } from 'vue-i18n'
-import {toast} from "vue-sonner";
+import { toast } from 'vue-sonner'
 
 defineOptions({
   name: 'ImageUpload',

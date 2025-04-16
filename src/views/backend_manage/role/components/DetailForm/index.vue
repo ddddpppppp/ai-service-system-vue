@@ -90,6 +90,7 @@ defineExpose({
     return new Promise<void>((resolve) => {
       formRef.value?.validate((valid) => {
         if (valid) {
+          loading.value = true
           apiSetting.editRole({ form: form.value, routes: routes.value }).then((res: any) => {
             loading.value = false
             if (res.status === 1) {
@@ -114,7 +115,7 @@ defineExpose({
         <ElInput v-model="form.name" placeholder="请输入角色名称" />
       </ElFormItem>
       <ElFormItem label="权限">
-        <ElTable :data="routes"  stripe highlight-current-row default-expand-all border :style="{ lineHeight: 'normal' }">
+        <ElTable :data="routes" stripe highlight-current-row default-expand-all border :style="{ lineHeight: 'normal' }">
           <ElTableColumn width="300" label="模块">
             <template #default="{ row }">
               {{ row.name }}
@@ -125,7 +126,7 @@ defineExpose({
               <ElCheckbox v-if="row.children" :key="row.value" v-model="row.checked" @change="checkAllChecked(1)">
                 全选
               </ElCheckbox>
-              <div v-for="auth in row.children" :key="auth.name" class="mt-1 ml-4">
+              <div v-for="auth in row.children" :key="auth.name" class="ml-4 mt-1">
                 <ElCheckbox :key="auth.name" v-model="auth.checked" @change="checkAllChecked(2)">
                   {{ auth.name }}
                 </ElCheckbox>

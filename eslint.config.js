@@ -1,5 +1,6 @@
 import antfu from '@antfu/eslint-config'
 import vueI18n from '@intlify/eslint-plugin-vue-i18n'
+import prettierPlugin from 'eslint-plugin-prettier'
 
 export default antfu(
   {
@@ -11,6 +12,10 @@ export default antfu(
     ],
   },
   {
+    // 新增 Prettier 集成和保存自动修复配置
+    plugins: {
+      prettier: prettierPlugin,
+    },
     rules: {
       'no-console': 'off',
       'vue/html-comment-content-spacing': 'off',

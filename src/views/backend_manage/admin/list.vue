@@ -183,7 +183,7 @@ function onRecoveryBatch() {
                 </template>
                 筛选
               </ElButton>
-              <ElButton link disabled @click="toggle">
+              <ElButton disabled link @click="toggle">
                 <template #icon>
                   <FaIcon :name="fold ? 'i-ep:caret-bottom' : 'i-ep:caret-top' " />
                 </template>

@@ -42,9 +42,22 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'facebook_game',
         name: 'pluginFacebookGame',
-        component: () => import('@/views/work_table/plugin/facebook_game/facebook-game.vue'),
+        component: () => import('@/views/work_table/plugin/facebook_game/list.vue'),
         meta: {
-          title: 'Facebook',
+          title: 'FacebookGame',
+        },
+      },
+      {
+        path: 'facebook_game/detail/:id',
+        name: 'pluginFacebookGameDetail',
+        component: () => import('@/views/work_table/plugin/facebook_game/detail.vue'),
+        meta: {
+          title: 'facebook实例',
+          menu: false,
+          activeMenu: '/plugin/facebook_game',
+          cache: true,
+          noCache: 'pluginFacebookGame',
+          copyright: false,
         },
       },
     ],

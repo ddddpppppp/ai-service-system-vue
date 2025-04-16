@@ -8,3 +8,7 @@ dist-ssr
 .idea
 release
 dist-electron
+.cursor
+.cursorrules
+.cursorignore
+pnpm-lock.yaml

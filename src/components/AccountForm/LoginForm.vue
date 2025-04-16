@@ -209,7 +209,9 @@ const onSubmit = form.handleSubmit((values) => {
     </div>
     <div v-show="type === 'qrcode'">
       <div class="flex-col-center">
-          <div class="mt-25 mb-20">暂未开放</div>
+          <div class="mb-20 mt-25">
+暂未开放
+</div>
 <!--        <div class="mt-2 text-sm text-secondary-foreground op-50">-->
 <!--          {{ t('wechatQrcode') }}-->
 <!--        </div>-->

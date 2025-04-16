@@ -17,12 +17,4 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
     const [channel, ...omit] = args
     return ipcRenderer.invoke(channel, ...omit)
   },
-  hideWindow: (containerId) => {
-    try {
-      ipcRenderer.send('hide-container', containerId)
-    }
-    catch (error) {
-      console.error('Failed to send hide-container event:', error)
-    }
-  },
 })

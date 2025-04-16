@@ -31,4 +31,5 @@ interface ImportMetaEnv {
   readonly VITE_OPEN_DEVTOOLS: boolean
   readonly VITE_DEV_SERVER_URL: string
   readonly VITE_DEV_SERVER_PORT: number
+  readonly VITE_WS_URL: string
 }

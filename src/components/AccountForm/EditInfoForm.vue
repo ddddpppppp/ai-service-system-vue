@@ -1,9 +1,8 @@
-
 <script setup lang="ts">
 import type { FormInstance } from 'element-plus'
 import ImageUpload from '@/components/ImageUpload/index.vue'
 import useUserStore from '@/store/modules/user'
-import { FormField, FormItem, FormMessage } from '@/ui/shadcn/ui/form'
+import { FormField, FormItem } from '@/ui/shadcn/ui/form'
 import { inject } from 'vue'
 
 defineOptions({
@@ -59,12 +58,12 @@ function onSubmit() {
     <ElForm ref="formRef" :model="form">
       <FormField name="password">
         <FormItem class="relative pb-6 space-y-0">
-          <ImageUpload v-model="form.avatar" name="file" :width="150" :height="150" :action="uploadFileAction" @on-success="onUpdateAvatar"/>
+          <ImageUpload v-model="form.avatar" name="file" :width="150" :height="150" :action="uploadFileAction" @on-success="onUpdateAvatar" />
         </FormItem>
       </FormField>
       <FormField name="password">
         <FormItem class="relative pb-6 space-y-0">
-          <FaInput v-model="form.nickname" type="text" placeholder="请输入你的昵称"  class="w-full" />
+          <FaInput v-model="form.nickname" type="text" placeholder="请输入你的昵称" class="w-full" />
         </FormItem>
       </FormField>
       <FaButton :loading="loading" size="lg" class="mt-8 w-full" type="submit" @click="onSubmit">

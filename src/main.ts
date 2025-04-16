@@ -8,7 +8,6 @@ import directive from '@/utils/directive'
 // 错误日志上报
 import errorLog from '@/utils/error.log'
 
-
 import VWave from 'v-wave'
 import App from './App.vue'
 

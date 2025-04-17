@@ -176,14 +176,14 @@ function onDelBatch() {
         <ElButton v-if="batch.enable" size="default" :disabled="!batch.selectionDataList.length" @click="onDelBatch">
           删除
         </ElButton>
-<!--        <ElButtonGroup v-if="batch.enable">-->
-<!--          <ElButton size="default" :disabled="!batch.selectionDataList.length">-->
-<!--            批量操作按钮组1-->
-<!--          </ElButton>-->
-<!--          <ElButton size="default" :disabled="!batch.selectionDataList.length">-->
-<!--            删除-->
-<!--          </ElButton>-->
-<!--        </ElButtonGroup>-->
+        <!--        <ElButtonGroup v-if="batch.enable"> -->
+        <!--          <ElButton size="default" :disabled="!batch.selectionDataList.length"> -->
+        <!--            批量操作按钮组1 -->
+        <!--          </ElButton> -->
+        <!--          <ElButton size="default" :disabled="!batch.selectionDataList.length"> -->
+        <!--            删除 -->
+        <!--          </ElButton> -->
+        <!--        </ElButtonGroup> -->
       </ElSpace>
       <ElTable v-loading="loading" class="my-4" :data="dataList" stripe highlight-current-row border height="100%" @sort-change="sortChange" @selection-change="batch.selectionDataList = $event">
         <ElTableColumn v-if="batch.enable" type="selection" align="center" fixed />

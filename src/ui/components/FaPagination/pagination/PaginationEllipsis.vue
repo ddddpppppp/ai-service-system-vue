@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { PaginationEllipsisProps } from 'radix-vue'
+import type { PaginationEllipsisProps } from 'reka-ui'
 import type { HTMLAttributes } from 'vue'
 import { cn } from '@/utils'
 import { MoreHorizontal } from 'lucide-vue-next'
-import { PaginationEllipsis } from 'radix-vue'
+import { PaginationEllipsis } from 'reka-ui'
 import { computed } from 'vue'
 
 const props = defineProps<PaginationEllipsisProps & { class?: HTMLAttributes['class'] }>()

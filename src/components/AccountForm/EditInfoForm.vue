@@ -47,14 +47,14 @@ function onSubmit() {
 
 <template>
   <div class="w-full flex-col-stretch-center">
-<!--    <div class="mb-6 space-y-2">-->
-<!--      <h3 class="text-4xl color-[var(&#45;&#45;el-text-color-primary)] font-bold">-->
-<!--        {{ t('intro') }}-->
-<!--      </h3>-->
-<!--      <p class="text-sm text-muted-foreground lg:text-base">-->
-<!--        {{ t('subIntro') }}-->
-<!--      </p>-->
-<!--    </div>-->
+    <!--    <div class="mb-6 space-y-2"> -->
+    <!--      <h3 class="text-4xl color-[var(&#45;&#45;el-text-color-primary)] font-bold"> -->
+    <!--        {{ t('intro') }} -->
+    <!--      </h3> -->
+    <!--      <p class="text-sm text-muted-foreground lg:text-base"> -->
+    <!--        {{ t('subIntro') }} -->
+    <!--      </p> -->
+    <!--    </div> -->
     <ElForm ref="formRef" :model="form">
       <FormField name="password">
         <FormItem class="relative pb-6 space-y-0">

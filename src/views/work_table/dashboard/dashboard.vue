@@ -79,8 +79,8 @@ const conversationType = ref('全部任务')
     <!-- 顶部标题和筛选器 -->
     <div class="dashboard-header">
       <div class="title">
-11/16-12/21数据（全部会话数据分析...）
-</div>
+        11/16-12/21数据（全部会话数据分析...）
+      </div>
       <div class="filters">
         <div class="filter-item">
           <span class="filter-label">会话任务：</span>
@@ -104,14 +104,14 @@ const conversationType = ref('全部任务')
           <div class="card-content">
             <div class="card-info">
               <div class="card-title">
-{{ card.label }}
-</div>
+                {{ card.label }}
+              </div>
               <div class="card-value">
                 {{ card.value }}<span v-if="card.unit">{{ card.unit }}</span>
               </div>
               <div class="card-subtext">
-{{ card.subText }}
-</div>
+                {{ card.subText }}
+              </div>
             </div>
             <div class="card-chart">
               <div
@@ -129,8 +129,8 @@ const conversationType = ref('全部任务')
       <el-col :span="12">
         <el-card shadow="hover">
           <div class="chart-title">
-会话趋势
-</div>
+            会话趋势
+          </div>
           <div class="bar-chart">
             <div
               v-for="(item, index) in chatTrends"
@@ -138,12 +138,12 @@ const conversationType = ref('全部任务')
               class="chart-column"
             >
               <div class="y-axis-label">
-{{ item.hours }}
-</div>
+                {{ item.hours }}
+              </div>
               <div class="bar" :style="{ height: `${item.value}px` }" />
               <div class="x-axis-label">
-{{ item.day }}
-</div>
+                {{ item.day }}
+              </div>
             </div>
           </div>
         </el-card>
@@ -152,8 +152,8 @@ const conversationType = ref('全部任务')
       <el-col :span="12">
         <el-card shadow="hover">
           <div class="chart-title">
-机器人响应时间
-</div>
+            机器人响应时间
+          </div>
           <div class="response-stats">
             <span class="stat-item">平均响应时间 <strong>15.5</strong>秒</span>
             <span class="stat-item">最长响应时间 <strong>45.5</strong>秒</span>
@@ -170,13 +170,13 @@ const conversationType = ref('全部任务')
                 :class="{ highlight: index === 1 }"
               />
               <div class="x-axis-label time-label">
-{{ item.time }}
-</div>
+                {{ item.time }}
+              </div>
             </div>
           </div>
           <div class="time-segment-label">
-时间段
-</div>
+            时间段
+          </div>
         </el-card>
       </el-col>
     </el-row>
@@ -184,8 +184,8 @@ const conversationType = ref('全部任务')
     <!-- 底部系统状态 -->
     <el-card shadow="hover" class="system-status-card">
       <div class="chart-title">
-系统健康状态
-</div>
+        系统健康状态
+      </div>
       <el-table :data="systemStatus" style="width: 100%;">
         <el-table-column prop="status" label="健康情况" />
         <el-table-column prop="api" label="API调用成功率" />

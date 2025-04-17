@@ -118,25 +118,25 @@ function sortChange({ prop, order }: { prop: string, order: string }) {
         </template>
       </FaSearchBar>
       <ElDivider border-style="dashed" />
-<!--      <ElSpace wrap>-->
-<!--        <ElButton type="primary" size="default" @click="onCreate">-->
-<!--          <template #icon>-->
-<!--            <FaIcon name="i-ep:plus" />-->
-<!--          </template>-->
-<!--          新增日志-->
-<!--        </ElButton>-->
-<!--        <ElButton v-if="batch.enable" size="default" :disabled="!batch.selectionDataList.length" @click="onDelBatch">-->
-<!--          删除-->
-<!--        </ElButton>-->
-<!--        <ElButtonGroup v-if="batch.enable">-->
-<!--          <ElButton size="default" :disabled="!batch.selectionDataList.length" @click="onDelBatch">-->
-<!--            冻结-->
-<!--          </ElButton>-->
-<!--          <ElButton size="default" :disabled="!batch.selectionDataList.length" @click="onRecoveryBatch">-->
-<!--            恢复-->
-<!--          </ElButton>-->
-<!--        </ElButtonGroup>-->
-<!--      </ElSpace>-->
+      <!--      <ElSpace wrap> -->
+      <!--        <ElButton type="primary" size="default" @click="onCreate"> -->
+      <!--          <template #icon> -->
+      <!--            <FaIcon name="i-ep:plus" /> -->
+      <!--          </template> -->
+      <!--          新增日志 -->
+      <!--        </ElButton> -->
+      <!--        <ElButton v-if="batch.enable" size="default" :disabled="!batch.selectionDataList.length" @click="onDelBatch"> -->
+      <!--          删除 -->
+      <!--        </ElButton> -->
+      <!--        <ElButtonGroup v-if="batch.enable"> -->
+      <!--          <ElButton size="default" :disabled="!batch.selectionDataList.length" @click="onDelBatch"> -->
+      <!--            冻结 -->
+      <!--          </ElButton> -->
+      <!--          <ElButton size="default" :disabled="!batch.selectionDataList.length" @click="onRecoveryBatch"> -->
+      <!--            恢复 -->
+      <!--          </ElButton> -->
+      <!--        </ElButtonGroup> -->
+      <!--      </ElSpace> -->
       <ElTable v-loading="loading" class="my-4" :data="dataList" stripe highlight-current-row border height="100%" @sort-change="sortChange" @selection-change="batch.selectionDataList = $event">
         <ElTableColumn v-if="batch.enable" type="selection" align="center" fixed />
         <ElTableColumn prop="merName" label="商户" />
@@ -144,19 +144,19 @@ function sortChange({ prop, order }: { prop: string, order: string }) {
         <ElTableColumn prop="content" label="日志内容" />
         <ElTableColumn prop="createdAt" label="生成时间" />
 
-<!--        <ElTableColumn label="操作" width="250" align="center" fixed="right">-->
-<!--          <template #default="scope">-->
-<!--            <ElButton type="primary" size="small" plain @click="onEdit(scope.row)">-->
-<!--              编辑-->
-<!--            </ElButton>-->
-<!--            <ElButton v-if="scope.row.status === 1" type="danger" size="small" plain @click="onDel(scope.row)">-->
-<!--              冻结-->
-<!--            </ElButton>-->
-<!--            <ElButton v-else type="primary" size="small" plain @click="onRecovery(scope.row)">-->
-<!--              恢复-->
-<!--            </ElButton>-->
-<!--          </template>-->
-<!--        </ElTableColumn>-->
+        <!--        <ElTableColumn label="操作" width="250" align="center" fixed="right"> -->
+        <!--          <template #default="scope"> -->
+        <!--            <ElButton type="primary" size="small" plain @click="onEdit(scope.row)"> -->
+        <!--              编辑 -->
+        <!--            </ElButton> -->
+        <!--            <ElButton v-if="scope.row.status === 1" type="danger" size="small" plain @click="onDel(scope.row)"> -->
+        <!--              冻结 -->
+        <!--            </ElButton> -->
+        <!--            <ElButton v-else type="primary" size="small" plain @click="onRecovery(scope.row)"> -->
+        <!--              恢复 -->
+        <!--            </ElButton> -->
+        <!--          </template> -->
+        <!--        </ElTableColumn> -->
       </ElTable>
       <ElPagination :current-page="pagination.page" :total="pagination.total" :page-size="pagination.size" :page-sizes="pagination.sizes" :layout="pagination.layout" :hide-on-single-page="false" class="pagination" background @size-change="sizeChange" @current-change="currentChange" />
     </FaPageMain>

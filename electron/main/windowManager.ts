@@ -1,6 +1,7 @@
+import path from 'node:path'
 import process from 'node:process'
 import { BrowserWindow, session } from 'electron'
-import { indexHtml, preloadJs, url } from '../config/pathConfig'
+import { __dirname, indexHtml, preloadJs, url } from '../config/pathConfig'
 
 let controlWindow: BrowserWindow | null = null
 const mainWindows: { window: BrowserWindow, containerId: string }[] = []
@@ -19,6 +20,7 @@ export function createControlWindow() {
   controlWindow = new BrowserWindow({
     width: 1600,
     height: 600,
+    icon: path.join(__dirname, '../../icon.png'),
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: true,
@@ -44,6 +46,7 @@ export function createBrowserWindow(containerId: string) {
   const window = new BrowserWindow({
     width: 1200,
     height: 900,
+    icon: path.join(__dirname, '/icon.png'),
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,

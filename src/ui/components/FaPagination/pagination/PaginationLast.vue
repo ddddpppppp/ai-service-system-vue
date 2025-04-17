@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { PaginationLastProps } from 'radix-vue'
+import type { PaginationLastProps } from 'reka-ui'
 import type { HTMLAttributes } from 'vue'
 import { cn } from '@/utils'
 import { ChevronsRight } from 'lucide-vue-next'
-import { PaginationLast } from 'radix-vue'
+import { PaginationLast } from 'reka-ui'
 import { computed } from 'vue'
 
 const props = withDefaults(defineProps<PaginationLastProps & { class?: HTMLAttributes['class'] }>(), {

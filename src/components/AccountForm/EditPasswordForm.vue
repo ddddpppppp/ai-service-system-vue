@@ -74,14 +74,20 @@ const loading = ref(false)
 
 const form = useForm({
   validationSchema: toTypedSchema(
-    z.object({
-      password: z.string().min(1, t('rules.password')),
-      newPassword: z.string().min(1, t('rules.newPassword')).min(6, t('rules.passwordLength')).max(18, t('rules.passwordLength')),
-      checkPassword: z.string().min(1, t('rules.checkPassword')),
-    }).refine(data => data.newPassword === data.checkPassword, {
-      message: t('rules.checkPasswordError'),
-      path: ['checkPassword'],
-    }),
+    z
+      .object({
+        password: z.string().min(1, t('rules.password')),
+        newPassword: z
+          .string()
+          .min(1, t('rules.newPassword'))
+          .min(6, t('rules.passwordLength'))
+          .max(18, t('rules.passwordLength')),
+        checkPassword: z.string().min(1, t('rules.checkPassword')),
+      })
+      .refine(data => data.newPassword === data.checkPassword, {
+        message: t('rules.checkPasswordError'),
+        path: ['checkPassword'],
+      }),
   ),
   initialValues: {
     password: '',
@@ -91,12 +97,15 @@ const form = useForm({
 })
 const onSubmit = form.handleSubmit((values) => {
   loading.value = true
-  userStore.editPassword(values).then(async () => {
-    toast.success('修改成功，请重新登录')
-    userStore.logout()
-  }).finally(() => {
-    loading.value = false
-  })
+  userStore
+    .editPassword(values)
+    .then(async () => {
+      toast.success('修改成功，请重新登录')
+      userStore.logout()
+    })
+    .finally(() => {
+      loading.value = false
+    })
 })
 </script>
 
@@ -114,9 +123,20 @@ const onSubmit = form.handleSubmit((values) => {
       <FormField v-slot="{ componentField, errors }" name="password">
         <FormItem class="relative pb-6 space-y-0">
           <FormControl>
-            <FaInput type="password" :placeholder="t('form.password')" class="w-full" :class="errors.length && 'border-destructive'" v-bind="componentField" />
+            <FaInput
+              type="password"
+              :placeholder="t('form.password')"
+              class="w-full"
+              :class="errors.length && 'border-destructive'"
+              v-bind="componentField"
+            />
           </FormControl>
-          <Transition enter-active-class="transition-opacity" enter-from-class="opacity-0" leave-active-class="transition-opacity" leave-to-class="opacity-0">
+          <Transition
+            enter-active-class="transition-opacity"
+            enter-from-class="opacity-0"
+            leave-active-class="transition-opacity"
+            leave-to-class="opacity-0"
+          >
             <FormMessage class="absolute bottom-1 text-xs" />
           </Transition>
         </FormItem>
@@ -124,9 +144,20 @@ const onSubmit = form.handleSubmit((values) => {
       <FormField v-slot="{ componentField, errors }" name="newPassword">
         <FormItem class="relative pb-6 space-y-0">
           <FormControl>
-            <FaInput type="password" :placeholder="t('form.newPassword')" class="w-full" :class="errors.length && 'border-destructive'" v-bind="componentField" />
+            <FaInput
+              type="password"
+              :placeholder="t('form.newPassword')"
+              class="w-full"
+              :class="errors.length && 'border-destructive'"
+              v-bind="componentField"
+            />
           </FormControl>
-          <Transition enter-active-class="transition-opacity" enter-from-class="opacity-0" leave-active-class="transition-opacity" leave-to-class="opacity-0">
+          <Transition
+            enter-active-class="transition-opacity"
+            enter-from-class="opacity-0"
+            leave-active-class="transition-opacity"
+            leave-to-class="opacity-0"
+          >
             <FormMessage class="absolute bottom-1 text-xs" />
           </Transition>
         </FormItem>
@@ -134,9 +165,20 @@ const onSubmit = form.handleSubmit((values) => {
       <FormField v-slot="{ componentField, errors }" name="checkPassword">
         <FormItem class="relative pb-6 space-y-0">
           <FormControl>
-            <FaInput type="password" :placeholder="t('form.checkPassword')" class="w-full" :class="errors.length && 'border-destructive'" v-bind="componentField" />
+            <FaInput
+              type="password"
+              :placeholder="t('form.checkPassword')"
+              class="w-full"
+              :class="errors.length && 'border-destructive'"
+              v-bind="componentField"
+            />
           </FormControl>
-          <Transition enter-active-class="transition-opacity" enter-from-class="opacity-0" leave-active-class="transition-opacity" leave-to-class="opacity-0">
+          <Transition
+            enter-active-class="transition-opacity"
+            enter-from-class="opacity-0"
+            leave-active-class="transition-opacity"
+            leave-to-class="opacity-0"
+          >
             <FormMessage class="absolute bottom-1 text-xs" />
           </Transition>
         </FormItem>

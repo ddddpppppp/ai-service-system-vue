@@ -113,10 +113,10 @@ defineExpose({
       <ElFormItem label="角色" prop="roleId">
         <el-radio-group v-model="form.roleId">
           <el-radio v-for="(role, index) in roleList" :key="index" :value="role.id">
-          {{ role.name }}
+            {{ role.name }}
           </el-radio>
         </el-radio-group>
       </ElFormItem>
-</ElForm>
+    </ElForm>
   </div>
 </template>

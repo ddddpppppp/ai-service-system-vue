@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { DropdownMenuContentProps } from 'radix-vue'
+import type { DropdownMenuContentProps } from 'reka-ui'
 import useSettingsStore from '@/store/modules/settings'
 import {
   DropdownMenu,

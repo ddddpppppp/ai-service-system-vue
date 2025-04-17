@@ -2,7 +2,7 @@ import path, { join } from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
+export const __dirname = path.dirname(fileURLToPath(import.meta.url))
 process.env.APP_ROOT = path.join(__dirname, '../..')
 
 export const RENDERER_DIST = path.join(process.env.APP_ROOT, 'dist')

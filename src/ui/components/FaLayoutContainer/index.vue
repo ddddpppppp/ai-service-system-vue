@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { HTMLAttributes } from 'vue'
 import { cn } from '@/utils'
 
 defineOptions({
@@ -20,6 +21,12 @@ const props = withDefaults(
     hideRightSideToggle?: boolean
     hideTopSideToggle?: boolean
     hideBottomSideToggle?: boolean
+    class?: HTMLAttributes['class']
+    leftSideClass?: HTMLAttributes['class']
+    rightSideClass?: HTMLAttributes['class']
+    topSideClass?: HTMLAttributes['class']
+    bottomSideClass?: HTMLAttributes['class']
+    defaultClass?: HTMLAttributes['class']
   }>(),
   {
     vertical: false,
@@ -66,12 +73,12 @@ const bottomSideTeleportId = useId()
   <div
     :class="cn('absolute h-full w-full flex gap-4 p-4', {
       'flex-col': vertical,
-    })"
+    }, props.class)"
   >
     <div :id="topSideTeleportId" class="contents empty:hidden" />
     <div :class="vertical ? 'flex flex-1 gap-4' : 'contents'">
       <div
-        v-if="enabledLeftSide" v-show="leftSideVisiable" class="h-full flex-none overflow-auto border rounded-lg bg-background p-4 transition-background-color-300" :style="{
+        v-if="enabledLeftSide" v-show="leftSideVisiable" :class="cn('h-full flex-none overflow-auto border rounded-lg bg-background p-4 transition-background-color-300', props.leftSideClass)" :style="{
           width: typeof leftSideWidth === 'number' ? `${leftSideWidth}px` : leftSideWidth,
         }"
       >
@@ -80,7 +87,7 @@ const bottomSideTeleportId = useId()
       <div class="flex flex-1 flex-col gap-4">
         <Teleport :to="`#${topSideTeleportId}`" defer :disabled="!vertical">
           <div
-            v-if="enabledTopSide" v-show="topSideVisiable" class="w-full border rounded-lg bg-background p-4 transition-background-color-300" :style="{
+            v-if="enabledTopSide" v-show="topSideVisiable" :class="cn('w-full border rounded-lg bg-background p-4 transition-background-color-300', props.topSideClass)" :style="{
               height: typeof topSideHeight === 'number' ? `${topSideHeight}px` : topSideHeight,
             }"
           >
@@ -100,13 +107,13 @@ const bottomSideTeleportId = useId()
           <div v-if="enabledBottomSide && !hideBottomSideToggle" class="group bottom-side-icon absolute left-1/2 z-1 h-6 w-6 flex-center rotate-45 cursor-pointer border-b border-r rounded-1/2 bg-background -bottom-3 -translate-x-1/2" @click="bottomSideVisiable = !bottomSideVisiable">
             <FaIcon :name="bottomSideVisiable ? 'i-ep:caret-bottom' : 'i-ep:caret-top'" class="op-30 transition-opacity -rotate-45 group-hover-op-100" />
           </div>
-          <div class="absolute inset-0 h-full w-full overflow-auto border rounded-lg bg-background p-4 transition-background-color-300">
+          <div :class="cn('absolute inset-0 h-full w-full overflow-auto border rounded-lg bg-background p-4 transition-background-color-300', props.defaultClass)">
             <slot name="default" />
           </div>
         </div>
         <Teleport :to="`#${bottomSideTeleportId}`" defer :disabled="!vertical">
           <div
-            v-if="enabledBottomSide" v-show="bottomSideVisiable" class="w-full border rounded-lg bg-background p-4 transition-background-color-300" :style="{
+            v-if="enabledBottomSide" v-show="bottomSideVisiable" :class="cn('w-full border rounded-lg bg-background p-4 transition-background-color-300', props.bottomSideClass)" :style="{
               height: typeof bottomSideHeight === 'number' ? `${bottomSideHeight}px` : bottomSideHeight,
             }"
           >
@@ -115,7 +122,7 @@ const bottomSideTeleportId = useId()
         </Teleport>
       </div>
       <div
-        v-if="enabledRightSide" v-show="rightSideVisiable" class="h-full flex-none overflow-auto border rounded-lg bg-background p-4 transition-background-color-300" :style="{
+        v-if="enabledRightSide" v-show="rightSideVisiable" :class="cn('h-full flex-none overflow-auto border rounded-lg bg-background p-4 transition-background-color-300', props.rightSideClass)" :style="{
           width: typeof rightSideWidth === 'number' ? `${rightSideWidth}px` : rightSideWidth,
         }"
       >

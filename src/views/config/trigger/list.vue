@@ -177,14 +177,14 @@ function onDelBatch() {
         <ElButton v-if="batch.enable" size="default" :disabled="!batch.selectionDataList.length" @click="onDelBatch">
           删除
         </ElButton>
-<!--        <ElButtonGroup v-if="batch.enable">-->
-<!--          <ElButton size="default" :disabled="!batch.selectionDataList.length" @click="onDelBatch">-->
-<!--            冻结-->
-<!--          </ElButton>-->
-<!--          <ElButton size="default" :disabled="!batch.selectionDataList.length" @click="onRecoveryBatch">-->
-<!--            恢复-->
-<!--          </ElButton>-->
-<!--        </ElButtonGroup>-->
+        <!--        <ElButtonGroup v-if="batch.enable"> -->
+        <!--          <ElButton size="default" :disabled="!batch.selectionDataList.length" @click="onDelBatch"> -->
+        <!--            冻结 -->
+        <!--          </ElButton> -->
+        <!--          <ElButton size="default" :disabled="!batch.selectionDataList.length" @click="onRecoveryBatch"> -->
+        <!--            恢复 -->
+        <!--          </ElButton> -->
+        <!--        </ElButtonGroup> -->
       </ElSpace>
       <ElTable v-loading="loading" class="my-4" :data="dataList" stripe highlight-current-row border height="100%" @sort-change="sortChange" @selection-change="batch.selectionDataList = $event">
         <ElTableColumn v-if="batch.enable" type="selection" align="center" fixed />
@@ -192,7 +192,7 @@ function onDelBatch() {
         <ElTableColumn prop="statusName" label="规则" width="1200">
           <template #default="scope">
             <VueJsonPretty
-class="vue-json-bg"
+              class="vue-json-bg"
               :data="scope.row.triggersObject"
               deep="1"
               show-length

@@ -13,13 +13,15 @@
 </i18n>
 
 <script setup lang="ts">
+import type { HTMLAttributes } from 'vue'
 import useSettingsStore from '@/store/modules/settings'
 import { cn } from '@/utils'
 import { useClipboard } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
 
-defineProps<{
+const props = defineProps<{
   code: string
+  class?: HTMLAttributes['class']
 }>()
 
 const settingsStore = useSettingsStore()
@@ -33,7 +35,7 @@ const { copy, copied, isSupported } = useClipboard()
   <div
     :class="cn('group relative w-full rounded-lg bg-dark p-4 text-light', {
       'bg-dark': settingsStore.mode === 'mobile',
-    })"
+    }, props.class)"
   >
     <pre class="w-full overflow-auto whitespace-pre-line">
       <code class="whitespace-pre" tabindex="0">{{ code }}</code>

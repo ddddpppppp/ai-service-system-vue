@@ -201,9 +201,9 @@ function onRecoveryBatch() {
           </template>
           新增员工
         </ElButton>
-<!--        <ElButton v-if="batch.enable" size="default" :disabled="!batch.selectionDataList.length" @click="onDelBatch">-->
-<!--          删除-->
-<!--        </ElButton>-->
+        <!--        <ElButton v-if="batch.enable" size="default" :disabled="!batch.selectionDataList.length" @click="onDelBatch"> -->
+        <!--          删除 -->
+        <!--        </ElButton> -->
         <ElButtonGroup v-if="batch.enable">
           <ElButton size="default" :disabled="!batch.selectionDataList.length" @click="onDelBatch">
             冻结

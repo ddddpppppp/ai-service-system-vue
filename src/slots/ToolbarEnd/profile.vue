@@ -28,9 +28,9 @@ const tabs = ref([
       </div>
     </div>
     <div class="ms-40 min-h-full flex-col-center p-10">
-<!--      <div v-if="active === 0">-->
-<!--        请开发者自行扩展-->
-<!--      </div>-->
+      <!--      <div v-if="active === 0"> -->
+      <!--        请开发者自行扩展 -->
+      <!--      </div> -->
       <EditInfoForm v-if="active === 0" />
       <EditPasswordForm v-if="active === 1" />
     </div>

@@ -181,40 +181,40 @@ const onSubmit = form.handleSubmit((values) => {
               </FormItem>
             </FormField>
           </div>
-<!--          <FaButton variant="link" class="h-auto p-0" type="button" @click="emits('onResetPassword', form.values.account)">-->
-<!--            {{ t('forget') }}-->
-<!--          </FaButton>-->
+          <!--          <FaButton variant="link" class="h-auto p-0" type="button" @click="emits('onResetPassword', form.values.account)"> -->
+          <!--            {{ t('forget') }} -->
+          <!--          </FaButton> -->
         </div>
         <FaButton :loading="loading" size="lg" class="w-full" type="submit">
           {{ t('form.login') }}
         </FaButton>
-<!--        <div class="mt-4 flex-center gap-2 text-sm">-->
-<!--          <span class="text-secondary-foreground op-50">{{ t('noAccount') }}</span>-->
-<!--          <FaButton variant="link" class="h-auto p-0" type="button" @click="emits('onRegister', form.values.account)">-->
-<!--            {{ t('register') }}-->
-<!--          </FaButton>-->
-<!--        </div>-->
+        <!--        <div class="mt-4 flex-center gap-2 text-sm"> -->
+        <!--          <span class="text-secondary-foreground op-50">{{ t('noAccount') }}</span> -->
+        <!--          <FaButton variant="link" class="h-auto p-0" type="button" @click="emits('onRegister', form.values.account)"> -->
+        <!--            {{ t('register') }} -->
+        <!--          </FaButton> -->
+        <!--        </div> -->
       </form>
-<!--      <div class="mt-4 text-center -mb-4">-->
-<!--        <FaDivider>{{ t('testLogin') }}</FaDivider>-->
-<!--        <div class="space-x-2">-->
-<!--          <FaButton variant="default" size="sm" plain @click="testAccount('admin')">-->
-<!--            admin-->
-<!--          </FaButton>-->
-<!--          <FaButton variant="outline" size="sm" plain @click="testAccount('test')">-->
-<!--            test-->
-<!--          </FaButton>-->
-<!--        </div>-->
-<!--      </div>-->
+      <!--      <div class="mt-4 text-center -mb-4"> -->
+      <!--        <FaDivider>{{ t('testLogin') }}</FaDivider> -->
+      <!--        <div class="space-x-2"> -->
+      <!--          <FaButton variant="default" size="sm" plain @click="testAccount('admin')"> -->
+      <!--            admin -->
+      <!--          </FaButton> -->
+      <!--          <FaButton variant="outline" size="sm" plain @click="testAccount('test')"> -->
+      <!--            test -->
+      <!--          </FaButton> -->
+      <!--        </div> -->
+      <!--      </div> -->
     </div>
     <div v-show="type === 'qrcode'">
       <div class="flex-col-center">
-          <div class="mb-20 mt-25">
-暂未开放
-</div>
-<!--        <div class="mt-2 text-sm text-secondary-foreground op-50">-->
-<!--          {{ t('wechatQrcode') }}-->
-<!--        </div>-->
+        <div class="mb-20 mt-25">
+          暂未开放
+        </div>
+        <!--        <div class="mt-2 text-sm text-secondary-foreground op-50"> -->
+        <!--          {{ t('wechatQrcode') }} -->
+        <!--        </div> -->
       </div>
     </div>
   </div>

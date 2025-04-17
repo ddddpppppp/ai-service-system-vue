@@ -44,6 +44,7 @@ const routes: RouteRecordRaw[] = [
         name: 'pluginFacebookGame',
         component: () => import('@/views/work_table/plugin/facebook_game/list.vue'),
         meta: {
+          auth: 'pluginFacebookGame.browse',
           title: 'FacebookGame',
         },
       },

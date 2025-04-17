@@ -22,6 +22,15 @@ export default {
   syncChromeFacebook: (data: any) => api.post('shop/work_table/syncChromeFacebook', data).then((res) => {
     return res
   }),
+  visitChromeFacebook: (data: any) => api.post('shop/work_table/visitChromeFacebook', data).then((res) => {
+    return res
+  }),
+  setChromeFacebookAiStatus: (data: any) => api.post('shop/work_table/setChromeFacebookAiStatus', data).then((res) => {
+    return res
+  }),
+  getChromeFacebookConfig: (data: any) => api.post('shop/work_table/getChromeFacebookConfig', data).then((res) => {
+    return res
+  }),
   saveChromeFacebookConfig: (data: any) => api.post('shop/work_table/saveChromeFacebookConfig', data).then((res) => {
     return res
   }),

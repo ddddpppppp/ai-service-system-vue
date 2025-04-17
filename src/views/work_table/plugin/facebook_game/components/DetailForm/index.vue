@@ -78,6 +78,6 @@ defineExpose({
       <ElFormItem label="主页id" prop="channelId">
         <ElInput v-model="form.channelId" placeholder="请输入主页id" />
       </ElFormItem>
-</ElForm>
+    </ElForm>
   </div>
 </template>

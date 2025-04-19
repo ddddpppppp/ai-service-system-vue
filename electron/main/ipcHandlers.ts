@@ -26,6 +26,7 @@ ipcMain.on('delete-browsers', (_, containerId: string) => {
   }
 
   const { window } = mainWindows[targetIndex]
+  window.setClosable(true)
   window.close()
   mainWindows.splice(targetIndex, 1)
 

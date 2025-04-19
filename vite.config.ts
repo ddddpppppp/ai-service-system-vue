@@ -36,7 +36,7 @@ export default defineConfig(({ mode, command }) => {
       sourcemap: env.VITE_BUILD_SOURCEMAP === 'true',
     },
     define: {
-      __SYSTEM_INFO__: JSON.stringify({
+      '__SYSTEM_INFO__': JSON.stringify({
         pkg: {
           version: pkg.version,
           dependencies: pkg.dependencies,
@@ -44,6 +44,7 @@ export default defineConfig(({ mode, command }) => {
         },
         lastBuildTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
       }),
+      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
     },
     plugins: createVitePlugins(mode, command === 'build'),
     resolve: {

@@ -10,9 +10,15 @@ if (!app.requestSingleInstanceLock()) {
   process.exit(0)
 }
 
+if (app.isPackaged) {
+  process.env.NODE_ENV = 'production'
+}
+
 app.on('ready', () => {
   createControlWindow()
-  // Menu.setApplicationMenu(null)
+  if (process.env.NODE_ENV === 'production') {
+    Menu.setApplicationMenu(null)
+  }
 })
 
 app.on('window-all-closed', () => {
@@ -39,7 +45,7 @@ app.on('activate', async () => {
         webPreferences: {
           nodeIntegration: true,
           contextIsolation: false,
-          devTools: false,
+          devTools: true,
         },
       })
       controlWindow.loadFile(indexHtml)
@@ -56,6 +62,5 @@ app.on('activate', async () => {
       })
       controlWindow.loadURL(url)
     }
-    Menu.setApplicationMenu(null)
   }
 })

@@ -55,6 +55,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           title: 'facebook实例',
           menu: false,
+          auth: 'pluginFacebookGame.browse',
           activeMenu: '/plugin/facebook_game',
           cache: true,
           noCache: 'pluginFacebookGame',

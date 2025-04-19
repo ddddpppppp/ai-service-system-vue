@@ -36,10 +36,17 @@ function searchReset() {
   Object.assign(search.value, searchDefault)
 }
 
-// 批量操作
+// Define an interface for your data items
+interface TriggerItem {
+  id: number
+  name: string
+  // other properties...
+}
+
+// Update the batch definition with proper typing
 const batch = ref({
   enable: true,
-  selectionDataList: [],
+  selectionDataList: [] as TriggerItem[],
 })
 
 // 列表
@@ -108,11 +115,11 @@ function onEdit(row: any) {
 }
 
 function onDel(row: any) {
-  ElMessageBox.confirm(`确认冻结「${row.name}」吗？`, '确认信息').then(() => {
+  ElMessageBox.confirm(`确认删除「${row.name}」吗？`, '确认信息').then(() => {
     apiConfig.delTrigger({ id: row.id }).then(() => {
       getDataList()
       ElMessage.success({
-        message: '冻结成功',
+        message: '删除成功',
         center: true,
       })
     })
@@ -120,15 +127,15 @@ function onDel(row: any) {
 }
 
 function onDelBatch() {
-  ElMessageBox.confirm(`确认批量冻结吗？`, '确认信息').then(() => {
-    const ids: any[] = []
+  ElMessageBox.confirm(`确认批量删除吗？`, '确认信息').then(() => {
+    const ids: number[] = []
     batch.value.selectionDataList.forEach((item) => {
       ids.push(item.id)
     })
     apiConfig.delTrigger({ ids }).then(() => {
       getDataList()
       ElMessage.success({
-        message: '冻结成功',
+        message: '删除成功',
         center: true,
       })
     })
@@ -179,7 +186,7 @@ function onDelBatch() {
         </ElButton>
         <!--        <ElButtonGroup v-if="batch.enable"> -->
         <!--          <ElButton size="default" :disabled="!batch.selectionDataList.length" @click="onDelBatch"> -->
-        <!--            冻结 -->
+        <!--            删除 -->
         <!--          </ElButton> -->
         <!--          <ElButton size="default" :disabled="!batch.selectionDataList.length" @click="onRecoveryBatch"> -->
         <!--            恢复 -->
@@ -194,7 +201,7 @@ function onDelBatch() {
             <VueJsonPretty
               class="vue-json-bg"
               :data="scope.row.triggersObject"
-              deep="1"
+              :deep="1"
               show-length
               highlight-mouseover
             />

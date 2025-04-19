@@ -20,7 +20,7 @@ export function createControlWindow() {
   controlWindow = new BrowserWindow({
     width: 1600,
     height: 600,
-    icon: path.join(__dirname, '../../icon.png'),
+    icon: path.join(__dirname, '../../icon.ico'),
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: true,
@@ -35,6 +35,16 @@ export function createControlWindow() {
     controlWindow.loadURL(url)
     controlWindow.webContents.openDevTools()
   }
+  controlWindow.on('closed', () => {
+    // 强制关闭所有已创建的窗口，包括最小化的窗口
+    for (const item of [...mainWindows]) {
+      item.window.setClosable(true)
+      item.window.close()
+    }
+    // 清空窗口列表
+    mainWindows.length = 0
+    controlWindow = null // 释放内存
+  })
   return controlWindow
 }
 
@@ -46,7 +56,7 @@ export function createBrowserWindow(containerId: string) {
   const window = new BrowserWindow({
     width: 1200,
     height: 900,
-    icon: path.join(__dirname, '/icon.png'),
+    icon: path.join(__dirname, '../../icon.ico'),
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,

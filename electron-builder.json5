@@ -3,7 +3,7 @@
   "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
   "appId": "helloword",
   "asar": true,
-  "productName": "ai-system",
+  "productName": "EchoNest",
   "directories": {
     "output": "release/${version}"
   },
@@ -18,7 +18,7 @@
     "artifactName": "${productName}-Mac-${version}-Installer.${ext}"
   },
   "win": {
-    "icon": "./icon.png"
+    "icon": "icon.ico",
     "target": [
       {
         "target": "nsis",

@@ -7,7 +7,7 @@ import generatedRoutes from 'virtual:generated-pages'
 import { setupLayouts } from 'virtual:meta-layouts'
 import BackendManage from './modules/backend_manage.ts'
 import Config from './modules/config.ts'
-import Data from './modules/data.ts'
+import Data from './modules/data_manage.ts'
 // import MultilevelMenuExample from './modules/multilevel.menu.example'
 import WorkTable from './modules/work_table.ts'
 

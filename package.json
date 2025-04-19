@@ -1,14 +1,14 @@
 {
-  "name": "ai-system",
+  "name": "echo-nest",
   "type": "module",
-  "version": "5.1.0",
+  "version": "1.1.0",
   "main": "dist-electron/main/index.js",
   "engines": {
     "node": "^18.18.0 || ^20.9.0 || >=21.1.0"
   },
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc --noEmit && vite build && electron-builder",
+    "build": "vue-tsc --noEmit && vite build --mode production && electron-builder",
     "build:test": "vue-tsc -b && vite build --mode test",
     "serve": "http-server ./dist -o",
     "serve:test": "http-server ./dist-test -o",

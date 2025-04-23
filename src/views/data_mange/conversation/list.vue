@@ -259,9 +259,14 @@ function onDelBatch() {
                     <div
                       v-for="(message, index) in scope.row.mixedContent" :key="index"
                       class="popover-message"
-                      :class="{ 'pop-message-user': message.sender_role === 'user', 'pop-message-assistant': message.sender_role === 'assistant' }"
+                      :class="{ 'pop-message-user': message.senderRole === 'user', 'pop-message-assistant': message.senderRole === 'assistant' }"
                     >
-                      <strong>{{ message.sender_role === 'user' ? '用户' : '助手' }}:</strong> {{ message.text_content }}
+                      <div v-if="message.contentType === 'text' && message.textContent">
+                        <strong>{{ message.senderRole === 'user' ? '用户' : '助手' }}:</strong> {{ message.textContent }}
+                      </div>
+                      <div v-else>
+                        <strong>{{ message.senderRole === 'user' ? '用户' : '助手' }}:</strong> [其它]
+                      </div>
                     </div>
                   </template>
                   <template v-else>

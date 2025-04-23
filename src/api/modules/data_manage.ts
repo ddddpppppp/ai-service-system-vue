@@ -7,6 +7,9 @@ export default {
   getConversation: (data: any) => api.post('shop/data_manage/getConversation', data).then((res) => {
     return res
   }),
+  getMessageList: (data: any) => api.post('shop/data_manage/getMessageList', data).then((res) => {
+    return res
+  }),
   submitConversationAnnotated: (data: any) => api.post('shop/data_manage/submitConversationAnnotated', data).then((res) => {
     return res
   }),

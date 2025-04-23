@@ -5,14 +5,11 @@ icon: i-ant-design:home-twotone
 </route>
 
 <script setup lang="ts">
-import useUserStore from '@/store/modules/user.ts'
 import eventBus from '@/utils/eventBus.ts'
-import { WebSocketService } from '@/utils/websocket'
 import { ref } from 'vue'
 import BrowserListPanel from './components/BrowserListPanel.vue'
 import ConfigListPanel from './components/ConfigListPanel.vue'
 
-const userStore = useUserStore()
 const browserListPanelRef = ref<InstanceType<typeof BrowserListPanel> | null>(null)
 const configListPanelRef = ref<InstanceType<typeof ConfigListPanel> | null>(null)
 
@@ -21,10 +18,6 @@ const configLoading = ref(false)
 const browserLoading = ref(false)
 
 const formMode = ref<'router' | 'dialog' | 'drawer'>('router')
-
-const WS_KEY = 'facebook_ws'
-
-let wsService = null
 
 onMounted(() => {
   // Initialize the components
@@ -37,25 +30,12 @@ onMounted(() => {
       browserListPanelRef.value?.getDataList()
     })
   }
-  wsService = WebSocketService.getInstance(WS_KEY, {
-    token: () => userStore.token || '',
-    path: '/ws_facebook/connect',
-  })
-
-  // 注册消息处理器
-  wsService.registerHandler('update_instance', (data) => {
-    console.log('收到聊天消息:', data)
-  })
-
-  // 发送消息
-  wsService.send('send_message', { text: 'Hello' })
 })
 
 onBeforeUnmount(() => {
   if (formMode.value === 'router') {
     eventBus.off('get-data-list')
   }
-  WebSocketService.destroyInstance(WS_KEY)
 })
 
 // 子组件刷新方法

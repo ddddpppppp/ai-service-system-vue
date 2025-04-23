@@ -102,7 +102,6 @@ export class WebSocketService {
 
     // 其他原有逻辑保持不变...
     this.socket.onopen = () => {
-      console.log('WebSocket connected')
       this.reconnectAttempts = 0
       this.setupHeartbeat()
       this.processQueue()
@@ -120,7 +119,6 @@ export class WebSocketService {
     }
 
     this.socket.onclose = (event) => {
-      console.log('WebSocket disconnected')
       // 过滤非正常关闭（如token失效不重连）
       if ([401].includes(event.code)) {
         console.error('认证失败，停止重连')
@@ -277,8 +275,6 @@ export class WebSocketService {
       this.sendInternal(action, data)
     }
     else {
-      console.log('WebSocket not connected, adding to queue')
-
       // 检查是否已有相同的未发送消息
       const existingIndex = this.messageQueue.findIndex(
         msg => msg.action === action && JSON.stringify(msg.data) === JSON.stringify(data),

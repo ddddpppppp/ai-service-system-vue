@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import useSettingsStore from '@/store/modules/settings'
+import useUserStore from '@/store/modules/user'
 import dayjs from '@/utils/dayjs'
 import { ua } from '@/utils/ua'
+import WebSocketService from '@/utils/WebSocketService'
+import { ElMessage } from 'element-plus'
+import { provide } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Provider from './ui/provider/index.vue'
 import 'dayjs/locale/en'
@@ -9,8 +13,14 @@ import 'dayjs/locale/zh-cn'
 import 'dayjs/locale/zh-tw'
 
 const route = useRoute()
-
 const settingsStore = useSettingsStore()
+const userStore = useUserStore()
+
+let wsService: WebSocketService | null = null
+
+provide('wsService', {
+  get instance() { return wsService },
+})
 
 const { locale } = useI18n()
 const { auth } = useAuth()
@@ -24,7 +34,6 @@ const isAuth = computed(() => {
   })
 })
 
-// 设置网页 title
 watch([
   () => settingsStore.settings.app.enableDynamicTitle,
   () => settingsStore.title,
@@ -50,6 +59,41 @@ onMounted(() => {
   window.addEventListener('resize', () => {
     settingsStore.setMode(document.documentElement.clientWidth)
   })
+
+  wsService = WebSocketService.getInstance('ws', {
+    token: () => userStore.token || '',
+    path: '/ws/connect',
+  })
+  wsService.on('error', (event) => {
+    try {
+      const data = JSON.parse(event.data)
+      ElMessage.error({
+        message: data.error_message,
+        center: true,
+      })
+    }
+    catch {
+      ElMessage.error({
+        message: 'Unknown error occurred',
+        center: true,
+      })
+    }
+  })
+})
+
+watch(() => userStore.token, (newToken) => {
+  if (!newToken && wsService) {
+    wsService.close()
+  }
+  else if (newToken && wsService) {
+    wsService.connect()
+  }
+})
+
+onUnmounted(() => {
+  if (wsService) {
+    wsService.close()
+  }
 })
 
 watch(() => settingsStore.lang, () => {

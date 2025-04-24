@@ -3,7 +3,6 @@ import type { WebSocketService } from '@/utils/WebSocketService'
 import apiDataManage from '@/api/modules/data_manage'
 import avatar from '@/assets/images/avatar.png'
 import { debounce, getCurrentTime } from '@/utils/helper'
-// Create a simple date formatter function since we don't have access to @/utils/format
 import { Loading } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { inject, nextTick, onMounted, onUnmounted, ref } from 'vue'
@@ -41,7 +40,14 @@ const scrollThreshold = 100 // 滚动到距离顶部100px内时加载更多
 // 总消息数量
 const totalMsgLength = ref(0)
 
-// 滚动到底部函数 - 保留作为备用方法
+watch(() => props.conversationId, () => {
+  messageList.value = []
+  messageOrder.value = 0
+  getConversationDetail()
+  getMessageList()
+})
+
+// 滚动到底部函数
 function scrollToBottom() {
   if (messageContainer.value) {
     const container = messageContainer.value as HTMLElement
@@ -59,7 +65,7 @@ function handleScroll() {
   // 检查是否滚动到顶部附近
   if (messageContainer.value.scrollTop <= scrollThreshold) {
     // 最后一条数据了自动放弃加载
-    if (messageList.value.length >= totalMsgLength.value) {
+    if (messageList.value.length >= totalMsgLength.value || messageList.value.length === 0) {
       return
     }
 
@@ -252,7 +258,7 @@ function updateAnnotations(messageId: string, annotations: any) {
 </script>
 
 <template>
-  <div v-loading="loading" class="chat-container">
+  <div v-loading="loading" class="chat-container" :class="{ 'border-radius-8': props.type === 'annotated' }">
     <div ref="messageContainer" class="chat-messageList-container">
       <div v-if="isLoading" class="loading-indicator">
         <FaSparklesText text="加载中" class="sm-font" />
@@ -268,7 +274,7 @@ function updateAnnotations(messageId: string, annotations: any) {
             <div class="message-column">
               <div class="chat-message" :class="getMessageClass(message.senderRole)">
                 <div class="message-avatar">
-                  <el-avatar :size="40" :src="avatar" />
+                  <el-avatar :size="40" :src="message.senderRole === 'assistant' ? avatar : message.avatar" />
                 </div>
                 <div class="message-content">
                   <div class="message-header">
@@ -338,6 +344,9 @@ function updateAnnotations(messageId: string, annotations: any) {
   flex-direction: column;
   height: 95%;
   background-color: #f9fafb;
+}
+
+.border-radius-8 {
   border-radius: 8px;
 }
 
@@ -564,7 +573,7 @@ function updateAnnotations(messageId: string, annotations: any) {
 
 @keyframes indicator-fade {
   0%,
- 100% {
+  100% {
     opacity: 0;
   }
 }

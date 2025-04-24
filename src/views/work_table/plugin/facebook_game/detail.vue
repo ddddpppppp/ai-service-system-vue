@@ -38,7 +38,7 @@ function goBack() {
 
 <template>
   <div>
-    <FaPageHeader :title="!route.params.id ? '新增facebook浏览器实例' : '编辑facebook浏览器实例'">
+    <FaPageHeader :title="!route.params.id ? '新增facebookFacebook实例' : '编辑facebookFacebook实例'">
       <ElButton size="default" round @click="goBack">
         <template #icon>
           <FaIcon name="i-ep:arrow-left" />

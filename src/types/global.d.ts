@@ -50,7 +50,7 @@ declare namespace Settings {
     enableColorAmblyopiaMode?: boolean
     /**
      * 默认语言
-     * @默认值 `''` 跟随浏览器语言设置
+     * @默认值 `''` 跟随Facebook语言设置
      * @可选值 参考 `/src/locales/index.ts` 里的语言列表
      */
     defaultLang?: string

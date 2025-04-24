@@ -48,7 +48,7 @@ export function createControlWindow() {
   return controlWindow
 }
 
-// 创建浏览器窗口
+// 创建Facebook窗口
 export function createBrowserWindow(containerId: string) {
   const persistentSession = session.fromPartition(`persist:${containerId}`, {
     cache: true,

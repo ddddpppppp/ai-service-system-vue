@@ -20,10 +20,19 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'conversation_data',
         name: 'conversationData',
-        component: () => import('@/views/data_mange/conversation/list.vue'),
+        component: () => import('@/views/data_mange/conversation_list/list.vue'),
         meta: {
           auth: 'conversationData.browse',
           title: '会话列表',
+        },
+      },
+      {
+        path: 'annotate_list',
+        name: 'annotateList',
+        component: () => import('@/views/data_mange/annotate_list/list.vue'),
+        meta: {
+          auth: 'conversationAnnotated.browse',
+          title: '标注列表',
         },
       },
     ],

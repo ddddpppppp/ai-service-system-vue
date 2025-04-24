@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import apiWorkTable from '@/api/modules/work_table'
-import chromeIcon from '@/assets/images/work_table/chrome.png'
 import { ElMessage, ElMessageBox, ElTooltip } from 'element-plus'
 import { ref } from 'vue'
 import { toast } from 'vue-sonner'
@@ -288,7 +287,7 @@ defineExpose({
     title-class="flex flex-wrap items-center justify-between gap-4"
   >
     <template #title>
-      浏览器列表
+      Facebook列表
     </template>
     <div class="button-group p-8-4 flex justify-end space-x-3">
       <div class="flex flex-grow items-center">
@@ -399,13 +398,7 @@ defineExpose({
             </ElTooltip>
           </div>
           <div class="mr-3 h-10 w-10 flex-shrink-0">
-            <ElImage
-              :src="chromeIcon"
-              fit="contain"
-              :preview-src-list="[chromeIcon]"
-              :initial-index="0"
-              @error="() => ElMessage.error('图片加载失败')"
-            />
+            <FaIcon name="logos:facebook" style="font-size: 40px;" />
           </div>
           <div>
             <div class="text-base font-medium">

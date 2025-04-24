@@ -10,7 +10,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import FormMode from './detail.vue'
 
 defineOptions({
-  name: 'DataManageConversationList',
+  name: 'DataManageAnnotateList',
 })
 
 const { pagination, getParams, onSizeChange, onCurrentChange, onSortChange } = usePagination()
@@ -30,7 +30,7 @@ const formMode = ref<'router' | 'dialog' | 'drawer'>('drawer')
 const searchDefault = {
   content: '',
   sender: '',
-  status: '',
+  status: 'cleaned',
 }
 const search = ref({ ...searchDefault })
 function searchReset() {
@@ -57,7 +57,7 @@ const statusList = ref([
     value: 'raw',
   },
   {
-    label: '已清洗',
+    label: '已清洗待标注',
     value: 'cleaned',
   },
   {
@@ -146,11 +146,6 @@ function onAnnotated(row: any) {
   formModeProps.value.visible = true
 }
 
-function onChatList(row: any) {
-  formModeProps.value.type = 'chat'
-  formModeProps.value.id = row.conversationId
-  formModeProps.value.visible = true
-}
 function onDel(row: any) {
   ElMessageBox.confirm(`确认删除「${row.name}」吗？`, '确认信息').then(() => {
     apiDataManage.delConversation({ id: row.conversationId }).then(() => {
@@ -196,7 +191,7 @@ function onDelBatch() {
               </ElSelect>
             </ElFormItem>
             <ElFormItem label="状态选择">
-              <ElSelect v-model="search.status" placeholder="请选择状态" clearable>
+              <ElSelect v-model="search.status" placeholder="请选择状态" clearable :disabled="true">
                 <ElOption v-for="item in statusList" :key="item.value" :label="item.label" :value="item.value" />
               </ElSelect>
             </ElFormItem>
@@ -292,9 +287,6 @@ function onDelBatch() {
 
         <ElTableColumn label="操作" width="250" align="center" fixed="right">
           <template #default="scope">
-            <ElButton type="info" size="small" plain @click="onChatList(scope.row)">
-              查看
-            </ElButton>
             <ElButton v-if="scope.row.status === 'cleaned'" type="primary" size="small" plain @click="onAnnotated(scope.row)">
               标注
             </ElButton>

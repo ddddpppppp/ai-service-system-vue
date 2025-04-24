@@ -366,7 +366,7 @@ async function handleReset() {
       <div v-if="userStore.preferences.tabbar?.hasOwnProperty('enableMemory')" class="setting-item">
         <div class="label">
           是否启用记忆功能
-          <FaTooltip text="非固定和非常驻的标签页将在本次会话窗口中始终存在，刷新浏览器或重新登录时不会丢失">
+          <FaTooltip text="非固定和非常驻的标签页将在本次会话窗口中始终存在，刷新Facebook或重新登录时不会丢失">
             <FaIcon name="i-ri:question-line" />
           </FaTooltip>
         </div>

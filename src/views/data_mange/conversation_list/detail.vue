@@ -1,27 +1,17 @@
 <script setup lang="ts">
-import type { Props } from './components/ChatList/ChatList.vue'
+import ChatConversationList from '@/components/ChatList/ChatList.vue'
 import { fileToBase64 } from '@/utils/file'
-import { computed, defineEmits, defineModel, defineProps, ref, useTemplateRef } from 'vue'
-import ChatConversationList from './components/ChatList/ChatList.vue'
+import { computed, ref, useTemplateRef } from 'vue'
 
-const props = defineProps<{
-  mode: 'dialog' | 'drawer'
-  type: 'annotated' | 'chat'
-} & Props>()
-
-const emits = defineEmits<{
-  success: []
-}>()
-
-const btnDisabled = ref(false)
-
-const visible = defineModel<boolean>({
-  default: false,
+defineProps({
+  conversationId: {
+    type: [String, Number],
+    default: '',
+  },
+  // ... 其他可能的属性
 })
 
 const formRef = useTemplateRef('formRef')
-
-const title = computed(() => props.type === 'annotated' ? '会话标注' : '会话详情')
 
 // 新消息输入
 const messageInput = ref<HTMLElement | null>(null)
@@ -128,95 +118,65 @@ function handleKeydown(event: KeyboardEvent) {
     sendMessage()
   }
 }
-
-function onSubmitConversationAnnotated() {
-  // submit() 为组件内部方法
-  btnDisabled.value = true
-  formRef.value?.submitConversationAnnotated().then(() => {
-    emits('success')
-    onCancel()
-  }).finally(() => {
-    btnDisabled.value = false
-  })
-}
-
-function onCancel() {
-  visible.value = false
-}
 </script>
 
 <template>
-  <div>
-    <ElDrawer
-      v-model="visible"
-      :title="title"
-      size="1200px"
-      :close-on-click-modal="true"
-      destroy-on-close
-      class="conversation-drawer"
+  <div class="chat-main">
+    <template v-if="$props.conversationId">
+      <div class="chat-conversation-wrapper">
+        <ChatConversationList ref="formRef" v-bind="$props" />
+      </div>
+
+      <!-- 仅在type为chat时显示输入框 -->
+      <div class="chat-input-container">
+        <div
+          ref="messageInput"
+          class="chat-input"
+          contenteditable="true"
+          placeholder="请输入消息..."
+          @input="handleInput"
+          @keydown="handleKeydown"
+          @paste="handlePaste"
+        />
+        <div class="chat-input-actions">
+          <el-tooltip content="发送消息 (Enter)" placement="top">
+            <el-button
+              class="send-button"
+              type="primary"
+              circle
+              :disabled="!messageText.trim() && !hasImageInClipboard"
+              @click="sendMessage"
+            >
+              <FaIcon name="i-ph:paper-plane-right-fill" />
+            </el-button>
+          </el-tooltip>
+        </div>
+      </div>
+    </template>
+
+    <!-- 当没有选择对话时显示空状态提示 -->
+    <el-empty v-else description="请选择一个对话" class="empty-placeholder" />
+
+    <!-- 图片确认对话框 -->
+    <el-dialog
+      v-model="showImageConfirm"
+      title="发送图片"
+      width="300px"
+      :close-on-click-modal="false"
+      class="image-confirm-dialog"
     >
-      <div class="chat-main">
-        <div class="chat-conversation-wrapper">
-          <ChatConversationList ref="formRef" v-bind="$props" />
+      <div class="image-confirm-content">
+        <div v-if="clipboardImage" class="image-preview">
+          <el-image :src="imagePreviewUrl" fit="contain" />
         </div>
-
-        <!-- 仅在type为chat时显示输入框 -->
-        <div v-if="type === 'chat'" class="chat-input-container">
-          <div
-            ref="messageInput"
-            class="chat-input"
-            contenteditable="true"
-            placeholder="请输入消息..."
-            @input="handleInput"
-            @keydown="handleKeydown"
-            @paste="handlePaste"
-          />
-          <div class="chat-input-actions">
-            <el-tooltip content="发送消息 (Enter)" placement="top">
-              <el-button
-                class="send-button"
-                type="primary"
-                circle
-                :disabled="!messageText.trim() && !hasImageInClipboard"
-                @click="sendMessage"
-              >
-                <FaIcon name="i-ph:paper-plane-right-fill" />
-              </el-button>
-            </el-tooltip>
-          </div>
-        </div>
-
-        <!-- 图片确认对话框 -->
-        <el-dialog
-          v-model="showImageConfirm"
-          title="发送图片"
-          width="300px"
-          :close-on-click-modal="false"
-          class="image-confirm-dialog"
-        >
-          <div class="image-confirm-content">
-            <div v-if="clipboardImage" class="image-preview">
-              <el-image :src="imagePreviewUrl" fit="contain" />
-            </div>
-          </div>
-          <template #footer>
-            <span class="dialog-footer">
-              <el-button @click="cancelSendImage">取消</el-button>
-              <el-button type="primary" @click="sendMessage">发送</el-button>
-            </span>
-          </template>
-        </el-dialog>
       </div>
-
-      <div v-if="type === 'annotated'" class="buttons">
-        <ElButton size="large" @click="onCancel">
-          取消
-        </ElButton>
-        <ElButton type="primary" size="large" :disabled="btnDisabled" @click="onSubmitConversationAnnotated">
-          提交标注
-        </ElButton>
-      </div>
-    </ElDrawer>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="cancelSendImage">取消</el-button>
+          <el-button type="primary" @click="sendMessage">发送</el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -263,7 +223,7 @@ function onCancel() {
   align-items: center;
   padding: 16px;
   background-color: #fff;
-  border-radius: 0 0 8px 8px;
+  border-radius: 0;
 }
 
 .chat-input {
@@ -341,5 +301,14 @@ function onCancel() {
   display: flex;
   gap: 10px;
   justify-content: flex-end;
+}
+
+/* 添加空状态提示的样式 */
+.empty-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
 }
 </style>

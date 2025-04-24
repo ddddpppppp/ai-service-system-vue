@@ -1,5 +1,6 @@
 import useSettingsStore from '@/store/modules/settings'
 import useUserStore from '@/store/modules/user'
+import storage from '@/utils/storage'
 import axios from 'axios'
 // import qs from 'qs'
 import { toast } from 'vue-sonner'
@@ -17,6 +18,7 @@ api.interceptors.request.use(
     const userStore = useUserStore()
     // 设置请求头
     if (request.headers) {
+      request.headers.Timezone = storage.local.get('userTimezone') || 'Asia/Shanghai'
       request.headers['Accept-Language'] = settingsStore.lang
       if (userStore.isLogin) {
         request.headers.Token = userStore.token

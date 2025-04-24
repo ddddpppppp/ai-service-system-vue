@@ -2,7 +2,7 @@
 {
   "zh-cn": {
     "tooltip1": "按住 {0} 键并点击",
-    "tooltip2": "可切换为浏览器原生刷新"
+    "tooltip2": "可切换为Facebook原生刷新"
   },
   "zh-tw": {
     "tooltip1": "按住 {0} 鍵並點擊",

@@ -214,7 +214,7 @@ const useSettingsStore = defineStore(
 
     // 当前语言
     const lang = computed(() => {
-      // 如果没设置默认语言，则返回当前浏览器语言设置默认语言
+      // 如果没设置默认语言，则返回当前Facebook语言设置默认语言
       if (settings.value.app.defaultLang === '') {
         const lang = navigator.language.toLowerCase()
         const locales = getLocales()

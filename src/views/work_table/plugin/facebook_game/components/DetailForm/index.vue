@@ -73,7 +73,7 @@ defineExpose({
   <div v-loading="loading">
     <ElForm ref="formRef" :model="form" :rules="formRules" label-width="120px" label-suffix="：">
       <ElFormItem label="备注" prop="nickname">
-        <ElInput v-model="form.remark" placeholder="请输入浏览器备注" />
+        <ElInput v-model="form.remark" placeholder="请输入Facebook备注" />
       </ElFormItem>
       <ElFormItem label="主页id" prop="channelId">
         <ElInput v-model="form.channelId" placeholder="请输入主页id" />

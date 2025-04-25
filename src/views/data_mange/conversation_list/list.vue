@@ -5,6 +5,7 @@ meta:
 
 <script setup lang="ts">
 import apiDataManage from '@/api/modules/data_manage'
+import { debounce } from '@/utils/helper'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import FormMode from './detail.vue'
 
@@ -57,6 +58,10 @@ const selectionMode = ref(false)
 // 列表
 const loading = ref(false)
 const dataList = ref<ConversationItem[]>([])
+
+// 创建一个 ref 来引用容器元素
+const contactContainer = ref<HTMLElement | null>(null)
+const scrollThreshold = 100 // 滚动到距离底部100px内时加载更多
 
 const statusList = ref([
   {
@@ -124,9 +129,68 @@ function resetFilter() {
 }
 
 onMounted(() => {
-  pagination.value.size = 20
-  getDataList()
+  if (contactContainer.value) {
+    contactContainer.value.addEventListener('scroll', handleScroll)
+    pagination.value.page = 1
+    pagination.value.size = 20
+    getDataList()
+  }
 })
+
+onUnmounted(() => {
+  if (contactContainer.value) {
+    contactContainer.value.removeEventListener('scroll', handleScroll)
+  }
+})
+
+function searchData() {
+  pagination.value.page = 1
+  getDataList()
+}
+
+// 使用防抖包装滚动处理函数
+function handleScroll() {
+  // 检查是否已经在加载或不应该触发加载
+  if (!contactContainer.value || loading.value) {
+    return
+  }
+
+  // 检查是否滚动到底部附近
+  if (contactContainer.value.scrollTop + contactContainer.value.clientHeight >= contactContainer.value.scrollHeight - scrollThreshold) {
+    // 最后一条数据了自动放弃加载
+    if (dataList.value.length >= pagination.value.total || dataList.value.length === 0) {
+      return
+    }
+
+    // 立即设置加载状态，防止重复触发
+    loading.value = true
+
+    // 延迟执行实际加载逻辑
+    debounce(async () => {
+      try {
+        // 记住当前滚动位置和内容高度
+        const prevScrollHeight = contactContainer.value!.scrollHeight
+
+        // 加载更多消息
+        pagination.value.page += 1
+        await getDataList()
+
+        // 等待DOM更新
+        await nextTick()
+
+        // 保持滚动位置
+        const newScrollHeight = contactContainer.value!.scrollHeight
+        contactContainer.value!.scrollTop = newScrollHeight - prevScrollHeight + contactContainer.value!.scrollTop
+      }
+      catch (error) {
+        console.error('Failed to load more messages:', error)
+      }
+      finally {
+        loading.value = false
+      }
+    }, 1000)()
+  }
+}
 
 function getDataList() {
   loading.value = true
@@ -141,7 +205,12 @@ function getDataList() {
   }
   apiDataManage.getConversationList(params).then((res: any) => {
     loading.value = false
-    dataList.value = res.data.list
+    if (pagination.value.page === 1) {
+      dataList.value = res.data.list
+    }
+    else {
+      dataList.value = [...dataList.value, ...res.data.list]
+    }
     pagination.value.total = res.data.total
   })
 }
@@ -222,7 +291,7 @@ function toggleSelectionMode() {
         <div class="user-list">
           <div class="user-list-header">
             <div class="search-box">
-              <el-input v-model="search.nickname" placeholder="搜索联系人" clearable @keyup.enter="getDataList()" />
+              <el-input v-model="search.nickname" placeholder="搜索联系人" clearable @keyup.enter="searchData()" />
             </div>
             <div class="filter-options">
               <!-- 批量操作图标 -->
@@ -295,7 +364,7 @@ function toggleSelectionMode() {
             </div>
           </div>
 
-          <div class="user-list-content">
+          <div ref="contactContainer" v-loading.body="loading" class="user-list-content">
             <div
               v-for="(item, index) in dataList"
               :key="index"
@@ -439,7 +508,7 @@ function toggleSelectionMode() {
             <el-button @click="resetFilter">
               重置
             </el-button>
-            <el-button type="primary" @click="getDataList(); filterDrawerVisible = false">
+            <el-button type="primary" @click="searchData(); filterDrawerVisible = false">
               确定
             </el-button>
           </div>
@@ -674,6 +743,7 @@ function toggleSelectionMode() {
 
 .preview-content {
   flex: 1;
+  width: 240px;
   overflow: hidden;
   text-overflow: ellipsis;
   font-size: 12px;

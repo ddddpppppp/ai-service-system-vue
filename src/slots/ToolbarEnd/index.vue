@@ -124,7 +124,7 @@ function openTimezonePopover() {
 
   <!-- 时区选择弹窗（作为独立组件） -->
   <Teleport to="body">
-    <div v-if="isTimezonePopoverVisible" class="fixed left-0 top-0 h-full w-full" @click="isTimezonePopoverVisible = false">
+    <div v-if="isTimezonePopoverVisible" class="fixed left-0 top-0 z-36 h-full w-full" @click="isTimezonePopoverVisible = false">
       <div class="timezone-popover absolute border rounded-md bg-white p-2 shadow-lg" style="top: 60px; right: 20px; z-index: 9999; width: 220px;" @click.stop>
         <div class="mb-2 font-medium">
           {{ t('current_timezone') }}

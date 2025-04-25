@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Props } from '@/components/ChatList/ChatList.vue'
 import ChatConversationList from '@/components/ChatList/ChatList.vue'
-import { computed, defineEmits, defineModel, defineProps, ref, useTemplateRef } from 'vue'
+import { computed, ref, useTemplateRef } from 'vue'
 
 const props = defineProps<{
   mode: 'dialog' | 'drawer'

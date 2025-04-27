@@ -22,7 +22,6 @@ export interface Props {
 
 const annotationsMap = ref<Record<string, any[]>>({})
 
-const loading = ref(false)
 const messageList = ref<any[]>([])
 const conversation = ref<any>({})
 
@@ -35,10 +34,13 @@ const labelOptions = ref([])
 const messageContainer = ref<HTMLElement | null>(null)
 
 const isLoading = ref(false) // 防止重复加载
-const scrollThreshold = 100 // 滚动到距离顶部100px内时加载更多
+const loading = ref(false) // 防止重复加载
+const scrollThreshold = 10 // 滚动到距离顶部100px内时加载更多
 
 // 总消息数量
 const totalMsgLength = ref(0)
+
+const resizeObserver = ref<ResizeObserver | null>(null)
 
 watch(() => props.conversationId, () => {
   messageList.value = []
@@ -71,22 +73,16 @@ function handleScroll() {
 
     // 立即设置加载状态，防止重复触发
     isLoading.value = true
+    loading.value = true
 
     // 延迟执行实际加载逻辑
     debounce(async () => {
       try {
-        // 记住当前滚动位置和内容高度
-        const prevScrollHeight = messageContainer.value!.scrollHeight
-
         // 加载更多消息
         await getMessageList()
 
         // 等待DOM更新
         await nextTick()
-
-        // 保持滚动位置
-        const newScrollHeight = messageContainer.value!.scrollHeight
-        messageContainer.value!.scrollTop = newScrollHeight - prevScrollHeight + messageContainer.value!.scrollTop
       }
       catch (error) {
         console.error('Failed to load more messages:', error)
@@ -111,12 +107,13 @@ onMounted(() => {
 onUnmounted(() => {
   if (messageContainer.value) {
     messageContainer.value.removeEventListener('scroll', handleScroll)
+    resizeObserver.value?.unobserve(messageContainer.value)
+    resizeObserver.value = null
   }
 })
 
 // Fetch conversation details
 function getConversationDetail() {
-  loading.value = true
   apiDataManage.getConversation({ id: props.conversationId }).then((res: any) => {
     if (res.status === 1) {
       conversation.value = res.data.conversation || {}
@@ -129,7 +126,6 @@ function getConversationDetail() {
       })
     }
   }).catch(() => {
-    loading.value = false
     ElMessage.error({
       message: '获取会话详情失败',
       center: true,
@@ -139,9 +135,18 @@ function getConversationDetail() {
 
 function getMessageList() {
   loading.value = true
+  // 获取容器元素
+  const container = messageContainer.value
+  if (!container) {
+    return
+  }
+  // 保存当前scrollTop和scrollHeight
+  const prevScrollTop = container.scrollTop
+  const prevScrollHeight = container.scrollHeight
+
   apiDataManage.getMessageList({ id: props.conversationId, messageOrder: messageOrder.value }).then((res: any) => {
-    loading.value = false
     if (res.status === 1) {
+      loading.value = false
       totalMsgLength.value = res.data.total
       if (messageOrder.value > 0) {
         // 上拉加载
@@ -155,6 +160,20 @@ function getMessageList() {
         })
       }
       messageOrder.value = messageList.value[0].messageOrder
+
+      // 设置ResizeObserver监听容器高度变化，保持滚动位置
+      nextTick(() => {
+        resizeObserver.value = new ResizeObserver(() => {
+          const newScrollHeight = container.scrollHeight
+          const heightDiff = newScrollHeight - prevScrollHeight
+          container.scrollTop = prevScrollTop + heightDiff
+
+          // 调整后断开观察，避免重复触发
+          resizeObserver.value?.unobserve(container)
+          resizeObserver.value = null
+        })
+        resizeObserver.value.observe(container)
+      })
     }
     else {
       ElMessage.error({
@@ -163,7 +182,6 @@ function getMessageList() {
       })
     }
   }).catch(() => {
-    loading.value = false
     ElMessage.error({
       message: '获取会话详情失败',
       center: true,
@@ -175,7 +193,6 @@ defineExpose({
   submitConversationAnnotated() {
     return new Promise<void>((resolve, reject) => {
       apiDataManage.submitConversationAnnotated({ id: props.conversationId, annotations: annotationsMap.value }).then((res: any) => {
-        loading.value = false
         if (res.status === 1) {
           ElMessage.success({
             message: res.statusText || '标注会话成功',
@@ -190,7 +207,6 @@ defineExpose({
         }
         resolve()
       }).catch(() => {
-        loading.value = false
         ElMessage.error({
           message: '标注会话失败',
           center: true,
@@ -258,23 +274,20 @@ function updateAnnotations(messageId: string, annotations: any) {
 </script>
 
 <template>
-  <div v-loading="loading" class="chat-container" :class="{ 'border-radius-8': props.type === 'annotated' }">
-    <div ref="messageContainer" class="chat-messageList-container">
-      <div v-if="isLoading" class="loading-indicator">
-        <FaSparklesText text="加载中" class="sm-font" />
-      </div>
+  <div class="chat-container" :class="{ 'border-radius-8': props.type === 'annotated' }">
+    <div ref="messageContainer" v-loading="loading" :scrollbar="true" class="chat-messageList-container">
       <div v-if="!messageList.length" class="chat-empty-state">
-        <el-empty :description="`暂无会话记录${messageList.length}`" />
+        <el-empty description="暂无会话记录" />
       </div>
       <template v-else>
-        <div v-for="(message, index) in messageList" :key="index" class="chat-message-wrapper">
+        <div class="chat-message-wrapper">
           <!-- 根据发送者类型调整布局 -->
-          <div class="chat-row" :class="{ 'chat-row-reverse': message.senderRole === 'assistant' }">
+          <div v-for="message in messageList" :key="message.messageId" class="chat-row" :class="{ 'chat-row-reverse': message.senderRole === 'assistant' }">
             <!-- 消息内容 -->
             <div class="message-column">
               <div class="chat-message" :class="getMessageClass(message.senderRole)">
                 <div class="message-avatar">
-                  <el-avatar :size="40" :src="message.senderRole === 'assistant' ? avatar : message.avatar" />
+                  <el-avatar :size="38" :src="message.senderRole === 'assistant' ? avatar : message.avatar" />
                 </div>
                 <div class="message-content">
                   <div class="message-header">
@@ -291,7 +304,7 @@ function updateAnnotations(messageId: string, annotations: any) {
                         fit="contain"
                         :preview-src-list="[message.attachment]"
                         loading="lazy"
-                        style="max-width: 400px; max-height: 400px;"
+                        style="max-width: 380px; max-height: 380px;"
                         class="message-image"
                       >
                         <template #placeholder>
@@ -355,9 +368,9 @@ function updateAnnotations(messageId: string, annotations: any) {
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
   height: 100%;
-  padding: 20px;
+  padding: 18px;
   overflow: scroll;
   overflow-y: auto;
   scroll-behavior: smooth;
@@ -379,9 +392,10 @@ function updateAnnotations(messageId: string, annotations: any) {
 
 .chat-row {
   display: flex;
-  gap: 16px;
+  gap: 14px;
   align-items: flex-start;
   width: 100%;
+  margin-top: 10px;
 
   .message-column {
     display: flex;
@@ -396,12 +410,12 @@ function updateAnnotations(messageId: string, annotations: any) {
 
 .chat-message {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   width: 100%;
 
   &.chat-message-user {
     align-self: flex-start;
-    min-width: 200px;
+    min-width: 198px;
 
     .message-content {
       background-color: #fff;
@@ -412,7 +426,7 @@ function updateAnnotations(messageId: string, annotations: any) {
   &.chat-message-assistant {
     flex-direction: row-reverse;
     align-self: flex-end;
-    min-width: 200px;
+    min-width: 198px;
 
     .message-content {
       background-color: #e1f3ff;
@@ -432,7 +446,7 @@ function updateAnnotations(messageId: string, annotations: any) {
 .message-content {
   display: flex;
   flex-direction: column;
-  padding: 12px 16px;
+  padding: 10px 14px;
   box-shadow: 0 2px 4px rgb(0 0 0 / 5%);
 }
 
@@ -440,34 +454,34 @@ function updateAnnotations(messageId: string, annotations: any) {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 6px;
+  margin-bottom: 5px;
 
   .sender-name {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
   }
 }
 
 .message-body {
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.5;
   word-break: break-word;
   white-space: pre-wrap;
 }
 
 .message-time {
-  margin-top: 6px;
+  margin-top: 5px;
   font-size: 11px;
   color: #909399;
 
   &.time-right {
     align-self: flex-end;
-    margin-right: 52px;
+    margin-right: 50px;
   }
 
   &.time-left {
     align-self: flex-start;
-    margin-left: 52px;
+    margin-left: 50px;
   }
 }
 

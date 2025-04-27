@@ -53,7 +53,7 @@ const configList = ref([
   {
     title: '送分接口api配置',
     type: 'api',
-    name: 'giftScoreApi',
+    name: 'sendScoreApi',
     form: {
       url: {
         value: '',
@@ -96,7 +96,7 @@ const configList = ref([
         readOnly: 1,
         value: {
           code: 'int|必返回|状态码',
-          data: {},
+          data: { url: 'string|必返回|充值链接' },
           message: 'string|必返回|消息',
         },
       },
@@ -123,6 +123,33 @@ const configList = ref([
         value: {
           code: 'int|必返回|状态码',
           data: {},
+          message: 'string|必返回|消息',
+        },
+      },
+    },
+  },
+  {
+    title: '查询用户Id接口api配置',
+    type: 'api',
+    name: 'queryUserIdApi',
+    form: {
+      url: {
+        value: '',
+        readOnly: 0,
+      },
+      input: {
+        readOnly: 1,
+        value: {
+          username: 'string|必填|用户名',
+        },
+      },
+      output: {
+        readOnly: 1,
+        value: {
+          code: 'int|必返回|状态码',
+          data: {
+            userId: 'string|必返回|用户id',
+          },
           message: 'string|必返回|消息',
         },
       },
@@ -361,9 +388,9 @@ defineExpose({
             </FormField>
           </div>
           <FaButton
+            type="button"
             size="lg"
             class="m-b-5 mt-8 w-full"
-            type="submit"
             @click="onSaveConfig(item)"
           >
             保存

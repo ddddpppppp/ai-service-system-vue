@@ -9,19 +9,20 @@ import directive from '@/utils/directive'
 import errorLog from '@/utils/error.log'
 
 import VWave from 'v-wave'
-import App from './App.vue'
 
+import App from './App.vue'
 import i18n from './locales'
 import router from './router'
+
 import pinia from './store'
-
 import uiProvider from './ui/provider'
-import '@/utils/systemCopyright'
 
+import '@/utils/systemCopyright'
 // 加载 svg 图标
 import 'virtual:svg-icons-register'
 import 'virtual:uno.css'
 import '@unocss/reset/tailwind-compat.css'
+
 // 全局样式
 import '@/assets/styles/globals.css'
 
@@ -31,6 +32,7 @@ app.use(pinia)
 app.use(router)
 app.use(uiProvider)
 app.use(i18n)
+
 directive(app)
 errorLog(app)
 if (icons.isOfflineUse) {

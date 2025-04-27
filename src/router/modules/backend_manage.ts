@@ -94,6 +94,42 @@ const routes: RouteRecordRaw[] = [
       },
     ],
   },
+  {
+    path: '/other_manage',
+    component: Layout,
+    redirect: '/other_manage/petter',
+    name: 'otherManage',
+    meta: {
+      title: '其他管理',
+      icon: 'hugeicons:file-management',
+      auth: 'backendManage',
+      alwaysOpened: true,
+    },
+    children: [
+      {
+        path: 'petter',
+        name: 'managePetter',
+        component: () => import('@/views/backend_manage/petter/list.vue'),
+        meta: {
+          title: '话术管理',
+          auth: 'petterManagement.browse',
+        },
+      },
+      {
+        path: 'petter/detail/:id',
+        name: 'managePetterDetail',
+        component: () => import('@/views/backend_manage/petter/detail.vue'),
+        meta: {
+          title: '话术编辑',
+          menu: false,
+          activeMenu: '/backend_manage/petter/list',
+          cache: true,
+          noCache: 'managePetter',
+          copyright: false,
+        },
+      },
+    ],
+  },
 ]
 
 export default routes

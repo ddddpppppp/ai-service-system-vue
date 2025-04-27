@@ -17,15 +17,27 @@ const loading = ref(false)
 const formRef = useTemplateRef<FormInstance>('formRef')
 const form = ref({
   id: props.id,
+  name: '',
+  agentId: '',
   remark: '',
   channelId: '',
+  landingPage: '',
 })
 const formRules = ref<FormRules>({
+  name: [
+    { required: true, message: '请输入名称', trigger: 'blur' },
+  ],
+  agentId: [
+    { required: true, message: '请输入代理id', trigger: 'blur' },
+  ],
   remark: [
     { required: true, message: '请输入备注', trigger: 'blur' },
   ],
   channelId: [
     { required: true, message: '请输入主页id', trigger: 'blur' },
+  ],
+  landingPage: [
+    { required: true, message: '请输入落地页', trigger: 'blur' },
   ],
 })
 
@@ -72,11 +84,20 @@ defineExpose({
 <template>
   <div v-loading="loading">
     <ElForm ref="formRef" :model="form" :rules="formRules" label-width="120px" label-suffix="：">
-      <ElFormItem label="备注" prop="nickname">
+      <ElFormItem label="名称" prop="name">
+        <ElInput v-model="form.name" placeholder="请输入名称" />
+      </ElFormItem>
+      <ElFormItem label="代理id" prop="agentId">
+        <ElInput v-model="form.agentId" placeholder="请输入代理id" />
+      </ElFormItem>
+      <ElFormItem label="备注" prop="remark">
         <ElInput v-model="form.remark" placeholder="请输入Facebook备注" />
       </ElFormItem>
       <ElFormItem label="主页id" prop="channelId">
         <ElInput v-model="form.channelId" placeholder="请输入主页id" />
+      </ElFormItem>
+      <ElFormItem label="落地页" prop="landingPage">
+        <ElInput v-model="form.landingPage" placeholder="请输入落地页" />
       </ElFormItem>
     </ElForm>
   </div>

@@ -49,4 +49,21 @@ export default {
   getOperationLogList: (data: any) => api.post('shop/setting/getOperationLogList', data).then((res) => {
     return res
   }),
+
+  getPetterSceneList: (data: any) => api.post('shop/setting/getPetterSceneList', data).then((res) => {
+    return res
+  }),
+  getPetterList: (data: any) => api.post('shop/setting/getPetterList', data).then((res) => {
+    return res
+  }),
+  getPetter: (data: any) => api.post('shop/setting/getPetter', data).then((res) => {
+    return res
+  }),
+  editPetter: (data: any) => api.post('shop/setting/editPetter', data).then((res) => {
+    return res
+  }),
+  delPetter: (data: any) => api.post('shop/setting/delPetter', data).then((res) => {
+    return res
+  }),
+
 }

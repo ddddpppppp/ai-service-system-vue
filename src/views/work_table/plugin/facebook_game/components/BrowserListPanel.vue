@@ -33,6 +33,7 @@ interface DataItem {
   visitLoginNum?: number
   visitRechargeNum?: number
   visitStatus?: number
+  agentId?: string
 }
 const dataList = ref<DataItem[]>([])
 
@@ -316,7 +317,10 @@ defineExpose({
         促充值
       </FaButton>
     </div>
-    <div class="card-grid">
+    <div v-if="dataList.length === 0" class="flex items-center justify-center" style="height: 50vh;">
+      <ElEmpty description="暂无实例，请先添加" />
+    </div>
+    <div v-else class="card-grid">
       <FaSpotlightCard
         v-for="(item, index) in dataList"
         :key="index"
@@ -401,11 +405,16 @@ defineExpose({
             <FaIcon name="logos:facebook" style="font-size: 40px;" />
           </div>
           <div>
-            <div class="text-base font-medium">
-              实例{{ item.name }}
+            <div class="text-sm font-medium">
+              {{ item.name }}
             </div>
-            <div class="text-xs text-gray-500">
-              备注：{{ item.remark }}
+            <div class="item-remark mt-2 text-xs">
+              <ElTag type="success">
+                代理id:{{ item.agentId }}
+              </ElTag>
+              <ElTag type="warning" class="ml-2">
+                备注:{{ item.remark }}
+              </ElTag>
             </div>
           </div>
         </div>
@@ -646,5 +655,12 @@ defineExpose({
 
 :deep(.el-tooltip__popper[data-popper-placement^="top"] .el-popper__arrow) {
   border-top-color: rgb(50 50 50 / 95%);
+}
+
+.item-remark {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>

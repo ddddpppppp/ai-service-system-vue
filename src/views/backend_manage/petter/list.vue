@@ -9,7 +9,7 @@ import eventBus from '@/utils/eventBus'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 defineOptions({
-  name: 'BackendManageAdminList',
+  name: 'PetterList',
 })
 
 const router = useRouter()
@@ -38,7 +38,7 @@ function searchReset() {
 // 批量操作
 const batch = ref({
   enable: true,
-  selectionDataList: [] as Array<{ uuid: string | number }>,
+  selectionDataList: [] as Array<{ id: string | number }>,
 })
 
 // 列表
@@ -66,7 +66,7 @@ function getDataList() {
     ...getParams(),
     ...(search.value.name && { name: search.value.name }),
   }
-  apiSetting.getAdminList(params).then((res: any) => {
+  apiSetting.getPetterList(params).then((res: any) => {
     loading.value = false
     dataList.value = res.data.list
     pagination.value.total = res.data.total
@@ -90,7 +90,7 @@ function sortChange({ prop, order }: { prop: string, order: string }) {
 
 function onCreate() {
   router.push({
-    name: 'backendManageAdminDetail',
+    name: 'managePetterDetail',
     params: {
       id: 0,
     },
@@ -99,19 +99,19 @@ function onCreate() {
 
 function onEdit(row: any) {
   router.push({
-    name: 'backendManageAdminDetail',
+    name: 'managePetterDetail',
     params: {
-      id: row.uuid,
+      id: row.id,
     },
   })
 }
 
 function onDel(row: any) {
-  ElMessageBox.confirm(`确认冻结「${row.name}」吗？`, '确认信息').then(() => {
-    apiSetting.delAdmin({ id: row.uuid }).then(() => {
+  ElMessageBox.confirm(`确认删除「${row.name}」吗？`, '确认信息').then(() => {
+    apiSetting.delPetter({ id: row.id }).then(() => {
       getDataList()
       ElMessage.success({
-        message: '冻结成功',
+        message: '删除成功',
         center: true,
       })
     })
@@ -119,43 +119,15 @@ function onDel(row: any) {
 }
 
 function onDelBatch() {
-  ElMessageBox.confirm(`确认批量冻结吗？`, '确认信息').then(() => {
+  ElMessageBox.confirm(`确认批量删除吗？`, '确认信息').then(() => {
     const ids: any[] = []
     batch.value.selectionDataList.forEach((item) => {
-      ids.push(item.uuid)
+      ids.push(item.id)
     })
-    apiSetting.delAdmin({ ids }).then(() => {
+    apiSetting.delPetter({ ids }).then(() => {
       getDataList()
       ElMessage.success({
-        message: '冻结成功',
-        center: true,
-      })
-    })
-  }).catch(() => {})
-}
-
-function onRecovery(row: any) {
-  ElMessageBox.confirm(`确认恢复「${row.name}」吗？`, '确认信息').then(() => {
-    apiSetting.delAdmin({ id: row.uuid }).then(() => {
-      getDataList()
-      ElMessage.success({
-        message: '恢复成功',
-        center: true,
-      })
-    })
-  }).catch(() => {})
-}
-
-function onRecoveryBatch() {
-  ElMessageBox.confirm(`确认批量恢复吗？`, '确认信息').then(() => {
-    const ids: any[] = []
-    batch.value.selectionDataList.forEach((item) => {
-      ids.push(item.uuid)
-    })
-    apiSetting.recoveryAdmin({ ids }).then(() => {
-      getDataList()
-      ElMessage.success({
-        message: '恢复成功',
+        message: '删除成功',
         center: true,
       })
     })
@@ -165,13 +137,13 @@ function onRecoveryBatch() {
 
 <template>
   <div :class="{ 'absolute-container': tableAutoHeight }">
-    <FaPageHeader title="员工管理" class="mb-0" />
+    <FaPageHeader title="话术管理" class="mb-0" />
     <FaPageMain :class="{ 'flex-1 overflow-auto': tableAutoHeight }" :main-class="{ 'flex-1 flex flex-col overflow-auto': tableAutoHeight }">
       <FaSearchBar :show-toggle="false">
         <template #default="{ fold, toggle }">
           <ElForm :model="search" size="default" label-width="100px" inline-message inline class="search-form">
             <ElFormItem label="名称">
-              <ElInput v-model="search.name" placeholder="请输入员工名称，支持模糊查询" clearable @keydown.enter="currentChange()" @clear="currentChange()" />
+              <ElInput v-model="search.name" placeholder="请输入话术名称，支持模糊查询" clearable @keydown.enter="currentChange()" @clear="currentChange()" />
             </ElFormItem>
             <ElFormItem>
               <ElButton @click="searchReset(); currentChange()">
@@ -199,45 +171,33 @@ function onRecoveryBatch() {
           <template #icon>
             <FaIcon name="i-ep:plus" />
           </template>
-          新增员工
+          新增话术
         </ElButton>
         <!--        <ElButton v-if="batch.enable" size="default" :disabled="!batch.selectionDataList.length" @click="onDelBatch"> -->
         <!--          删除 -->
         <!--        </ElButton> -->
         <ElButtonGroup v-if="batch.enable">
           <ElButton size="default" :disabled="!batch.selectionDataList.length" @click="onDelBatch">
-            冻结
+            删除
           </ElButton>
-          <ElButton size="default" :disabled="!batch.selectionDataList.length" @click="onRecoveryBatch">
+          <!-- <ElButton size="default" :disabled="!batch.selectionDataList.length" @click="onRecoveryBatch">
             恢复
-          </ElButton>
+          </ElButton> -->
         </ElButtonGroup>
       </ElSpace>
       <ElTable v-loading="loading" class="my-4" :data="dataList" stripe highlight-current-row border height="100%" @sort-change="sortChange" @selection-change="batch.selectionDataList = $event">
         <ElTableColumn v-if="batch.enable" type="selection" align="center" fixed />
-        <ElTableColumn prop="nickname" label="昵称" />
-        <ElTableColumn prop="username" label="登录账号" />
-        <ElTableColumn prop="roleName" label="角色" />
-        <ElTableColumn prop="statusName" label="状态">
-          <template #default="scope">
-            <ElButton :type="scope.row.statusClass" size="small">
-              {{ scope.row.statusName }}
-            </ElButton>
-          </template>
-        </ElTableColumn>
+        <ElTableColumn prop="name" label="话术名称" />
+        <ElTableColumn prop="sceneName" label="场景" />
         <ElTableColumn prop="createdAt" label="生成时间" />
         <ElTableColumn prop="updatedAt" label="更新日期" />
-
         <ElTableColumn label="操作" width="250" align="center" fixed="right">
           <template #default="scope">
             <ElButton type="primary" size="small" plain @click="onEdit(scope.row)">
               编辑
             </ElButton>
-            <ElButton v-if="scope.row.status === 1" type="danger" size="small" plain @click="onDel(scope.row)">
-              冻结
-            </ElButton>
-            <ElButton v-else type="primary" size="small" plain @click="onRecovery(scope.row)">
-              恢复
+            <ElButton type="danger" size="small" plain @click="onDel(scope.row)">
+              删除
             </ElButton>
           </template>
         </ElTableColumn>

@@ -37,7 +37,7 @@ function goBack() {
 
 <template>
   <div>
-    <FaPageHeader :title="!route.params.id ? '新增角色' : '编辑角色'">
+    <FaPageHeader :title="!parseInt(route.params.id as string) ? '新增角色' : '编辑角色'">
       <ElButton size="default" round @click="goBack">
         <template #icon>
           <FaIcon name="i-ep:arrow-left" />

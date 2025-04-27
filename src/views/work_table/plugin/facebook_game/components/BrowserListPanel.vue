@@ -434,7 +434,7 @@ defineExpose({
             关闭
           </ElButton>
           <ElButton v-if="item.status === 1" class="button-no-gap flex-1 border-0 rounded-none" @click="onShow(item)">
-            窗口
+            对话
           </ElButton>
           <ElDropdown class="button-no-gap flex-1">
             <ElButton class="button-no-gap dropdown-button no-hover-border w-full border-0 rounded-none">

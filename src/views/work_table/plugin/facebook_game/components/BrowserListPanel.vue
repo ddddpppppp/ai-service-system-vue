@@ -405,7 +405,7 @@ defineExpose({
             <FaIcon name="logos:facebook" style="font-size: 40px;" />
           </div>
           <div>
-            <div class="text-sm font-medium">
+            <div class="name-text text-sm font-medium">
               {{ item.name }}
             </div>
             <div class="item-remark mt-2 text-xs">
@@ -452,7 +452,7 @@ defineExpose({
                   编辑
                 </ElDropdownItem>
                 <ElDropdownItem @click="onSyncChromeFacebook(item)">
-                  抓取信息
+                  同步
                 </ElDropdownItem>
                 <ElDropdownItem @click="onVisit(item, 'login')">
                   {{ item.visitStatus === 1 ? '停止促登录' : '促登录任务' }}
@@ -540,6 +540,12 @@ defineExpose({
   max-width: 295px;
   height: 100%;
   margin: 0 auto;
+
+  .name-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 /* Extra small devices */

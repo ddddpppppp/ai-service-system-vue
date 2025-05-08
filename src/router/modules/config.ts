@@ -16,30 +16,7 @@ const routes: RouteRecordRaw[] = [
       auth: 'config',
       alwaysOpened: true,
     },
-    children: [
-      {
-        path: 'trigger_config',
-        name: 'triggerConfig',
-        component: () => import('@/views/config/trigger/list.vue'),
-        meta: {
-          auth: 'triggerConfig.browse',
-          title: '触发器',
-        },
-      },
-      {
-        path: 'trigger_config/detail/:id',
-        name: 'triggerConfigDetail',
-        component: () => import('@/views/config/trigger/detail.vue'),
-        meta: {
-          title: '触发器编辑',
-          menu: false,
-          activeMenu: '/config/trigger_config',
-          cache: true,
-          noCache: 'triggerConfig',
-          copyright: false,
-        },
-      },
-    ],
+    children: [],
   },
 ]
 

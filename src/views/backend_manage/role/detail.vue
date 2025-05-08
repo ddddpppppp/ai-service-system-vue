@@ -19,9 +19,10 @@ const btnDisabled = ref<boolean>(false)
 function onSubmit() {
   btnDisabled.value = true
   formRef.value?.submit().then(() => {
-    btnDisabled.value = false
     eventBus.emit('get-data-list')
     goBack()
+  }).finally(() => {
+    btnDisabled.value = false
   })
 }
 

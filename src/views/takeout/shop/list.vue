@@ -1,36 +1,29 @@
 <route lang="yaml">
-meta:
-  enabled: false
-</route>
+  meta:
+    enabled: false
+  </route>
 
 <script setup lang="ts">
-import apiSetting from '@/api/modules/setting'
-import eventBus from '@/utils/eventBus'
+import apiTakeout from '@/api/modules/takeout'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import TakeoutShopDetail from './detail.vue'
 
 defineOptions({
-  name: 'BackendManageMerchantList',
+  name: 'SlotPetterList',
 })
 
-const router = useRouter()
 const { pagination, getParams, onSizeChange, onCurrentChange, onSortChange } = usePagination()
 
 // 表格是否自适应高度
 const tableAutoHeight = ref(false)
 
-/**
- * 详情展示模式
- * router 路由跳转
- * dialog 对话框
- * drawer 抽屉
- */
-const formMode = ref<'router' | 'dialog' | 'drawer'>('router')
-
 // 搜索
 const searchDefault = {
   name: '',
+  storeId: '',
 }
 const search = ref({ ...searchDefault })
+
 function searchReset() {
   Object.assign(search.value, searchDefault)
 }
@@ -38,30 +31,35 @@ function searchReset() {
 // 批量操作
 const batch = ref({
   enable: true,
-  selectionDataList: [
-    {
-      uuid: '',
-    },
-  ],
+  selectionDataList: [] as Array<{ storeId: string | number }>,
 })
 
 // 列表
 const loading = ref(false)
-const dataList = ref([])
-
-onMounted(() => {
-  getDataList()
-  if (formMode.value === 'router') {
-    eventBus.on('get-data-list', () => {
-      getDataList()
-    })
-  }
+const dataList = ref([
+  {
+    storeId: 'xxx',
+    name: '711便利店',
+  },
+])
+const storeList = ref([
+  {
+    storeId: '',
+    name: '全部',
+  },
+])
+// 详情
+const formModeProps = ref<{
+  visible: boolean
+  id: number
+}>({
+  visible: false,
+  id: 0,
 })
 
-onBeforeUnmount(() => {
-  if (formMode.value === 'router') {
-    eventBus.off('get-data-list')
-  }
+onMounted(() => {
+  getDataStore()
+  getDataList()
 })
 
 function getDataList() {
@@ -69,11 +67,18 @@ function getDataList() {
   const params = {
     ...getParams(),
     ...(search.value.name && { name: search.value.name }),
+    ...({ storeId: search.value.storeId }),
   }
-  apiSetting.getMerchantList(params).then((res: any) => {
+  apiTakeout.getStoreList(params).then((res: any) => {
     loading.value = false
     dataList.value = res.data.list
     pagination.value.total = res.data.total
+  })
+}
+
+function getDataStore() {
+  apiTakeout.getAllStore().then((res: any) => {
+    storeList.value = res.data.list
   })
 }
 
@@ -93,73 +98,64 @@ function sortChange({ prop, order }: { prop: string, order: string }) {
 }
 
 function onCreate() {
-  router.push({
-    name: 'backendManageMerchantDetail',
-    params: {
-      id: 0,
-    },
-  })
+  formModeProps.value.id = 0
+  formModeProps.value.visible = true
 }
 
 function onEdit(row: any) {
-  router.push({
-    name: 'backendManageMerchantDetail',
-    params: {
-      id: row.uuid,
-    },
-  })
+  formModeProps.value.id = row.storeId
+  formModeProps.value.visible = true
 }
 
-function onDel(row: any) {
-  ElMessageBox.confirm(`确认冻结「${row.name}」吗？`, '确认信息').then(() => {
-    apiSetting.delMerchant({ id: row.uuid }).then(() => {
+function onDisable(row: any) {
+  ElMessageBox.confirm(`确认下架「${row.name}」吗？`, '确认信息').then(() => {
+    apiTakeout.disableStore({ id: row.id }).then(() => {
       getDataList()
       ElMessage.success({
-        message: '冻结成功',
+        message: '下架成功',
         center: true,
       })
     })
   }).catch(() => {})
 }
 
-function onDelBatch() {
-  ElMessageBox.confirm(`确认批量冻结吗？`, '确认信息').then(() => {
+function onDisableBatch() {
+  ElMessageBox.confirm(`确认批量下架吗？`, '确认信息').then(() => {
     const ids: any[] = []
     batch.value.selectionDataList.forEach((item) => {
-      ids.push(item.uuid)
+      ids.push(item.storeId)
     })
-    apiSetting.delMerchant({ ids }).then(() => {
+    apiTakeout.disableStore({ ids }).then(() => {
       getDataList()
       ElMessage.success({
-        message: '冻结成功',
+        message: '下架成功',
+        center: true,
+      })
+    })
+  }).catch(() => {})
+}
+function onEnable(row: any) {
+  ElMessageBox.confirm(`确认上架「${row.name}」吗？`, '确认信息').then(() => {
+    apiTakeout.enableStore({ id: row.storeId }).then(() => {
+      getDataList()
+      ElMessage.success({
+        message: '上架成功',
         center: true,
       })
     })
   }).catch(() => {})
 }
 
-function onRecovery(row: any) {
-  ElMessageBox.confirm(`确认恢复「${row.name}」吗？`, '确认信息').then(() => {
-    apiSetting.delMerchant({ id: row.uuid }).then(() => {
-      getDataList()
-      ElMessage.success({
-        message: '恢复成功',
-        center: true,
-      })
-    })
-  }).catch(() => {})
-}
-
-function onRecoveryBatch() {
-  ElMessageBox.confirm(`确认批量恢复吗？`, '确认信息').then(() => {
+function onEnableBatch() {
+  ElMessageBox.confirm(`确认批量上架吗？`, '确认信息').then(() => {
     const ids: any[] = []
     batch.value.selectionDataList.forEach((item) => {
-      ids.push(item.uuid)
+      ids.push(item.storeId)
     })
-    apiSetting.recoveryMerchant({ ids }).then(() => {
+    apiTakeout.disableStore({ ids }).then(() => {
       getDataList()
       ElMessage.success({
-        message: '恢复成功',
+        message: '上架成功',
         center: true,
       })
     })
@@ -169,13 +165,18 @@ function onRecoveryBatch() {
 
 <template>
   <div :class="{ 'absolute-container': tableAutoHeight }">
-    <FaPageHeader title="商户管理" class="mb-0" />
+    <FaPageHeader title="商铺管理" class="mb-0" />
     <FaPageMain :class="{ 'flex-1 overflow-auto': tableAutoHeight }" :main-class="{ 'flex-1 flex flex-col overflow-auto': tableAutoHeight }">
       <FaSearchBar :show-toggle="false">
         <template #default="{ fold, toggle }">
           <ElForm :model="search" size="default" label-width="100px" inline-message inline class="search-form">
             <ElFormItem label="名称">
-              <ElInput v-model="search.name" placeholder="请输入商户名称，支持模糊查询" clearable @keydown.enter="currentChange()" @clear="currentChange()" />
+              <ElInput v-model="search.name" placeholder="请输入商铺名称，支持模糊查询" clearable @keydown.enter="currentChange()" @clear="currentChange()" />
+            </ElFormItem>
+            <ElFormItem label="店铺">
+              <ElSelect v-model="search.storeId" placeholder="请选择店铺" clearable>
+                <ElOption v-for="item in storeList" :key="item.storeId" :label="item.name" :value="item.storeId" />
+              </ElSelect>
             </ElFormItem>
             <ElFormItem>
               <ElButton @click="searchReset(); currentChange()">
@@ -187,7 +188,7 @@ function onRecoveryBatch() {
                 </template>
                 筛选
               </ElButton>
-              <ElButton link disabled @click="toggle">
+              <ElButton disabled link @click="toggle">
                 <template #icon>
                   <FaIcon :name="fold ? 'i-ep:caret-bottom' : 'i-ep:caret-top' " />
                 </template>
@@ -203,84 +204,74 @@ function onRecoveryBatch() {
           <template #icon>
             <FaIcon name="i-ep:plus" />
           </template>
-          新增商户
+          新增商铺
         </ElButton>
         <!--        <ElButton v-if="batch.enable" size="default" :disabled="!batch.selectionDataList.length" @click="onDelBatch"> -->
-        <!--          删除 -->
+        <!--          下架 -->
         <!--        </ElButton> -->
         <ElButtonGroup v-if="batch.enable">
-          <ElButton size="default" :disabled="!batch.selectionDataList.length" @click="onDelBatch">
-            冻结
+          <ElButton size="default" :disabled="!batch.selectionDataList.length" @click="onDisableBatch">
+            下架
           </ElButton>
-          <ElButton size="default" :disabled="!batch.selectionDataList.length" @click="onRecoveryBatch">
-            恢复
+          <ElButton size="default" :disabled="!batch.selectionDataList.length" @click="onEnableBatch">
+            上架
           </ElButton>
         </ElButtonGroup>
       </ElSpace>
       <ElTable v-loading="loading" class="my-4" :data="dataList" stripe highlight-current-row border height="100%" @sort-change="sortChange" @selection-change="batch.selectionDataList = $event">
         <ElTableColumn v-if="batch.enable" type="selection" align="center" fixed />
-        <ElTableColumn prop="name" label="昵称" />
-        <ElTableColumn prop="username" label="登录账号" />
-        <ElTableColumn prop="accessList" label="权限" />
-        <ElTableColumn prop="balance" label="余额" />
-        <ElTableColumn prop="statusName" label="状态">
-          <template #default="scope">
-            <ElButton :type="scope.row.statusClass" size="small">
-              {{ scope.row.statusName }}
-            </ElButton>
-          </template>
-        </ElTableColumn>
+        <ElTableColumn prop="name" label="商铺名称" />
         <ElTableColumn prop="createdAt" label="生成时间" />
         <ElTableColumn prop="updatedAt" label="更新日期" />
-
         <ElTableColumn label="操作" width="250" align="center" fixed="right">
           <template #default="scope">
             <ElButton type="primary" size="small" plain @click="onEdit(scope.row)">
               编辑
             </ElButton>
-            <ElButton v-if="scope.row.status === 1" type="danger" size="small" plain @click="onDel(scope.row)">
-              冻结
+            <ElButton v-if="scope.row.status === 1" type="danger" size="small" plain @click="onDisable(scope.row)">
+              下架
             </ElButton>
-            <ElButton v-else type="primary" size="small" plain @click="onRecovery(scope.row)">
-              恢复
+            <ElButton v-else type="primary" size="small" plain @click="onEnable(scope.row)">
+              上架
             </ElButton>
           </template>
         </ElTableColumn>
       </ElTable>
       <ElPagination :current-page="pagination.page" :total="pagination.total" :page-size="pagination.size" :page-sizes="pagination.sizes" :layout="pagination.layout" :hide-on-single-page="false" class="pagination" background @size-change="sizeChange" @current-change="currentChange" />
     </FaPageMain>
+    <TakeoutShopDetail :id="formModeProps.id" v-model="formModeProps.visible" @success="getDataList" />
   </div>
 </template>
 
-<style scoped>
-.absolute-container {
-  position: absolute;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: 100%;
-}
+  <style scoped>
+  .absolute-container {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+  }
 
-.search-form {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
-  margin-bottom: -18px;
+  .search-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+    margin-bottom: -18px;
 
-  :deep(.el-form-item) {
-    grid-column: auto / span 1;
+    :deep(.el-form-item) {
+      grid-column: auto / span 1;
 
-    &:last-child {
-      grid-column-end: -1;
+      &:last-child {
+        grid-column-end: -1;
 
-      .el-form-item__content {
-        justify-content: flex-end;
+        .el-form-item__content {
+          justify-content: flex-end;
+        }
       }
     }
   }
-}
 
-.el-divider {
-  width: calc(100% + 40px);
-  margin-inline: -20px;
-}
-</style>
+  .el-divider {
+    width: calc(100% + 40px);
+    margin-inline: -20px;
+  }
+  </style>

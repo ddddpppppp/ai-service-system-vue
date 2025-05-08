@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { WebSocketService } from '@/utils/WebSocketService'
-import apiDataManage from '@/api/modules/data_manage'
+import apiDataManage from '@/api/modules/slot'
 import avatar from '@/assets/images/avatar.png'
 import { debounce, getCurrentTime } from '@/utils/helper'
 import { Loading } from '@element-plus/icons-vue'

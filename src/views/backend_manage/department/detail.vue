@@ -8,14 +8,13 @@ import eventBus from '@/utils/eventBus'
 import DetailForm from './components/DetailForm/index.vue'
 
 defineOptions({
-  name: 'BackendManageMerchantDetail',
+  name: 'BackendManageDepartmentDetail',
 })
 
 const route = useRoute()
 const router = useRouter()
 
 const formRef = useTemplateRef('formRef')
-
 const btnDisabled = ref<boolean>(false)
 function onSubmit() {
   btnDisabled.value = true
@@ -33,13 +32,13 @@ function onCancel() {
 
 // 返回列表页
 function goBack() {
-  router.push({ name: 'backendManageMerchant' })
+  router.push({ name: 'backendManageDepartment' })
 }
 </script>
 
 <template>
   <div>
-    <FaPageHeader :title="!parseInt(route.params.id as string) ? '新增商户' : '编辑商户'">
+    <FaPageHeader :title="!parseInt(route.params.id as string) ? '新增部门' : '编辑部门'">
       <ElButton size="default" round @click="goBack">
         <template #icon>
           <FaIcon name="i-ep:arrow-left" />
@@ -55,7 +54,7 @@ function goBack() {
       </ElRow>
     </FaPageMain>
     <FaFixedActionBar>
-      <ElButton :disabled="btnDisabled" type="primary" size="large" @click="onSubmit">
+      <ElButton type="primary" :disabled="btnDisabled" size="large" @click="onSubmit">
         提交
       </ElButton>
       <ElButton size="large" @click="onCancel">

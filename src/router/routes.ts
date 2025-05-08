@@ -1,15 +1,15 @@
 import type { Route } from '#/global'
 import type { RouteRecordRaw } from 'vue-router'
 import { $t } from '@/locales'
-import pinia from '@/store'
-import useSettingsStore from '@/store/modules/settings'
+// import pinia from '@/store'
+// import useSettingsStore from '@/store/modules/settings'
 import generatedRoutes from 'virtual:generated-pages'
 import { setupLayouts } from 'virtual:meta-layouts'
 import BackendManage from './modules/backend_manage.ts'
 import Config from './modules/config.ts'
-import Data from './modules/data_manage.ts'
 // import MultilevelMenuExample from './modules/multilevel.menu.example'
-import WorkTable from './modules/work_table.ts'
+import Slot from './modules/slot.ts'
+import Takeout from './modules/takeout.ts'
 
 // 固定路由（默认路由）
 const constantRoutes: RouteRecordRaw[] = [
@@ -42,15 +42,6 @@ const systemRoutes: RouteRecordRaw[] = [
     },
     children: [
       {
-        path: '',
-        component: () => import('@/views/work_table/dashboard/dashboard.vue'),
-        meta: {
-          title: $t(useSettingsStore(pinia).settings.home.title),
-          icon: 'i-ant-design:home-twotone',
-          breadcrumb: false,
-        },
-      },
-      {
         path: 'reload',
         name: 'reload',
         component: () => import('@/views/reload.vue'),
@@ -67,20 +58,20 @@ const systemRoutes: RouteRecordRaw[] = [
 const asyncRoutes: Route.recordMainRaw[] = [
   {
     meta: {
-      title: '工作台',
-      icon: 'i-uim:airplay',
+      title: 'Slot',
+      icon: 'solar:gamepad-old-bold-duotone',
     },
     children: [
-      ...WorkTable,
+      ...Slot,
     ],
   },
   {
     meta: {
-      title: '数据',
-      icon: 'i-uim:chart',
+      title: '外卖',
+      icon: 'solar:gamepad-old-bold-duotone',
     },
     children: [
-      ...Data,
+      ...Takeout,
     ],
   },
   {

@@ -8,7 +8,7 @@ import eventBus from '@/utils/eventBus'
 import DetailForm from './components/DetailForm/index.vue'
 
 defineOptions({
-  name: 'BackendManageMerchantDetail',
+  name: 'SlotFacebookGameDetail',
 })
 
 const route = useRoute()
@@ -33,13 +33,13 @@ function onCancel() {
 
 // 返回列表页
 function goBack() {
-  router.push({ name: 'backendManageMerchant' })
+  router.push({ name: 'slotFacebookList' })
 }
 </script>
 
 <template>
   <div>
-    <FaPageHeader :title="!parseInt(route.params.id as string) ? '新增商户' : '编辑商户'">
+    <FaPageHeader :title="!parseInt(route.params.id as string) ? '新增Facebook实例' : '编辑Facebook实例'">
       <ElButton size="default" round @click="goBack">
         <template #icon>
           <FaIcon name="i-ep:arrow-left" />

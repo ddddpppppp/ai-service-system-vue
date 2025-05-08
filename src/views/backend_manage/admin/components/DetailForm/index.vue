@@ -3,6 +3,7 @@ import type { FormInstance, FormRules } from 'element-plus'
 import apiAdmin from '@/api/modules/admin'
 import apiSetting from '@/api/modules/setting'
 import ImageUpload from '@/components/ImageUpload/index.vue'
+import { useFaModal } from '@/ui/components/FaModal'
 import { ElMessage } from 'element-plus'
 import { inject } from 'vue'
 
@@ -26,8 +27,10 @@ const form = ref({
   username: '',
   password: '',
   roleId: 0,
+  departmentId: '',
 })
-const roleList = ref([])
+const roleList = ref([{ id: 0, name: '请选择角色' }])
+const departmentList = ref([{ uuid: '', name: '请选择部门' }])
 let usernameDisabled = false
 const formRules = ref<FormRules>({
   avatar: [
@@ -38,6 +41,9 @@ const formRules = ref<FormRules>({
   ],
   username: [
     { required: true, message: '请输入管理员账号', trigger: 'blur' },
+  ],
+  departmentId: [
+    { required: true, message: '请选择部门', trigger: 'blur' },
   ],
   roleId: [
     { required: true, message: '请选择角色', trigger: 'blur' },
@@ -53,10 +59,29 @@ function getInfo() {
   apiAdmin.getAllRole({}).then((res) => {
     if (res.status === 1) {
       if (res.data.list) {
-        loading.value = false
         roleList.value = res.data.list
       }
     }
+  }).catch((e) => {
+    loading.value = false
+    useFaModal().error({
+      title: '提醒',
+      content: e.statusText,
+    })
+  })
+  apiAdmin.getAllDepartment({}).then((res) => {
+    if (res.status === 1) {
+      if (res.data.list) {
+        departmentList.value = res.data.list
+      }
+    }
+  }).catch((e) => {
+    useFaModal().error({
+      title: '提醒',
+      content: e.statusText,
+    })
+  }).finally(() => {
+    loading.value = false
   })
   if (Number(form.value.id) !== 0) {
     usernameDisabled = true
@@ -74,7 +99,7 @@ function onUpdateAvatar(res: any) {
 }
 defineExpose({
   submit() {
-    return new Promise<void>((resolve) => {
+    return new Promise<void>((resolve, reject) => {
       formRef.value?.validate((valid) => {
         if (valid) {
           loading.value = true
@@ -88,6 +113,9 @@ defineExpose({
             }
             resolve()
           })
+        }
+        else {
+          reject(new Error('请检查输入内容'))
         }
       })
     })
@@ -116,6 +144,11 @@ defineExpose({
             {{ role.name }}
           </el-radio>
         </el-radio-group>
+      </ElFormItem>
+      <ElFormItem label="部门" prop="departmentId">
+        <el-select v-model="form.departmentId" placeholder="请选择部门">
+          <el-option v-for="(department, index) in departmentList" :key="index" :label="department.name" :value="department.uuid" />
+        </el-select>
       </ElFormItem>
     </ElForm>
   </div>

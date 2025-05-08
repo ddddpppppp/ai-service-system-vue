@@ -87,7 +87,7 @@ function checkAllChecked(deep: any) {
 }
 defineExpose({
   submit() {
-    return new Promise<void>((resolve) => {
+    return new Promise<void>((resolve, reject) => {
       formRef.value?.validate((valid) => {
         if (valid) {
           loading.value = true
@@ -101,6 +101,9 @@ defineExpose({
             }
             resolve()
           })
+        }
+        else {
+          reject(new Error('请检查输入内容'))
         }
       })
     })

@@ -9,7 +9,7 @@ import eventBus from '@/utils/eventBus'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 defineOptions({
-  name: 'BackendManageMerchantList',
+  name: 'BackendManageDepartmentList',
 })
 
 const router = useRouter()
@@ -47,7 +47,11 @@ const batch = ref({
 
 // 列表
 const loading = ref(false)
-const dataList = ref([])
+const dataList = ref([
+  {
+    uuid: '',
+  },
+])
 
 onMounted(() => {
   getDataList()
@@ -70,7 +74,7 @@ function getDataList() {
     ...getParams(),
     ...(search.value.name && { name: search.value.name }),
   }
-  apiSetting.getMerchantList(params).then((res: any) => {
+  apiSetting.getDepartmentList(params).then((res: any) => {
     loading.value = false
     dataList.value = res.data.list
     pagination.value.total = res.data.total
@@ -94,7 +98,7 @@ function sortChange({ prop, order }: { prop: string, order: string }) {
 
 function onCreate() {
   router.push({
-    name: 'backendManageMerchantDetail',
+    name: 'backendManageDepartmentDetail',
     params: {
       id: 0,
     },
@@ -103,63 +107,63 @@ function onCreate() {
 
 function onEdit(row: any) {
   router.push({
-    name: 'backendManageMerchantDetail',
+    name: 'backendManageDepartmentDetail',
     params: {
       id: row.uuid,
     },
   })
 }
 
-function onDel(row: any) {
-  ElMessageBox.confirm(`确认冻结「${row.name}」吗？`, '确认信息').then(() => {
-    apiSetting.delMerchant({ id: row.uuid }).then(() => {
+function onDisable(row: any) {
+  ElMessageBox.confirm(`确认禁用「${row.name}」吗？`, '确认信息').then(() => {
+    apiSetting.disableDepartment({ uuid: row.uuid }).then(() => {
       getDataList()
       ElMessage.success({
-        message: '冻结成功',
+        message: '禁用成功',
         center: true,
       })
     })
   }).catch(() => {})
 }
 
-function onDelBatch() {
-  ElMessageBox.confirm(`确认批量冻结吗？`, '确认信息').then(() => {
+function onDisableBatch() {
+  ElMessageBox.confirm(`确认批量禁用吗？`, '确认信息').then(() => {
     const ids: any[] = []
     batch.value.selectionDataList.forEach((item) => {
       ids.push(item.uuid)
     })
-    apiSetting.delMerchant({ ids }).then(() => {
+    apiSetting.disableDepartment({ ids }).then(() => {
       getDataList()
       ElMessage.success({
-        message: '冻结成功',
+        message: '禁用成功',
         center: true,
       })
     })
   }).catch(() => {})
 }
 
-function onRecovery(row: any) {
-  ElMessageBox.confirm(`确认恢复「${row.name}」吗？`, '确认信息').then(() => {
-    apiSetting.delMerchant({ id: row.uuid }).then(() => {
+function onEnable(row: any) {
+  ElMessageBox.confirm(`确认启用「${row.name}」吗？`, '确认信息').then(() => {
+    apiSetting.enableDepartment({ uuid: row.uuid }).then(() => {
       getDataList()
       ElMessage.success({
-        message: '恢复成功',
+        message: '启用成功',
         center: true,
       })
     })
   }).catch(() => {})
 }
 
-function onRecoveryBatch() {
-  ElMessageBox.confirm(`确认批量恢复吗？`, '确认信息').then(() => {
+function onEnableBatch() {
+  ElMessageBox.confirm(`确认批量启用吗？`, '确认信息').then(() => {
     const ids: any[] = []
     batch.value.selectionDataList.forEach((item) => {
       ids.push(item.uuid)
     })
-    apiSetting.recoveryMerchant({ ids }).then(() => {
+    apiSetting.enableDepartment({ ids }).then(() => {
       getDataList()
       ElMessage.success({
-        message: '恢复成功',
+        message: '启用成功',
         center: true,
       })
     })
@@ -169,13 +173,13 @@ function onRecoveryBatch() {
 
 <template>
   <div :class="{ 'absolute-container': tableAutoHeight }">
-    <FaPageHeader title="商户管理" class="mb-0" />
+    <FaPageHeader title="部门管理" class="mb-0" />
     <FaPageMain :class="{ 'flex-1 overflow-auto': tableAutoHeight }" :main-class="{ 'flex-1 flex flex-col overflow-auto': tableAutoHeight }">
       <FaSearchBar :show-toggle="false">
         <template #default="{ fold, toggle }">
           <ElForm :model="search" size="default" label-width="100px" inline-message inline class="search-form">
             <ElFormItem label="名称">
-              <ElInput v-model="search.name" placeholder="请输入商户名称，支持模糊查询" clearable @keydown.enter="currentChange()" @clear="currentChange()" />
+              <ElInput v-model="search.name" placeholder="请输入部门名称，支持模糊查询" clearable @keydown.enter="currentChange()" @clear="currentChange()" />
             </ElFormItem>
             <ElFormItem>
               <ElButton @click="searchReset(); currentChange()">
@@ -203,46 +207,43 @@ function onRecoveryBatch() {
           <template #icon>
             <FaIcon name="i-ep:plus" />
           </template>
-          新增商户
+          新增部门
         </ElButton>
-        <!--        <ElButton v-if="batch.enable" size="default" :disabled="!batch.selectionDataList.length" @click="onDelBatch"> -->
-        <!--          删除 -->
-        <!--        </ElButton> -->
+        <!-- <ElButton v-if="batch.enable" size="default" :disabled="!batch.selectionDataList.length" @click="onDelBatch">
+          禁用
+        </ElButton> -->
         <ElButtonGroup v-if="batch.enable">
-          <ElButton size="default" :disabled="!batch.selectionDataList.length" @click="onDelBatch">
-            冻结
+          <ElButton size="default" :disabled="!batch.selectionDataList.length" @click="onEnableBatch">
+            启用
           </ElButton>
-          <ElButton size="default" :disabled="!batch.selectionDataList.length" @click="onRecoveryBatch">
-            恢复
+          <ElButton size="default" :disabled="!batch.selectionDataList.length" @click="onDisableBatch">
+            禁用
           </ElButton>
         </ElButtonGroup>
       </ElSpace>
       <ElTable v-loading="loading" class="my-4" :data="dataList" stripe highlight-current-row border height="100%" @sort-change="sortChange" @selection-change="batch.selectionDataList = $event">
         <ElTableColumn v-if="batch.enable" type="selection" align="center" fixed />
-        <ElTableColumn prop="name" label="昵称" />
-        <ElTableColumn prop="username" label="登录账号" />
-        <ElTableColumn prop="accessList" label="权限" />
-        <ElTableColumn prop="balance" label="余额" />
-        <ElTableColumn prop="statusName" label="状态">
+        <ElTableColumn prop="name" label="部门名称" />
+        <ElTableColumn prop="adminName" label="管理员" />
+        <ElTableColumn prop="status" label="状态" align="center">
           <template #default="scope">
-            <ElButton :type="scope.row.statusClass" size="small">
+            <ElTag :type="scope.row.statusClass">
               {{ scope.row.statusName }}
-            </ElButton>
+            </ElTag>
           </template>
         </ElTableColumn>
         <ElTableColumn prop="createdAt" label="生成时间" />
         <ElTableColumn prop="updatedAt" label="更新日期" />
-
         <ElTableColumn label="操作" width="250" align="center" fixed="right">
           <template #default="scope">
             <ElButton type="primary" size="small" plain @click="onEdit(scope.row)">
               编辑
             </ElButton>
-            <ElButton v-if="scope.row.status === 1" type="danger" size="small" plain @click="onDel(scope.row)">
-              冻结
+            <ElButton v-if="scope.row.status === 1" type="danger" size="small" plain @click="onDisable(scope.row)">
+              禁用
             </ElButton>
-            <ElButton v-else type="primary" size="small" plain @click="onRecovery(scope.row)">
-              恢复
+            <ElButton v-else type="success" size="small" plain @click="onEnable(scope.row)">
+              启用
             </ElButton>
           </template>
         </ElTableColumn>

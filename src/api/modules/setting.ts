@@ -46,23 +46,23 @@ export default {
     return res
   }),
 
-  getOperationLogList: (data: any) => api.post('shop/setting/getOperationLogList', data).then((res) => {
+  getDepartmentList: (data: any) => api.post('shop/setting/getDepartmentList', data).then((res) => {
+    return res
+  }),
+  getDepartment: (data: any) => api.post('shop/setting/getDepartment', data).then((res) => {
+    return res
+  }),
+  editDepartment: (data: any) => api.post('shop/setting/editDepartment', data).then((res) => {
+    return res
+  }),
+  disableDepartment: (data: any) => api.post('shop/setting/disableDepartment', data).then((res) => {
+    return res
+  }),
+  enableDepartment: (data: any) => api.post('shop/setting/enableDepartment', data).then((res) => {
     return res
   }),
 
-  getPetterSceneList: (data: any) => api.post('shop/setting/getPetterSceneList', data).then((res) => {
-    return res
-  }),
-  getPetterList: (data: any) => api.post('shop/setting/getPetterList', data).then((res) => {
-    return res
-  }),
-  getPetter: (data: any) => api.post('shop/setting/getPetter', data).then((res) => {
-    return res
-  }),
-  editPetter: (data: any) => api.post('shop/setting/editPetter', data).then((res) => {
-    return res
-  }),
-  delPetter: (data: any) => api.post('shop/setting/delPetter', data).then((res) => {
+  getOperationLogList: (data: any) => api.post('shop/setting/getOperationLogList', data).then((res) => {
     return res
   }),
 

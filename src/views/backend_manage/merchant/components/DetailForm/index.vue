@@ -24,6 +24,7 @@ const form = ref({
   name: '',
   username: '',
   password: '',
+  accessList: [],
 })
 let usernameDisabled = false
 const formRules = ref<FormRules>({
@@ -61,7 +62,7 @@ function onUpdateAvatar(res: any) {
 }
 defineExpose({
   submit() {
-    return new Promise<void>((resolve) => {
+    return new Promise<void>((resolve, reject) => {
       formRef.value?.validate((valid) => {
         if (valid) {
           loading.value = true
@@ -75,6 +76,9 @@ defineExpose({
             }
             resolve()
           })
+        }
+        else {
+          reject(new Error('请检查输入内容'))
         }
       })
     })
@@ -96,6 +100,12 @@ defineExpose({
       </ElFormItem>
       <ElFormItem label="登录密码" prop="password">
         <ElInput v-model="form.password" placeholder="请输入登录密码，不输入就不更改密码" />
+      </ElFormItem>
+      <ElFormItem label="权限">
+        <el-checkbox-group v-model="form.accessList">
+          <el-checkbox label="slot" value="slot" />
+          <el-checkbox label="外卖" value="takeout" />
+        </el-checkbox-group>
       </ElFormItem>
     </ElForm>
   </div>

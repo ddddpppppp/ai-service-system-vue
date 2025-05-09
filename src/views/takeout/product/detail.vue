@@ -7,14 +7,12 @@ import { inject, ref, useTemplateRef, watch } from 'vue'
 
 export interface Props {
   id?: number | string
-  type?: 'home' | 'shop'
   storeId?: number | string
 }
 const props = withDefaults(
   defineProps<Props>(),
   {
     id: '',
-    type: 'home',
     storeId: '',
   },
 )
@@ -36,9 +34,13 @@ const formRef = useTemplateRef<FormInstance>('formRef')
 // 创建初始表单状态的函数
 function createInitialFormState() {
   return {
-    id: props.id,
+    productId: props.id,
     name: '',
     image: '',
+    intro: '',
+    price: '',
+    homeCategoryId: '',
+    storeCategoryId: '',
     storeId: props.storeId,
     createdAt: '',
     updatedAt: '',
@@ -46,18 +48,37 @@ function createInitialFormState() {
 }
 
 const form = ref(createInitialFormState())
-const storeList = ref([
-  {
-    storeId: '',
-    name: '全部',
-  },
-])
+const homeCategoryList = ref([{
+  id: 0,
+  name: '请选择分类',
+}])
+const storeCategoryList = ref([{
+  id: 0,
+  name: '请选择分类',
+}])
+const storeList = ref([{
+  storeId: '',
+  name: '请选择店铺',
+}])
+
 const formRules = ref<FormRules>({
   name: [
-    { required: true, message: '请输入分类名称，例如蛋糕，咖啡', trigger: 'blur' },
+    { required: true, message: '请输入产品名称', trigger: 'blur' },
   ],
   image: [
-    { required: true, message: '请上传分类图片', trigger: 'blur' },
+    { required: true, message: '请上传产品图片', trigger: 'change' },
+  ],
+  intro: [
+    { required: true, message: '请输入产品简介', trigger: 'blur' },
+  ],
+  price: [
+    { required: true, message: '请输入产品价格', trigger: 'blur' },
+  ],
+  homeCategoryId: [
+    { required: true, message: '请选择产品分类', trigger: 'change' },
+  ],
+  storeCategoryId: [
+    { required: true, message: '请选择店铺分类', trigger: 'change' },
   ],
   storeId: [
     { required: true, message: '请选择店铺', trigger: 'change' },
@@ -66,17 +87,12 @@ const formRules = ref<FormRules>({
 
 // 监听props变化
 watch(() => props.id, (newId) => {
-  form.value.id = newId
+  form.value.productId = newId
   getInfo()
 })
 
 watch(() => props.storeId, (newStoreId) => {
   form.value.storeId = newStoreId
-  getInfo()
-})
-
-watch(() => props.type, () => {
-  getInfo()
 })
 
 onMounted(() => {
@@ -84,18 +100,21 @@ onMounted(() => {
 })
 
 function getInfo() {
-  if (props.type === 'shop') {
-    form.value.storeId = props.storeId
-    apiTakeout.getAllStore().then((res: any) => {
-      storeList.value = res.data.list
-    })
-  }
+  apiTakeout.getAllStoreCategory({ storeId: props.storeId }).then((res: any) => {
+    storeCategoryList.value = res.data.list
+  })
+  apiTakeout.getAllHomeCategory().then((res: any) => {
+    homeCategoryList.value = res.data.list
+  })
+  apiTakeout.getAllStore().then((res: any) => {
+    storeList.value = res.data.list
+  })
   if (props.id && props.id !== '') {
     loading.value = true
-    apiTakeout.getCategory({ id: props.id }).then((res: any) => {
+    apiTakeout.getProduct({ id: props.id }).then((res: any) => {
       loading.value = false
       if (res.status === 1) {
-        form.value = res.data.category
+        form.value = res.data.product
       }
     })
   }
@@ -126,7 +145,7 @@ function submit() {
     formRef.value?.validate((valid) => {
       if (valid) {
         loading.value = true
-        apiTakeout.editCategory({ form: form.value }).then((res: any) => {
+        apiTakeout.editProduct({ form: form.value }).then((res: any) => {
           loading.value = false
           if (res.status === 1) {
             ElMessage.success({
@@ -149,24 +168,40 @@ function submit() {
   <div>
     <el-dialog
       v-model="visible"
-      width="500px"
-      :title="id ? '编辑分类' : '新增分类'"
+      width="700px"
+      :title="id ? '编辑产品' : '新增产品'"
       :close-on-click-modal="true"
       destroy-on-close
       class="conversation-drawer"
     >
-      <div v-loading="loading" class="takeout-category-main">
+      <div v-loading="loading" class="takeout-product-main">
         <ElForm ref="formRef" :model="form" :rules="formRules" label-width="120px" label-suffix="：">
-          <ElFormItem label="分类名称" prop="name">
-            <ElInput v-model="form.name" placeholder="请输入分类名称，例如中餐，蛋糕，咖啡" />
-          </ElFormItem>
-          <ElFormItem v-if="type === 'shop'" label="店铺" prop="storeId">
-            <ElSelect v-model="form.storeId" placeholder="请选择店铺">
+          <ElFormItem label="店铺" prop="storeId">
+            <ElSelect v-model="form.storeId" placeholder="请选择店铺" clearable :disabled="true">
               <ElOption v-for="item in storeList" :key="item.storeId" :label="item.name" :value="item.storeId" />
             </ElSelect>
           </ElFormItem>
-          <ElFormItem label="分类图片" prop="image">
-            <ImageUpload v-model="form.image" :action="uploadFileAction" :width="100" :height="100" :notip="true" @on-success="onUploadSuccess" />
+          <ElFormItem label="产品名称" prop="name">
+            <ElInput v-model="form.name" placeholder="请输入产品名称" />
+          </ElFormItem>
+          <ElFormItem label="产品图片" prop="image">
+            <ImageUpload v-model="form.image" :action="uploadFileAction" :width="100" :height="100" :notip="true" :size="3000" @on-success="onUploadSuccess" />
+          </ElFormItem>
+          <ElFormItem label="产品分类" prop="homeCategoryId">
+            <ElSelect v-model="form.homeCategoryId" placeholder="请选择产品分类" clearable>
+              <ElOption v-for="item in homeCategoryList" :key="item.id" :label="item.name" :value="item.id" />
+            </ElSelect>
+          </ElFormItem>
+          <ElFormItem label="店铺分类" prop="storeCategoryId">
+            <ElSelect v-model="form.storeCategoryId" placeholder="请选择店铺分类" clearable>
+              <ElOption v-for="item in storeCategoryList" :key="item.id" :label="item.name" :value="item.id" />
+            </ElSelect>
+          </ElFormItem>
+          <ElFormItem label="产品价格" prop="price">
+            <ElInput v-model="form.price" placeholder="请输入产品价格" />
+          </ElFormItem>
+          <ElFormItem label="产品简介" prop="intro">
+            <ElInput v-model="form.intro" type="textarea" placeholder="请输入产品简介" :rows="4" />
           </ElFormItem>
         </ElForm>
       </div>
@@ -190,7 +225,7 @@ function submit() {
   justify-content: flex-end;
 }
 
-.takeout-category-main {
+.takeout-product-main {
   margin-top: 20px;
 }
 </style>

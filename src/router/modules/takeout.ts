@@ -84,6 +84,15 @@ const routes: RouteRecordRaw[] = [
           },
         },
       },
+      {
+        path: 'takeout_shop_product',
+        name: 'takeoutShopProduct',
+        component: () => import('@/views/takeout/product/list.vue'),
+        meta: {
+          auth: 'takeoutShop.browse',
+          title: '产品管理',
+        },
+      },
     ],
   },
 ]

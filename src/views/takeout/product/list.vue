@@ -5,13 +5,12 @@
 
 <script setup lang="ts">
 import apiTakeout from '@/api/modules/takeout'
-import router from '@/router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import TakeoutCategoryDetail from '../category/detail.vue'
-import TakeoutShopDetail from './detail.vue'
+import { useRoute } from 'vue-router'
+import TakeoutProductDetail from './detail.vue'
 
 defineOptions({
-  name: 'TakeoutShopList',
+  name: 'TakeoutProductList',
 })
 
 const { pagination, getParams, onSizeChange, onCurrentChange } = usePagination()
@@ -36,20 +35,22 @@ function searchReset() {
 // 批量操作
 const batch = ref({
   enable: true,
-  selectionDataList: [] as Array<{ storeId: string | number }>,
+  selectionDataList: [] as Array<{ productId: string | number }>,
 })
 
 // 列表
 const loading = ref(false)
 const dataList = ref([
   {
+    productId: 'xxx',
     storeId: 'xxx',
     name: '711便利店',
     image: '',
     status: 1,
     statusClass: 'success',
     statusName: '已启用',
-    productCount: 0,
+    rating: 0,
+    intro: '711便利店',
   },
 ])
 const storeList = ref([
@@ -62,18 +63,20 @@ const storeList = ref([
 const formModeProps = ref<{
   visible: boolean
   id: number
+  storeId: number | string
 }>({
   visible: false,
   id: 0,
-})
-
-const formModeCategoryProps = ref<{
-  visible: boolean
-  storeId: string | number
-}>({
-  visible: false,
   storeId: '',
 })
+
+// const formModeCategoryProps = ref<{
+//   visible: boolean
+//   productId: string | number
+// }>({
+//   visible: false,
+//   productId: '',
+// })
 
 // 是否全选
 const allSelected = computed({
@@ -82,6 +85,12 @@ const allSelected = computed({
 })
 
 onMounted(() => {
+  const route = useRoute()
+  const query = route.query
+  const storeId = query.storeId as string
+  if (storeId) {
+    search.value.storeId = storeId
+  }
   getDataStore()
   getDataList()
 })
@@ -93,7 +102,7 @@ function getDataList() {
     ...(search.value.name && { name: search.value.name }),
     ...({ storeId: search.value.storeId }),
   }
-  apiTakeout.getStoreList(params).then((res: any) => {
+  apiTakeout.getProductList(params).then((res: any) => {
     loading.value = false
     dataList.value = res.data.list
     pagination.value.total = res.data.total
@@ -119,23 +128,24 @@ function currentChange(page = 1) {
 }
 
 function onCreate() {
+  if (!search.value.storeId) {
+    ElMessage.warning('请先选择商铺')
+    return
+  }
   formModeProps.value.id = 0
+  formModeProps.value.storeId = search.value.storeId
   formModeProps.value.visible = true
 }
 
 function onEdit(row: any) {
-  formModeProps.value.id = row.storeId
+  formModeProps.value.id = row.productId
+  formModeProps.value.storeId = row.storeId
   formModeProps.value.visible = true
-}
-
-function onAddCategory(row: any) {
-  formModeCategoryProps.value.storeId = row.storeId
-  formModeCategoryProps.value.visible = true
 }
 
 function onDisable(row: any) {
   ElMessageBox.confirm(`确认下架「${row.name}」吗？`, '确认信息').then(() => {
-    apiTakeout.disableStore({ id: row.storeId }).then(() => {
+    apiTakeout.disableProduct({ id: row.productId }).then(() => {
       getDataList()
       ElMessage.success({
         message: '下架成功',
@@ -149,9 +159,9 @@ function onDisableBatch() {
   ElMessageBox.confirm(`确认批量下架吗？`, '确认信息').then(() => {
     const ids: any[] = []
     batch.value.selectionDataList.forEach((item) => {
-      ids.push(item.storeId)
+      ids.push(item.productId)
     })
-    apiTakeout.disableStore({ ids }).then(() => {
+    apiTakeout.disableProduct({ ids }).then(() => {
       getDataList()
       ElMessage.success({
         message: '下架成功',
@@ -162,7 +172,7 @@ function onDisableBatch() {
 }
 function onEnable(row: any) {
   ElMessageBox.confirm(`确认上架「${row.name}」吗？`, '确认信息').then(() => {
-    apiTakeout.enableStore({ id: row.storeId }).then(() => {
+    apiTakeout.enableProduct({ id: row.productId }).then(() => {
       getDataList()
       ElMessage.success({
         message: '上架成功',
@@ -176,9 +186,9 @@ function onEnableBatch() {
   ElMessageBox.confirm(`确认批量上架吗？`, '确认信息').then(() => {
     const ids: any[] = []
     batch.value.selectionDataList.forEach((item) => {
-      ids.push(item.storeId)
+      ids.push(item.productId)
     })
-    apiTakeout.enableStore({ ids }).then(() => {
+    apiTakeout.enableProduct({ ids }).then(() => {
       getDataList()
       ElMessage.success({
         message: '上架成功',
@@ -188,29 +198,37 @@ function onEnableBatch() {
   }).catch(() => {})
 }
 
-function toProductList(shop: any) {
-  router.push({
-    name: 'takeoutShopProduct',
-    query: {
-      storeId: shop.storeId,
-    },
-  })
+function onDeleteBatch() {
+  ElMessageBox.confirm(`确认批量删除吗？`, '确认信息').then(() => {
+    const ids: any[] = []
+    batch.value.selectionDataList.forEach((item) => {
+      ids.push(item.productId)
+    })
+    apiTakeout.deleteProduct({ ids }).then(() => {
+      getDataList()
+      ElMessage.success({
+        message: '删除成功',
+        center: true,
+      })
+    })
+  }).catch(() => {})
 }
-function onSelectionChange(shop: any, checked: boolean | string | number) {
+
+function onSelectionChange(product: any, checked: boolean | string | number) {
   const isChecked = Boolean(checked)
   if (isChecked) {
-    batch.value.selectionDataList.push(shop)
+    batch.value.selectionDataList.push(product)
   }
   else {
-    const index = batch.value.selectionDataList.findIndex(item => item.storeId === shop.storeId)
+    const index = batch.value.selectionDataList.findIndex(item => item.productId === product.productId)
     if (index !== -1) {
       batch.value.selectionDataList.splice(index, 1)
     }
   }
 }
 
-function isSelected(shop: any) {
-  return batch.value.selectionDataList.some(item => item.storeId === shop.storeId)
+function isSelected(product: any) {
+  return batch.value.selectionDataList.some(item => item.productId === product.productId)
 }
 
 function toggleSelectAll(checked: boolean | string | number) {
@@ -230,16 +248,16 @@ function isAllSelected() {
 
 <template>
   <div :class="{ 'absolute-container': tableAutoHeight }">
-    <FaPageHeader title="店铺管理" class="mb-0" />
+    <FaPageHeader title="产品管理" class="mb-0" />
     <FaPageMain :class="{ 'flex-1 overflow-auto': tableAutoHeight }" :main-class="{ 'flex-1 flex flex-col overflow-auto': tableAutoHeight }">
       <FaSearchBar :show-toggle="false">
         <template #default="{ fold, toggle }">
           <ElForm :model="search" size="default" label-width="100px" inline-message inline class="search-form">
             <ElFormItem label="名称">
-              <ElInput v-model="search.name" placeholder="请输入店铺名称，支持模糊查询" clearable @keydown.enter="currentChange()" @clear="currentChange()" />
+              <ElInput v-model="search.name" placeholder="请输入产品名称，支持模糊查询" clearable @keydown.enter="currentChange()" @clear="currentChange()" />
             </ElFormItem>
-            <ElFormItem label="店铺">
-              <ElSelect v-model="search.storeId" placeholder="请选择店铺" clearable>
+            <ElFormItem label="商铺">
+              <ElSelect v-model="search.storeId" placeholder="请选择商铺" clearable>
                 <ElOption v-for="item in storeList" :key="item.storeId" :label="item.name" :value="item.storeId" />
               </ElSelect>
             </ElFormItem>
@@ -269,7 +287,7 @@ function isAllSelected() {
           <template #icon>
             <FaIcon name="i-ep:plus" />
           </template>
-          新增店铺
+          新增产品
         </ElButton>
         <ElCheckbox v-model="allSelected" style="margin-right: 10px;">
           全选
@@ -281,45 +299,45 @@ function isAllSelected() {
           <ElButton size="default" :disabled="!batch.selectionDataList.length" @click="onEnableBatch">
             上架
           </ElButton>
+          <ElButton size="default" :disabled="!batch.selectionDataList.length" @click="onDeleteBatch">
+            删除
+          </ElButton>
         </ElButtonGroup>
       </ElSpace>
-      <ElRow :gutter="20" class="shop-card-list">
+      <ElRow :gutter="20" class="product-card-list">
         <ElCol
-          v-for="shop in dataList"
-          :key="shop.storeId"
+          v-for="product in dataList"
+          :key="product.productId"
           :span="8"
-          class="shop-card-col"
+          class="product-card-col"
         >
-          <ElCard shadow="hover" class="shop-card">
-            <div class="shop-card-img-wrap" @click="toProductList(shop)">
-              <div class="shop-card-checkbox" @click.stop>
-                <ElCheckbox :model-value="isSelected(shop)" @update:model-value="checked => onSelectionChange(shop, checked)" />
+          <ElCard shadow="hover" class="product-card">
+            <div class="product-card-img-wrap">
+              <div class="product-card-checkbox">
+                <ElCheckbox :model-value="isSelected(product)" @update:model-value="checked => onSelectionChange(product, checked)" />
               </div>
-              <img :src="shop.image || defaultImg" class="shop-card-img">
-              <ElTag class="shop-card-status-tag" :type="shop.statusClass as any">
-                {{ shop.statusName }}
+              <img :src="product.image || defaultImg" class="product-card-img">
+              <ElTag class="product-card-status-tag" :type="product.statusClass as any">
+                {{ product.statusName }}
               </ElTag>
             </div>
-            <div class="shop-card-content">
-              <div class="shop-card-title">
-                {{ shop.name }}
+            <div class="product-card-content">
+              <div class="product-card-title">
+                {{ product.name }}
               </div>
-              <div class="shop-card-row">
-                <span class="shop-card-info">产品数量: {{ shop.productCount }}</span>
-                <span class="shop-card-actions">
-                  <ElButton type="primary" size="small" circle plain @click="onAddCategory(shop)">
-                    <FaIcon name="tabler:category-filled" />
-                  </ElButton>
-                  <ElButton type="primary" size="small" circle plain @click="onEdit(shop)">
+              <div class="product-card-row">
+                <span class="product-card-info" :title="product.intro">{{ product.intro }}</span>
+                <span class="product-card-actions">
+                  <ElButton type="primary" size="small" circle plain @click="onEdit(product)">
                     <FaIcon name="i-ep:edit" />
                   </ElButton>
                   <ElButton
-                    v-if="shop.status === 1"
+                    v-if="product.status === 1"
                     type="danger"
                     size="small"
                     circle
                     plain
-                    @click="onDisable(shop)"
+                    @click="onDisable(product)"
                   >
                     <FaIcon name="i-ep:remove" />
                   </ElButton>
@@ -329,7 +347,7 @@ function isAllSelected() {
                     size="small"
                     circle
                     plain
-                    @click="onEnable(shop)"
+                    @click="onEnable(product)"
                   >
                     <FaIcon name="i-ep:check" />
                   </ElButton>
@@ -342,8 +360,7 @@ function isAllSelected() {
       <ElEmpty v-if="dataList.length === 0" description="暂无数据" />
       <ElPagination :current-page="pagination.page" :total="pagination.total" :page-size="pagination.size" :page-sizes="pagination.sizes" :layout="pagination.layout" :hide-on-single-page="false" class="pagination" background @size-change="sizeChange" @current-change="currentChange" />
     </FaPageMain>
-    <TakeoutShopDetail :id="formModeProps.id" v-model="formModeProps.visible" @success="getDataList" />
-    <TakeoutCategoryDetail v-model="formModeCategoryProps.visible" type="shop" :store-id="formModeCategoryProps.storeId" @success="getDataList" />
+    <TakeoutProductDetail :id="formModeProps.id" v-model="formModeProps.visible" :store-id="formModeProps.storeId" @success="getDataList" />
   </div>
 </template>
 
@@ -379,15 +396,15 @@ function isAllSelected() {
     margin-inline: -20px;
   }
 
-  .shop-card-list {
+  .product-card-list {
     margin-top: 30px;
   }
 
-  .shop-card-col {
+  .product-card-col {
     margin-bottom: 12px;
   }
 
-  .shop-card {
+  .product-card {
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -397,16 +414,15 @@ function isAllSelected() {
     border-radius: 12px;
   }
 
-  .shop-card-img-wrap {
+  .product-card-img-wrap {
     position: relative;
     width: 100%;
     aspect-ratio: 2.5/1;
     overflow: hidden;
-    cursor: pointer;
     border-radius: 12px 12px 0 0;
   }
 
-  .shop-card-checkbox {
+  .product-card-checkbox {
     position: absolute;
     top: 8px;
     left: 8px;
@@ -415,18 +431,18 @@ function isAllSelected() {
   }
 
   /* Make the checkbox larger */
-  .shop-card-checkbox :deep(.el-checkbox__input) {
+  .product-card-checkbox :deep(.el-checkbox__input) {
     transform: scale(1.2);
   }
 
-  .shop-card-img {
+  .product-card-img {
     display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
   }
 
-  .shop-card-status-tag {
+  .product-card-status-tag {
     position: absolute;
     top: 8px;
     right: 8px;
@@ -437,37 +453,41 @@ function isAllSelected() {
     line-height: 20px;
   }
 
-  .shop-card-content {
+  .product-card-content {
     display: flex;
     flex: 1;
     flex-direction: column;
     padding: 8px 15px;
   }
 
-  .shop-card-title {
+  .product-card-title {
     margin-bottom: 2px;
     font-size: 15px;
     font-weight: 500;
     line-height: 1.2;
   }
 
-  .shop-card-row {
+  .product-card-row {
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
     margin-bottom: 2px;
   }
 
-  .shop-card-info {
+  .product-card-info {
+    width: 290px;
+    overflow: hidden;
+    text-overflow: ellipsis;
     font-size: 12px;
     color: #666;
+    white-space: nowrap;
   }
 
-  .shop-card-actions .el-button + .el-button {
+  .product-card-actions .el-button + .el-button {
     margin-left: 4px;
   }
 
-  .shop-card-intro {
+  .product-card-intro {
     margin-top: 2px;
     overflow: hidden;
     text-overflow: ellipsis;

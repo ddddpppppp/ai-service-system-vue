@@ -10,7 +10,7 @@ import { useRoute } from 'vue-router'
 import TakeoutCategoryDetail from './detail.vue'
 
 defineOptions({
-  name: 'SlotPetterList',
+  name: 'TakeoutCategoryList',
 })
 
 const { pagination, getParams, onSizeChange, onCurrentChange, onSortChange } = usePagination()

@@ -9,10 +9,9 @@ import eventBus from '@/utils/eventBus'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 defineOptions({
-  name: 'BackendManageMerchantList',
+  name: 'BackendManagePaymentList',
 })
 
-const router = useRouter()
 const { pagination, getParams, onSizeChange, onCurrentChange, onSortChange } = usePagination()
 
 // 表格是否自适应高度
@@ -40,7 +39,7 @@ const batch = ref({
   enable: true,
   selectionDataList: [
     {
-      uuid: '',
+      id: '',
     },
   ],
 })
@@ -70,7 +69,7 @@ function getDataList() {
     ...getParams(),
     ...(search.value.name && { name: search.value.name }),
   }
-  apiSetting.getMerchantList(params).then((res: any) => {
+  apiSetting.getPaymentChannelList(params).then((res: any) => {
     loading.value = false
     dataList.value = res.data.list
     pagination.value.total = res.data.total
@@ -92,27 +91,15 @@ function sortChange({ prop, order }: { prop: string, order: string }) {
   onSortChange(prop, order).then(() => getDataList())
 }
 
-function onCreate() {
-  router.push({
-    name: 'backendManageMerchantDetail',
-    params: {
-      id: 0,
-    },
-  })
-}
-
-function onEdit(row: any) {
-  router.push({
-    name: 'backendManageMerchantDetail',
-    params: {
-      id: row.uuid,
-    },
+function onEdit(row: any, field: string) {
+  apiSetting.editPaymentChannel({ id: row.id, key: field, value: row[field] }).then(() => {
+    getDataList()
   })
 }
 
 function onDel(row: any) {
   ElMessageBox.confirm(`确认冻结「${row.name}」吗？`, '确认信息').then(() => {
-    apiSetting.delMerchant({ id: row.uuid }).then(() => {
+    apiSetting.disablePaymentChannel({ id: row.id }).then(() => {
       getDataList()
       ElMessage.success({
         message: '冻结成功',
@@ -126,9 +113,9 @@ function onDelBatch() {
   ElMessageBox.confirm(`确认批量冻结吗？`, '确认信息').then(() => {
     const ids: any[] = []
     batch.value.selectionDataList.forEach((item) => {
-      ids.push(item.uuid)
+      ids.push(item.id)
     })
-    apiSetting.delMerchant({ ids }).then(() => {
+    apiSetting.disablePaymentChannel({ ids }).then(() => {
       getDataList()
       ElMessage.success({
         message: '冻结成功',
@@ -140,7 +127,7 @@ function onDelBatch() {
 
 function onRecovery(row: any) {
   ElMessageBox.confirm(`确认恢复「${row.name}」吗？`, '确认信息').then(() => {
-    apiSetting.recoveryMerchant({ id: row.uuid }).then(() => {
+    apiSetting.enablePaymentChannel({ id: row.id }).then(() => {
       getDataList()
       ElMessage.success({
         message: '恢复成功',
@@ -154,9 +141,9 @@ function onRecoveryBatch() {
   ElMessageBox.confirm(`确认批量恢复吗？`, '确认信息').then(() => {
     const ids: any[] = []
     batch.value.selectionDataList.forEach((item) => {
-      ids.push(item.uuid)
+      ids.push(item.id)
     })
-    apiSetting.recoveryMerchant({ ids }).then(() => {
+    apiSetting.enablePaymentChannel({ ids }).then(() => {
       getDataList()
       ElMessage.success({
         message: '恢复成功',
@@ -169,7 +156,7 @@ function onRecoveryBatch() {
 
 <template>
   <div :class="{ 'absolute-container': tableAutoHeight }">
-    <FaPageHeader title="商户管理" class="mb-0" />
+    <FaPageHeader title="代收渠道管理" class="mb-0" />
     <FaPageMain
       :class="{ 'flex-1 overflow-auto': tableAutoHeight }"
       :main-class="{ 'flex-1 flex flex-col overflow-auto': tableAutoHeight }"
@@ -179,7 +166,7 @@ function onRecoveryBatch() {
           <ElForm :model="search" size="default" label-width="100px" inline-message inline class="search-form">
             <ElFormItem label="名称">
               <ElInput
-                v-model="search.name" placeholder="请输入商户名称，支持模糊查询" clearable @keydown.enter="currentChange()"
+                v-model="search.name" placeholder="请输入代收渠道名称，支持模糊查询" clearable @keydown.enter="currentChange()"
                 @clear="currentChange()"
               />
             </ElFormItem>
@@ -205,12 +192,12 @@ function onRecoveryBatch() {
       </FaSearchBar>
       <ElDivider border-style="dashed" />
       <ElSpace wrap>
-        <ElButton type="primary" size="default" @click="onCreate">
+        <!-- <ElButton type="primary" size="default" @click="onCreate">
           <template #icon>
             <FaIcon name="i-ep:plus" />
           </template>
-          新增商户
-        </ElButton>
+          新增代收渠道
+        </ElButton> -->
         <!--        <ElButton v-if="batch.enable" size="default" :disabled="!batch.selectionDataList.length" @click="onDelBatch"> -->
         <!--          删除 -->
         <!--        </ElButton> -->
@@ -228,31 +215,92 @@ function onRecoveryBatch() {
         @sort-change="sortChange" @selection-change="batch.selectionDataList = $event"
       >
         <ElTableColumn v-if="batch.enable" type="selection" align="center" fixed />
-        <ElTableColumn prop="name" label="昵称" />
-        <ElTableColumn prop="username" label="登录账号" />
-        <ElTableColumn prop="accessList" label="权限" />
-        <ElTableColumn prop="balance" label="余额" />
-        <ElTableColumn prop="statusName" label="状态">
+        <ElTableColumn prop="name" label="名称" />
+        <ElTableColumn prop="type" label="类型" />
+        <ElTableColumn prop="rate" label="费率" width="100">
           <template #default="scope">
-            <ElButton :type="scope.row.statusClass" size="small">
-              {{ scope.row.statusName }}
-            </ElButton>
+            <ElInput v-if="scope.row.id > 0" v-model="scope.row.rate" type="number" @change="onEdit(scope.row, 'rate')">
+              <template #suffix>
+                %
+              </template>
+            </ElInput>
+            <span v-else>--</span>
           </template>
         </ElTableColumn>
-        <ElTableColumn prop="createdAt" label="生成时间" />
-        <ElTableColumn prop="updatedAt" label="更新日期" />
-
-        <ElTableColumn label="操作" width="250" align="center" fixed="right">
+        <ElTableColumn prop="chargeFee" label="手续费" width="100">
           <template #default="scope">
-            <ElButton type="primary" size="small" plain @click="onEdit(scope.row)">
-              编辑
+            <ElInput v-if="scope.row.id > 0" v-model="scope.row.chargeFee" type="number" @change="onEdit(scope.row, 'chargeFee')" />
+            <span v-else>--</span>
+          </template>
+        </ElTableColumn>
+        <ElTableColumn prop="guarantee" label="保证金" width="100">
+          <template #default="scope">
+            <ElInput v-if="scope.row.id > 0" v-model="scope.row.guarantee" type="number" @change="onEdit(scope.row, 'guarantee')">
+              <template #suffix>
+                %
+              </template>
+            </ElInput>
+            <span v-else>--</span>
+          </template>
+        </ElTableColumn>
+        <ElTableColumn prop="freezeTime" label="冻结日期" width="100">
+          <template #default="scope">
+            <ElInput v-if="scope.row.id > 0" v-model="scope.row.freezeTime" type="number" @change="onEdit(scope.row, 'freezeTime')">
+              <template #suffix>
+                天
+              </template>
+            </ElInput>
+            <span v-else>--</span>
+          </template>
+        </ElTableColumn>
+        <ElTableColumn prop="countTime" label="结算日期" width="100">
+          <template #default="scope">
+            <ElInput v-if="scope.row.id > 0" v-model="scope.row.countTime" type="number" @change="onEdit(scope.row, 'countTime')">
+              <template #suffix>
+                天
+              </template>
+            </ElInput>
+            <span v-else>--</span>
+          </template>
+        </ElTableColumn>
+        <ElTableColumn prop="sort" label="排序">
+          <template #default="scope">
+            <ElInput v-if="scope.row.id > 0" v-model="scope.row.sort" type="number" @change="onEdit(scope.row, 'sort')" />
+            <span v-else>--</span>
+          </template>
+        </ElTableColumn>
+        <ElTableColumn prop="remark" label="备注" width="150">
+          <template #default="scope">
+            <ElInput v-if="scope.row.id > 0" v-model="scope.row.remark" @change="onEdit(scope.row, 'remark')" />
+            <span v-else>--</span>
+          </template>
+        </ElTableColumn>
+
+        <ElTableColumn prop="statusName" label="状态">
+          <template #default="scope">
+            <ElButton v-if="scope.row.id > 0" :type="scope.row.statusClass" size="small">
+              {{ scope.row.statusName }}
             </ElButton>
-            <ElButton v-if="scope.row.status === 1" type="danger" size="small" plain @click="onDel(scope.row)">
-              冻结
-            </ElButton>
-            <ElButton v-else type="primary" size="small" plain @click="onRecovery(scope.row)">
-              恢复
-            </ElButton>
+            <span v-else>--</span>
+          </template>
+        </ElTableColumn>
+        <ElTableColumn prop="orderCount" label="订单量" />
+        <ElTableColumn prop="orderSuccessCount" label="成功量" />
+        <ElTableColumn prop="orderAmount" label="订单金额" width="200" />
+        <ElTableColumn prop="orderSuccessAmount" label="成功金额" width="200" />
+        <ElTableColumn prop="orderSuccessRate" label="成功率" width="100" />
+
+        <ElTableColumn label="操作" width="80" align="center" fixed="right">
+          <template #default="scope">
+            <div v-if="scope.row.id > 0">
+              <ElButton v-if="scope.row.status === 1" type="danger" size="small" plain @click="onDel(scope.row)">
+                冻结
+              </ElButton>
+              <ElButton v-else type="primary" size="small" plain @click="onRecovery(scope.row)">
+                恢复
+              </ElButton>
+            </div>
+            <span v-else>--</span>
           </template>
         </ElTableColumn>
       </ElTable>

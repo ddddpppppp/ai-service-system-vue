@@ -218,6 +218,7 @@ function onRecoveryBatch() {
         <ElTableColumn prop="nickname" label="昵称" />
         <ElTableColumn prop="username" label="登录账号" />
         <ElTableColumn prop="roleName" label="角色" />
+        <ElTableColumn prop="depth" label="层级" />
         <ElTableColumn prop="statusName" label="状态">
           <template #default="scope">
             <ElButton :type="scope.row.statusClass" size="small">

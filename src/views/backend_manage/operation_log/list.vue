@@ -62,7 +62,7 @@ function getDataList() {
   loading.value = true
   const params = {
     ...getParams(),
-    ...(search.value.name && { name: search.value.name }),
+    ...(search.value.content && { content: search.value.content }),
   }
   apiSetting.getOperationLogList(params).then((res: any) => {
     loading.value = false
@@ -90,12 +90,18 @@ function sortChange({ prop, order }: { prop: string, order: string }) {
 <template>
   <div :class="{ 'absolute-container': tableAutoHeight }">
     <FaPageHeader title="日志管理" class="mb-0" />
-    <FaPageMain :class="{ 'flex-1 overflow-auto': tableAutoHeight }" :main-class="{ 'flex-1 flex flex-col overflow-auto': tableAutoHeight }">
+    <FaPageMain
+      :class="{ 'flex-1 overflow-auto': tableAutoHeight }"
+      :main-class="{ 'flex-1 flex flex-col overflow-auto': tableAutoHeight }"
+    >
       <FaSearchBar :show-toggle="false">
         <template #default="{ fold, toggle }">
           <ElForm :model="search" size="default" label-width="100px" inline-message inline class="search-form">
             <ElFormItem label="日志">
-              <ElInput v-model="search.content" placeholder="请输入日志内容，支持模糊查询" clearable @keydown.enter="currentChange()" @clear="currentChange()" />
+              <ElInput
+                v-model="search.content" placeholder="请输入日志内容，支持模糊查询" clearable @keydown.enter="currentChange()"
+                @clear="currentChange()"
+              />
             </ElFormItem>
             <ElFormItem>
               <ElButton @click="searchReset(); currentChange()">
@@ -109,7 +115,7 @@ function sortChange({ prop, order }: { prop: string, order: string }) {
               </ElButton>
               <ElButton link disabled @click="toggle">
                 <template #icon>
-                  <FaIcon :name="fold ? 'i-ep:caret-bottom' : 'i-ep:caret-top' " />
+                  <FaIcon :name="fold ? 'i-ep:caret-bottom' : 'i-ep:caret-top'" />
                 </template>
                 {{ fold ? '展开' : '收起' }}
               </ElButton>
@@ -137,7 +143,10 @@ function sortChange({ prop, order }: { prop: string, order: string }) {
       <!--          </ElButton> -->
       <!--        </ElButtonGroup> -->
       <!--      </ElSpace> -->
-      <ElTable v-loading="loading" class="my-4" :data="dataList" stripe highlight-current-row border height="100%" @sort-change="sortChange" @selection-change="batch.selectionDataList = $event">
+      <ElTable
+        v-loading="loading" class="my-4" :data="dataList" stripe highlight-current-row border height="100%"
+        @sort-change="sortChange" @selection-change="batch.selectionDataList = $event"
+      >
         <ElTableColumn v-if="batch.enable" type="selection" align="center" fixed />
         <ElTableColumn prop="merName" label="商户" />
         <ElTableColumn prop="adminName" label="员工" />
@@ -158,7 +167,11 @@ function sortChange({ prop, order }: { prop: string, order: string }) {
         <!--          </template> -->
         <!--        </ElTableColumn> -->
       </ElTable>
-      <ElPagination :current-page="pagination.page" :total="pagination.total" :page-size="pagination.size" :page-sizes="pagination.sizes" :layout="pagination.layout" :hide-on-single-page="false" class="pagination" background @size-change="sizeChange" @current-change="currentChange" />
+      <ElPagination
+        :current-page="pagination.page" :total="pagination.total" :page-size="pagination.size"
+        :page-sizes="pagination.sizes" :layout="pagination.layout" :hide-on-single-page="false" class="pagination"
+        background @size-change="sizeChange" @current-change="currentChange"
+      />
     </FaPageMain>
   </div>
 </template>

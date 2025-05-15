@@ -38,7 +38,7 @@ function searchReset() {
 // 批量操作
 const batch = ref({
   enable: true,
-  selectionDataList: [],
+  selectionDataList: [{ id: 1, name: '测试' }],
 })
 
 // 列表

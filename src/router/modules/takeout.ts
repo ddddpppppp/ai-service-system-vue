@@ -34,7 +34,7 @@ const routes: RouteRecordRaw[] = [
     name: 'takeoutSetting',
     meta: {
       title: '管理设置',
-      icon: 'i-clarity:plugin-outline-alerted',
+      icon: 'ic:baseline-display-settings',
       alwaysOpened: true,
     },
     children: [
@@ -59,7 +59,7 @@ const routes: RouteRecordRaw[] = [
     name: 'takeoutShop',
     meta: {
       title: '店铺管理',
-      icon: 'i-clarity:plugin-outline-alerted',
+      icon: 'hugeicons:store-01',
       alwaysOpened: true,
     },
     children: [
@@ -77,7 +77,7 @@ const routes: RouteRecordRaw[] = [
         name: 'takeoutShopCategory',
         component: () => import('@/views/takeout/category/list.vue'),
         meta: {
-          auth: 'takeoutShop.browse',
+          auth: 'takeoutShopCategory.browse',
           title: '店铺分类',
           query: {
             type: 'shop',
@@ -89,8 +89,17 @@ const routes: RouteRecordRaw[] = [
         name: 'takeoutShopProduct',
         component: () => import('@/views/takeout/product/list.vue'),
         meta: {
-          auth: 'takeoutShop.browse',
+          auth: 'takeoutShopProduct.browse',
           title: '产品管理',
+        },
+      },
+      {
+        path: 'takeout_shop_order',
+        name: 'takeoutShopOrder',
+        component: () => import('@/views/takeout/order/list.vue'),
+        meta: {
+          auth: 'takeoutOrder.browse',
+          title: '订单管理',
         },
       },
     ],

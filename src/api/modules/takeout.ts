@@ -55,4 +55,30 @@ export default {
   deleteProduct: (data: any) => api.post('shop/takeout/delProduct', data).then((res) => {
     return res
   }),
+
+  getCommentList: (data: any) => api.post('shop/takeout/getCommentList', data).then((res) => {
+    return res
+  }),
+  editComment: (data: any) => api.post('shop/takeout/editComment', data).then((res) => {
+    return res
+  }),
+  deleteComment: (data: any) => api.post('shop/takeout/delComment', data).then((res) => {
+    return res
+  }),
+
+  getOrderList: (data: any) => api.post('shop/takeout/getOrderList', data).then((res) => {
+    return res
+  }),
+  finishOrder: (data: any) => api.post('shop/takeout/finishOrder', data).then((res) => {
+    return res
+  }),
+  cancelOrder: (data: any) => api.post('shop/takeout/cancelOrder', data).then((res) => {
+    return res
+  }),
+  delOrder: (data: any) => api.post('shop/takeout/delOrder', data).then((res) => {
+    return res
+  }),
+  getOrder: (data: any) => api.post('shop/takeout/getOrder', data).then((res) => {
+    return res
+  }),
 }

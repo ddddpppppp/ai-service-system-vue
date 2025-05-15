@@ -59,6 +59,7 @@ const asyncRoutes: Route.recordMainRaw[] = [
   {
     meta: {
       title: 'Slot',
+      auth: 'slotDashboard.browse',
       icon: 'solar:gamepad-old-bold-duotone',
     },
     children: [
@@ -68,7 +69,8 @@ const asyncRoutes: Route.recordMainRaw[] = [
   {
     meta: {
       title: '外卖',
-      icon: 'solar:gamepad-old-bold-duotone',
+      auth: 'takeoutDashboard.browse',
+      icon: 'icon-park-solid:hamburger-one',
     },
     children: [
       ...Takeout,
@@ -86,6 +88,7 @@ const asyncRoutes: Route.recordMainRaw[] = [
   {
     meta: {
       title: '配置',
+      auth: 'config.browse',
       icon: 'i-uim:microsoft',
     },
     children: [

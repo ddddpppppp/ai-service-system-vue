@@ -287,7 +287,7 @@ function isAllSelected() {
         <ElCol
           v-for="shop in dataList"
           :key="shop.storeId"
-          :span="8"
+          :span="6"
           class="shop-card-col"
         >
           <ElCard shadow="hover" class="shop-card">
@@ -307,21 +307,20 @@ function isAllSelected() {
               <div class="shop-card-row">
                 <span class="shop-card-info">产品数量: {{ shop.productCount }}</span>
                 <span class="shop-card-actions">
-                  <ElButton type="primary" size="small" circle plain @click="onAddCategory(shop)">
+                  <ElButton size="small" circle plain @click="onAddCategory(shop)">
                     <FaIcon name="tabler:category-filled" />
                   </ElButton>
-                  <ElButton type="primary" size="small" circle plain @click="onEdit(shop)">
+                  <ElButton size="small" circle plain @click="onEdit(shop)">
                     <FaIcon name="i-ep:edit" />
                   </ElButton>
                   <ElButton
                     v-if="shop.status === 1"
-                    type="danger"
                     size="small"
                     circle
                     plain
                     @click="onDisable(shop)"
                   >
-                    <FaIcon name="i-ep:remove" />
+                    <FaIcon name="gravity-ui:ban" />
                   </ElButton>
                   <ElButton
                     v-else
@@ -461,6 +460,10 @@ function isAllSelected() {
   .shop-card-info {
     font-size: 12px;
     color: #666;
+  }
+
+  .shop-card-actions {
+    min-width: 80px;
   }
 
   .shop-card-actions .el-button + .el-button {

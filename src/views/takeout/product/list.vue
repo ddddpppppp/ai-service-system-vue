@@ -7,6 +7,7 @@
 import apiTakeout from '@/api/modules/takeout'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useRoute } from 'vue-router'
+import TakeoutProductCommentList from './comment_list.vue'
 import TakeoutProductDetail from './detail.vue'
 
 defineOptions({
@@ -51,6 +52,7 @@ const dataList = ref([
     statusName: '已启用',
     rating: 0,
     intro: '711便利店',
+    commentCount: 0,
   },
 ])
 const storeList = ref([
@@ -70,13 +72,13 @@ const formModeProps = ref<{
   storeId: '',
 })
 
-// const formModeCategoryProps = ref<{
-//   visible: boolean
-//   productId: string | number
-// }>({
-//   visible: false,
-//   productId: '',
-// })
+const formModeCommentProps = ref<{
+  visible: boolean
+  product: any
+}>({
+  visible: false,
+  product: {},
+})
 
 // 是否全选
 const allSelected = computed({
@@ -141,6 +143,11 @@ function onEdit(row: any) {
   formModeProps.value.id = row.productId
   formModeProps.value.storeId = row.storeId
   formModeProps.value.visible = true
+}
+
+function onComment(row: any) {
+  formModeCommentProps.value.product = row
+  formModeCommentProps.value.visible = true
 }
 
 function onDisable(row: any) {
@@ -308,7 +315,7 @@ function isAllSelected() {
         <ElCol
           v-for="product in dataList"
           :key="product.productId"
-          :span="8"
+          :span="6"
           class="product-card-col"
         >
           <ElCard shadow="hover" class="product-card">
@@ -325,21 +332,27 @@ function isAllSelected() {
               <div class="product-card-title">
                 {{ product.name }}
               </div>
+              <div class="product-card-comment">
+                <el-rate v-model="product.rating" :allow-half="true" :disabled="true" class="product-rating" />
+                <span class="product-card-comment-count">({{ product.commentCount }})</span>
+              </div>
               <div class="product-card-row">
                 <span class="product-card-info" :title="product.intro">{{ product.intro }}</span>
                 <span class="product-card-actions">
-                  <ElButton type="primary" size="small" circle plain @click="onEdit(product)">
+                  <ElButton size="small" plain circle @click="onComment(product)">
+                    <FaIcon name="uil:comment-alt-dots" />
+                  </ElButton>
+                  <ElButton size="small" circle plain @click="onEdit(product)">
                     <FaIcon name="i-ep:edit" />
                   </ElButton>
                   <ElButton
                     v-if="product.status === 1"
-                    type="danger"
                     size="small"
                     circle
                     plain
                     @click="onDisable(product)"
                   >
-                    <FaIcon name="i-ep:remove" />
+                    <FaIcon name="gravity-ui:ban" />
                   </ElButton>
                   <ElButton
                     v-else
@@ -361,142 +374,170 @@ function isAllSelected() {
       <ElPagination :current-page="pagination.page" :total="pagination.total" :page-size="pagination.size" :page-sizes="pagination.sizes" :layout="pagination.layout" :hide-on-single-page="false" class="pagination" background @size-change="sizeChange" @current-change="currentChange" />
     </FaPageMain>
     <TakeoutProductDetail :id="formModeProps.id" v-model="formModeProps.visible" :store-id="formModeProps.storeId" @success="getDataList" />
+    <TakeoutProductCommentList v-model="formModeCommentProps.visible" :product="formModeCommentProps.product" @success="getDataList" />
   </div>
 </template>
 
-  <style scoped>
-  .absolute-container {
-    position: absolute;
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    height: 100%;
-  }
+<style scoped>
+.absolute-container {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
 
-  .search-form {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
-    margin-bottom: -18px;
+.search-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+  margin-bottom: -18px;
 
-    :deep(.el-form-item) {
-      grid-column: auto / span 1;
+  :deep(.el-form-item) {
+    grid-column: auto / span 1;
 
-      &:last-child {
-        grid-column-end: -1;
+    &:last-child {
+      grid-column-end: -1;
 
-        .el-form-item__content {
-          justify-content: flex-end;
-        }
+      .el-form-item__content {
+        justify-content: flex-end;
       }
     }
   }
+}
 
-  .el-divider {
-    width: calc(100% + 40px);
-    margin-inline: -20px;
-  }
+.el-divider {
+  width: calc(100% + 40px);
+  margin-inline: -20px;
+}
 
-  .product-card-list {
-    margin-top: 30px;
-  }
+.product-card-list {
+  margin-top: 30px;
+}
 
-  .product-card-col {
-    margin-bottom: 12px;
-  }
+.product-card-col {
+  margin-bottom: 12px;
+}
 
-  .product-card {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    padding: 0;
-    overflow: hidden;
-    background: #fff;
-    border-radius: 12px;
-  }
+.product-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 0;
+  overflow: hidden;
+  background: #fff;
+  border-radius: 12px;
+}
 
-  .product-card-img-wrap {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 2.5/1;
-    overflow: hidden;
-    border-radius: 12px 12px 0 0;
-  }
+.product-card-img-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2.5/1;
+  overflow: hidden;
+  border-radius: 12px 12px 0 0;
+}
 
-  .product-card-checkbox {
-    position: absolute;
-    top: 8px;
-    left: 8px;
-    z-index: 2;
-    padding: 0 5px;
-  }
+.product-card-checkbox {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  padding: 0 5px;
+}
 
-  /* Make the checkbox larger */
-  .product-card-checkbox :deep(.el-checkbox__input) {
-    transform: scale(1.2);
-  }
+/* Make the checkbox larger */
+.product-card-checkbox :deep(.el-checkbox__input) {
+  transform: scale(1.2);
+}
 
-  .product-card-img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
+.product-card-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
-  .product-card-status-tag {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    z-index: 2;
-    height: 22px;
-    padding: 0 6px;
-    font-size: 12px;
-    line-height: 20px;
-  }
+.product-card-status-tag {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  height: 22px;
+  padding: 0 6px;
+  font-size: 12px;
+  line-height: 20px;
+}
 
-  .product-card-content {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    padding: 8px 15px;
-  }
+.product-card-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 8px 15px;
+}
 
-  .product-card-title {
-    margin-bottom: 2px;
-    font-size: 15px;
-    font-weight: 500;
-    line-height: 1.2;
-  }
+.product-card-title {
+  margin-bottom: 2px;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.2;
+}
 
-  .product-card-row {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    margin-bottom: 2px;
-  }
+.product-card-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
 
-  .product-card-info {
-    width: 290px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    font-size: 12px;
-    color: #666;
-    white-space: nowrap;
-  }
+.product-card-info {
+  width: 290px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 12px;
+  color: #666;
+  white-space: nowrap;
+}
 
-  .product-card-actions .el-button + .el-button {
-    margin-left: 4px;
-  }
+.product-card-actions {
+  min-width: 80px;
+}
 
-  .product-card-intro {
-    margin-top: 2px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    font-size: 12px;
-    color: #888;
-    white-space: nowrap;
-  }
+.product-card-actions .el-button + .el-button {
+  margin-left: 4px;
+}
 
-  :deep(.el-card__body) {
-    padding: 0;
-  }
-  </style>
+.product-card-comment {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  margin-top: 7px;
+  margin-bottom: 2px;
+  margin-left: -4px;
+}
+
+.product-card-comment-count {
+  font-size: 12px;
+  color: #666;
+}
+
+.product-rating {
+  height: auto;
+  padding-left: 0;
+  transform-origin: left;
+
+  --el-rate-icon-size: 20px;
+  --el-rate-icon-margin: 0px;
+}
+
+.product-card-intro {
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 12px;
+  color: #888;
+  white-space: nowrap;
+}
+
+:deep(.el-card__body) {
+  padding: 0;
+}
+</style>

@@ -76,8 +76,8 @@ const globalSettingsDefault: RecursiveRequired<Settings.all> = {
     storageTo: 'local',
   },
   breadcrumb: {
-    style: '',
-    enableMainMenu: false,
+    style: 'modern',
+    enableMainMenu: true,
   },
   mainPage: {
     enableHotkeys: true,

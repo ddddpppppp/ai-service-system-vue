@@ -40,28 +40,6 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
-        path: 'department',
-        name: 'backendManageDepartment',
-        component: () => import('@/views/backend_manage/department/list.vue'),
-        meta: {
-          title: '部门管理',
-          auth: 'departmentManagement.browse',
-        },
-      },
-      {
-        path: 'department/detail/:id',
-        name: 'backendManageDepartmentDetail',
-        component: () => import('@/views/backend_manage/department/detail.vue'),
-        meta: {
-          title: '部门编辑',
-          menu: false,
-          activeMenu: '/backend_manage/department',
-          cache: true,
-          noCache: 'backendManageDepartment',
-          copyright: false,
-        },
-      },
-      {
         path: 'admin',
         name: 'backendManageAdmin',
         component: () => import('@/views/backend_manage/admin/list.vue'),
@@ -103,6 +81,29 @@ const routes: RouteRecordRaw[] = [
           cache: true,
           noCache: 'backendManageRole',
           copyright: false,
+        },
+      },
+    ],
+  },
+  {
+    path: '/payment_channel',
+    component: Layout,
+    redirect: '/payment_channel/payment',
+    name: 'payment',
+    meta: {
+      title: '支付渠道',
+      icon: 'ri:bank-card-2-line',
+      auth: 'paymentChannel',
+      alwaysOpened: true,
+    },
+    children: [
+      {
+        path: 'payment',
+        name: 'paymentChannel',
+        component: () => import('@/views/backend_manage/payment/list.vue'),
+        meta: {
+          title: '代收渠道',
+          auth: 'paymentChannel.browse',
         },
       },
     ],

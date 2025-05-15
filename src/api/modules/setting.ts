@@ -46,19 +46,16 @@ export default {
     return res
   }),
 
-  getDepartmentList: (data: any) => api.post('shop/setting/getDepartmentList', data).then((res) => {
+  getPaymentChannelList: (data: any) => api.post('shop/setting/getPaymentChannelList', data).then((res) => {
     return res
   }),
-  getDepartment: (data: any) => api.post('shop/setting/getDepartment', data).then((res) => {
+  disablePaymentChannel: (data: any) => api.post('shop/setting/disablePaymentChannel', data).then((res) => {
     return res
   }),
-  editDepartment: (data: any) => api.post('shop/setting/editDepartment', data).then((res) => {
+  enablePaymentChannel: (data: any) => api.post('shop/setting/enablePaymentChannel', data).then((res) => {
     return res
   }),
-  disableDepartment: (data: any) => api.post('shop/setting/disableDepartment', data).then((res) => {
-    return res
-  }),
-  enableDepartment: (data: any) => api.post('shop/setting/enableDepartment', data).then((res) => {
+  editPaymentChannel: (data: any) => api.post('shop/setting/editPaymentChannel', data).then((res) => {
     return res
   }),
 

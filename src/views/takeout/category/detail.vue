@@ -65,18 +65,15 @@ const formRules = ref<FormRules>({
 })
 
 // 监听props变化
-watch(() => props.id, (newId) => {
-  form.value.id = newId
-  getInfo()
-})
 
-watch(() => props.storeId, (newStoreId) => {
-  form.value.storeId = newStoreId
-  getInfo()
-})
-
-watch(() => props.type, () => {
-  getInfo()
+watch(() => visible.value, (newVisible) => {
+  if (newVisible) {
+    nextTick(() => {
+      // 重置表单为初始状态，然后加载数据
+      form.value = createInitialFormState()
+      getInfo()
+    })
+  }
 })
 
 onMounted(() => {

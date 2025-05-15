@@ -39,7 +39,6 @@ function createInitialFormState() {
     image: '',
     intro: '',
     price: '',
-    homeCategoryId: '',
     storeCategoryId: '',
     storeId: props.storeId,
     createdAt: '',
@@ -48,10 +47,7 @@ function createInitialFormState() {
 }
 
 const form = ref(createInitialFormState())
-const homeCategoryList = ref([{
-  id: 0,
-  name: '请选择分类',
-}])
+
 const storeCategoryList = ref([{
   id: 0,
   name: '请选择分类',
@@ -74,9 +70,6 @@ const formRules = ref<FormRules>({
   price: [
     { required: true, message: '请输入产品价格', trigger: 'blur' },
   ],
-  homeCategoryId: [
-    { required: true, message: '请选择产品分类', trigger: 'change' },
-  ],
   storeCategoryId: [
     { required: true, message: '请选择店铺分类', trigger: 'change' },
   ],
@@ -85,14 +78,19 @@ const formRules = ref<FormRules>({
   ],
 })
 
-// 监听props变化
-watch(() => props.id, (newId) => {
-  form.value.productId = newId
-  getInfo()
-})
-
 watch(() => props.storeId, (newStoreId) => {
   form.value.storeId = newStoreId
+})
+
+// 监听对话框显示状态，当显示时重新加载数据
+watch(() => visible.value, (newVisible) => {
+  if (newVisible) {
+    nextTick(() => {
+      // 重置表单为初始状态，然后加载数据
+      form.value = createInitialFormState()
+      getInfo()
+    })
+  }
 })
 
 onMounted(() => {
@@ -102,9 +100,6 @@ onMounted(() => {
 function getInfo() {
   apiTakeout.getAllStoreCategory({ storeId: props.storeId }).then((res: any) => {
     storeCategoryList.value = res.data.list
-  })
-  apiTakeout.getAllHomeCategory().then((res: any) => {
-    homeCategoryList.value = res.data.list
   })
   apiTakeout.getAllStore().then((res: any) => {
     storeList.value = res.data.list
@@ -186,11 +181,6 @@ function submit() {
           </ElFormItem>
           <ElFormItem label="产品图片" prop="image">
             <ImageUpload v-model="form.image" :action="uploadFileAction" :width="100" :height="100" :notip="true" :size="3000" @on-success="onUploadSuccess" />
-          </ElFormItem>
-          <ElFormItem label="产品分类" prop="homeCategoryId">
-            <ElSelect v-model="form.homeCategoryId" placeholder="请选择产品分类" clearable>
-              <ElOption v-for="item in homeCategoryList" :key="item.id" :label="item.name" :value="item.id" />
-            </ElSelect>
           </ElFormItem>
           <ElFormItem label="店铺分类" prop="storeCategoryId">
             <ElSelect v-model="form.storeCategoryId" placeholder="请选择店铺分类" clearable>

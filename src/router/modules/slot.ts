@@ -13,6 +13,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       title: '仪表盘',
       icon: 'icon-park-outline:freezing-line-column',
+      auth: 'slotDashboard.browse',
       alwaysOpened: true,
     },
     children: [
@@ -34,6 +35,7 @@ const routes: RouteRecordRaw[] = [
     name: 'slotList',
     meta: {
       title: '投流列表',
+      auth: 'slotFacebookList.browse',
       icon: 'i-clarity:plugin-outline-alerted',
       alwaysOpened: true,
     },

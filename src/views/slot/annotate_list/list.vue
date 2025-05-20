@@ -30,7 +30,7 @@ const formMode = ref<'router' | 'dialog' | 'drawer'>('drawer')
 const searchDefault = {
   content: '',
   sender: '',
-  status: 'cleaned',
+  status: ['cleaned', 'annotated'],
 }
 const search = ref({ ...searchDefault })
 function searchReset() {
@@ -47,28 +47,28 @@ const batch = ref({
 const loading = ref(false)
 const dataList = ref([])
 
-const statusList = ref([
-  {
-    label: '全部',
-    value: '',
-  },
-  {
-    label: '待清洗',
-    value: 'raw',
-  },
-  {
-    label: '已清洗待标注',
-    value: 'cleaned',
-  },
-  {
-    label: '已标注',
-    value: 'annotated',
-  },
-  {
-    label: '已完成',
-    value: 'archived',
-  },
-])
+// const statusList = ref([
+//   {
+//     label: '全部',
+//     value: '',
+//   },
+//   {
+//     label: '待清洗',
+//     value: 'raw',
+//   },
+//   {
+//     label: '已清洗待标注',
+//     value: 'cleaned',
+//   },
+//   {
+//     label: '已标注',
+//     value: 'annotated',
+//   },
+//   {
+//     label: '已完成',
+//     value: 'archived',
+//   },
+// ])
 const senderList = ref([
   {
     label: '全部',
@@ -190,11 +190,11 @@ function onDelBatch() {
                 <ElOption v-for="item in senderList" :key="item.value" :label="item.label" :value="item.value" />
               </ElSelect>
             </ElFormItem>
-            <ElFormItem label="状态选择">
+            <!-- <ElFormItem label="状态选择">
               <ElSelect v-model="search.status" placeholder="请选择状态" clearable :disabled="true">
                 <ElOption v-for="item in statusList" :key="item.value" :label="item.label" :value="item.value" />
               </ElSelect>
-            </ElFormItem>
+            </ElFormItem> -->
             <ElFormItem>
               <ElButton @click="searchReset(); currentChange()">
                 重置
@@ -256,7 +256,7 @@ function onDelBatch() {
                       class="popover-message"
                       :class="{ 'pop-message-user': message.senderRole === 'user', 'pop-message-assistant': message.senderRole === 'assistant' }"
                     >
-                      <div v-if="message.contentType === 'text' && message.textContent">
+                      <div v-if="(message.contentType === 'text' || message.contentType === 'mixed') && message.textContent">
                         <strong>{{ message.senderRole === 'user' ? '用户' : '助手' }}:</strong> {{ message.textContent }}
                       </div>
                       <div v-else>

@@ -45,7 +45,9 @@ export default {
   recoveryMerchant: (data: any) => api.post('shop/setting/recoveryMerchant', data).then((res) => {
     return res
   }),
-
+  getAllPaymentChannel: (data: any) => api.post('shop/setting/getAllPaymentChannel', data).then((res) => {
+    return res
+  }),
   getPaymentChannelList: (data: any) => api.post('shop/setting/getPaymentChannelList', data).then((res) => {
     return res
   }),

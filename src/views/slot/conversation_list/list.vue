@@ -196,6 +196,7 @@ function getDataList() {
   loading.value = true
   const params = {
     ...getParams(),
+    ...(search.value.nickname && { nickname: search.value.nickname }),
     ...(search.value.channel && { channel: search.value.channel }),
     ...(search.value.status && { status: search.value.status }),
     ...(search.value.sender && { sender: search.value.sender }),

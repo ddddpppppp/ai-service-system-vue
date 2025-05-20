@@ -22,7 +22,7 @@ const uploadFileAction = String(inject('uploadFileAction'))
 const loading = ref(false)
 const formRef = useTemplateRef<FormInstance>('formRef')
 const btnDisabled = ref<boolean>(false)
-
+const paymentChannelList = ref<any[]>([])
 // 创建初始表单状态的函数
 function createInitialFormState() {
   return {
@@ -33,6 +33,7 @@ function createInitialFormState() {
     password: '',
     accessList: [] as string[],
     takeoutRate: 0,
+    paymentChannelIds: [] as string[],
   }
 }
 
@@ -62,6 +63,11 @@ onMounted(() => {
 
 function getInfo() {
   const id = route.params.id as string
+  apiSetting.getAllPaymentChannel({}).then((res: any) => {
+    if (res.status === 1) {
+      paymentChannelList.value = res.data.list
+    }
+  })
   if (id && id !== '0') {
     usernameDisabled = true
     loading.value = true
@@ -164,6 +170,11 @@ function submit() {
               </ElFormItem>
               <ElFormItem v-if="form.accessList.includes('takeout')" label="外卖抽成点位">
                 <ElInput v-model="form.takeoutRate" placeholder="请输入抽成点位" />
+              </ElFormItem>
+              <ElFormItem label="支付渠道">
+                <el-checkbox-group v-model="form.paymentChannelIds">
+                  <el-checkbox v-for="item in paymentChannelList" :key="item.id" :label="item.name" :value="item.id" />
+                </el-checkbox-group>
               </ElFormItem>
             </ElForm>
           </div>

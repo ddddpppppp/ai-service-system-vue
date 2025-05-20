@@ -63,6 +63,14 @@ const formModeProps = ref<{
   id: 0,
 })
 
+const total = ref({
+  totalProfit: 0,
+  totalOrder: 0,
+  totalSuccessOrder: 0,
+  totalOrderAmount: 0,
+  totalSuccessOrderAmount: 0,
+})
+
 onMounted(() => {
   const route = useRoute()
   if (route.query.storeId) {
@@ -70,6 +78,7 @@ onMounted(() => {
   }
   getDataStore()
   getDataList()
+  getDataTotal()
 })
 
 async function getDataList(isExport = false) {
@@ -92,7 +101,21 @@ async function getDataList(isExport = false) {
     return res.data.list
   }
   dataList.value = res.data.list
-  pagination.value.total = res.data.total
+}
+
+async function getDataTotal() {
+  const params = {
+    ...getParams(),
+    ...(search.value.name && { name: search.value.name }),
+    ...(search.value.storeId && { storeId: search.value.storeId }),
+    ...(search.value.dateData && { dateData: search.value.dateData }),
+    ...(search.value.userName && { userName: search.value.userName }),
+    ...(search.value.agentName && { agentName: search.value.agentName }),
+    ...(search.value.status && { status: search.value.status }),
+  }
+  const res = await apiTakeout.getOrderTotal(params)
+  pagination.value.total = res.data.total.totalOrder
+  total.value = res.data.total
 }
 
 function getDataStore() {
@@ -125,6 +148,7 @@ function onDel(row: any) {
   ElMessageBox.confirm(`确认删除「${row.orderNo}」吗？`, '确认信息').then(() => {
     apiTakeout.delOrder({ id: row.orderNo }).then(() => {
       getDataList()
+      getDataTotal()
       ElMessage.success({
         message: '删除成功',
         center: true,
@@ -141,6 +165,7 @@ function onDelBatch() {
     })
     apiTakeout.delOrder({ ids }).then(() => {
       getDataList()
+      getDataTotal()
       ElMessage.success({
         message: '删除成功',
         center: true,
@@ -327,7 +352,7 @@ const contextMenuItems = computed(() => {
               <ElButton @click="searchReset(); currentChange()">
                 重置
               </ElButton>
-              <ElButton type="primary" @click="currentChange()">
+              <ElButton type="primary" @click="currentChange(); getDataTotal()">
                 <template #icon>
                   <FaIcon name="i-ep:search" />
                 </template>
@@ -363,21 +388,40 @@ const contextMenuItems = computed(() => {
       </div>
 
       <!-- Replace the batch operations ElSpace with this to align with the menu -->
-      <div class="actions-container">
-        <ElButtonGroup v-if="batch.enable">
-          <ElButton size="default" :disabled="!batch.selectionDataList.length" @click="onDelBatch">
-            <FaIcon name="i-ep:delete" class="mr-1" />
-            删除
-          </ElButton>
-          <ElButton size="default" :disabled="!batch.selectionDataList.length" @click="onFinishBatch">
-            <FaIcon name="i-ep:check" class="mr-1" />
-            标记完成
-          </ElButton>
-          <ElButton size="default" :disabled="!batch.selectionDataList.length" @click="onCancelBatch">
-            <FaIcon name="i-ep:close" class="mr-1" />
-            标记取消
-          </ElButton>
-        </ElButtonGroup>
+      <div class="mb-4 flex items-center justify-between">
+        <div class="actions-container">
+          <ElButtonGroup v-if="batch.enable">
+            <ElButton size="default" :disabled="!batch.selectionDataList.length" @click="onDelBatch">
+              <FaIcon name="i-ep:delete" class="mr-1" />
+              删除
+            </ElButton>
+            <ElButton size="default" :disabled="!batch.selectionDataList.length" @click="onFinishBatch">
+              <FaIcon name="i-ep:check" class="mr-1" />
+              标记完成
+            </ElButton>
+            <ElButton size="default" :disabled="!batch.selectionDataList.length" @click="onCancelBatch">
+              <FaIcon name="i-ep:close" class="mr-1" />
+              标记取消
+            </ElButton>
+          </ElButtonGroup>
+        </div>
+        <div class="flex items-center gap-2">
+          <el-tag type="primary">
+            订单总数：{{ total.totalOrder }}
+          </el-tag>
+          <el-tag type="primary">
+            成功订单数：{{ total.totalSuccessOrder }}
+          </el-tag>
+          <el-tag type="primary">
+            总金额：${{ total.totalOrderAmount }}
+          </el-tag>
+          <el-tag type="primary">
+            成功总金额：${{ total.totalSuccessOrderAmount }}
+          </el-tag>
+          <el-tag type="primary">
+            我的总收益：${{ total.totalProfit }}
+          </el-tag>
+        </div>
       </div>
       <ElTable v-loading="loading" class="my-4" :data="dataList" stripe highlight-current-row height="100%" @sort-change="sortChange" @selection-change="batch.selectionDataList = $event">
         <ElTableColumn v-if="batch.enable" type="selection" align="center" fixed />
@@ -392,6 +436,13 @@ const contextMenuItems = computed(() => {
           <template #default="scope">
             <span class="text-red-500 font-bold">
               {{ scope.row.total }}
+            </span>
+          </template>
+        </ElTableColumn>
+        <ElTableColumn prop="myProfit" label="我的分润">
+          <template #default="scope">
+            <span class="text-red-500 font-bold">
+              {{ scope.row.myProfit }}
             </span>
           </template>
         </ElTableColumn>
@@ -457,7 +508,6 @@ const contextMenuItems = computed(() => {
 
 .actions-container {
   display: flex;
-  margin-bottom: 12px;
 }
 
 .absolute-container {
@@ -567,7 +617,7 @@ const contextMenuItems = computed(() => {
   }
 
   td,
- th {
+  th {
     border-color: hsl(var(--border)) !important;
   }
 }

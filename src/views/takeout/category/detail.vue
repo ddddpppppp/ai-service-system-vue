@@ -124,7 +124,6 @@ function submit() {
       if (valid) {
         loading.value = true
         apiTakeout.editCategory({ form: form.value }).then((res: any) => {
-          loading.value = false
           if (res.status === 1) {
             ElMessage.success({
               message: res.statusText,
@@ -132,6 +131,8 @@ function submit() {
             })
           }
           resolve()
+        }).finally(() => {
+          loading.value = false
         })
       }
       else {

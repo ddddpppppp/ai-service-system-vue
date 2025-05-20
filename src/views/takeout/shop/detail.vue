@@ -129,7 +129,6 @@ function onSubmit() {
     if (valid) {
       loading.value = true
       apiTakeout.editStore({ form: form.value }).then((res: any) => {
-        loading.value = false
         if (res.status === 1) {
           ElMessage.success({
             message: res.statusText,
@@ -138,6 +137,9 @@ function onSubmit() {
           emits('success')
           onCancel()
         }
+      }).finally(() => {
+        loading.value = false
+        btnDisabled.value = false
       })
     }
     else {

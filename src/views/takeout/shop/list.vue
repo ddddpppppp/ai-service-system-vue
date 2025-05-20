@@ -41,17 +41,15 @@ const batch = ref({
 
 // 列表
 const loading = ref(false)
-const dataList = ref([
-  {
-    storeId: 'xxx',
-    name: '711便利店',
-    image: '',
-    status: 1,
-    statusClass: 'success',
-    statusName: '已启用',
-    productCount: 0,
-  },
-])
+const dataList = ref([] as Array<{
+  storeId: string | number
+  name: string
+  image: string
+  status: number
+  statusClass: string
+  statusName: string
+  productCount: number
+}>)
 const storeList = ref([
   {
     storeId: '',

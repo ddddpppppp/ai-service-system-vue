@@ -1,6 +1,9 @@
 import api from '../index'
 
 export default {
+  getDashboard: (data: any) => api.post('shop/takeout/getDashboard', data).then((res) => {
+    return res
+  }),
   getCategoryList: (data: any) => api.post('shop/takeout/getCategoryList', data).then((res) => {
     return res
   }),

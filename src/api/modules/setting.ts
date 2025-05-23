@@ -61,6 +61,28 @@ export default {
     return res
   }),
 
+  getBalanceTotal: (data: any) => api.post('shop/setting/getBalanceTotal', data).then((res) => {
+    return res
+  }),
+  getBalanceList: (data: any) => api.post('shop/setting/getBalanceList', data).then((res) => {
+    return res
+  }),
+  getBalanceFrozenList: (data: any) => api.post('shop/setting/getBalanceFrozenList', data).then((res) => {
+    return res
+  }),
+  getWithdrawList: (data: any) => api.post('shop/setting/getWithdrawList', data).then((res) => {
+    return res
+  }),
+  editWithdraw: (data: any) => api.post('shop/setting/editWithdraw', data).then((res) => {
+    return res
+  }),
+  disableWithdraw: (data: any) => api.post('shop/setting/disableWithdraw', data).then((res) => {
+    return res
+  }),
+  enableWithdraw: (data: any) => api.post('shop/setting/enableWithdraw', data).then((res) => {
+    return res
+  }),
+
   getOperationLogList: (data: any) => api.post('shop/setting/getOperationLogList', data).then((res) => {
     return res
   }),

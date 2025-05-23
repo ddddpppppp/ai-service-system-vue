@@ -71,6 +71,8 @@ const total = ref({
   totalSuccessOrderAmount: 0,
 })
 
+const canComplete = ref(false)
+
 onMounted(() => {
   const route = useRoute()
   if (route.query.storeId) {
@@ -101,6 +103,7 @@ async function getDataList(isExport = false) {
     return res.data.list
   }
   dataList.value = res.data.list
+  canComplete.value = res.data.canComplete
 }
 
 async function getDataTotal() {
@@ -142,6 +145,25 @@ function sortChange({ prop, order }: { prop: string, order: string }) {
 function onEdit(row: any) {
   formModeProps.value.id = row.orderNo
   formModeProps.value.visible = true
+}
+
+function onCopy(row: any) {
+  if (navigator.clipboard && row.checkoutUrl) {
+    navigator.clipboard.writeText(row.checkoutUrl)
+      .then(() => {
+        ElMessage.success({
+          message: '复制成功',
+          center: true,
+        })
+      })
+      .catch((err) => {
+        console.error('Failed to copy URL:', err)
+        ElMessage.error({
+          message: '复制失败',
+          center: true,
+        })
+      })
+  }
 }
 
 function onDel(row: any) {
@@ -395,7 +417,7 @@ const contextMenuItems = computed(() => {
               <FaIcon name="i-ep:delete" class="mr-1" />
               删除
             </ElButton>
-            <ElButton size="default" :disabled="!batch.selectionDataList.length" @click="onFinishBatch">
+            <ElButton v-if="canComplete" size="default" :disabled="!batch.selectionDataList.length" @click="onFinishBatch">
               <FaIcon name="i-ep:check" class="mr-1" />
               标记完成
             </ElButton>
@@ -406,21 +428,47 @@ const contextMenuItems = computed(() => {
           </ElButtonGroup>
         </div>
         <div class="flex items-center gap-2">
-          <el-tag type="primary">
-            订单总数：{{ total.totalOrder }}
-          </el-tag>
-          <el-tag type="primary">
-            成功订单数：{{ total.totalSuccessOrder }}
-          </el-tag>
-          <el-tag type="primary">
-            总金额：${{ total.totalOrderAmount }}
-          </el-tag>
-          <el-tag type="primary">
-            成功总金额：${{ total.totalSuccessOrderAmount }}
-          </el-tag>
-          <el-tag type="primary">
-            我的总收益：${{ total.totalProfit }}
-          </el-tag>
+          <div class="stats-mini-cards">
+            <div class="mini-card orders">
+              <FaIcon name="i-ep:document" class="mini-card-icon" />
+              <span class="mini-card-label">订单总数:</span>
+              <span class="mini-card-value">
+                <FaCountTo :start-val="0" :end-val="total.totalOrder" :duration="2000" />
+              </span>
+            </div>
+
+            <div class="mini-card success-orders">
+              <FaIcon name="i-ep:document-checked" class="mini-card-icon" />
+              <span class="mini-card-label">成功订单数:</span>
+              <span class="mini-card-value">
+                <FaCountTo :start-val="0" :end-val="total.totalSuccessOrder" :duration="2000" />
+              </span>
+            </div>
+
+            <div class="mini-card amount">
+              <FaIcon name="i-ep:money" class="mini-card-icon" />
+              <span class="mini-card-label">总金额:</span>
+              <span class="mini-card-value">
+                <FaCountTo :start-val="0" :end-val="total.totalOrderAmount" :duration="2000" prefix="$" />
+              </span>
+            </div>
+
+            <div class="mini-card success-amount">
+              <FaIcon name="i-ep:wallet" class="mini-card-icon" />
+              <span class="mini-card-label">成功总金额:</span>
+              <span class="mini-card-value">
+                <FaCountTo :start-val="0" :end-val="total.totalSuccessOrderAmount" :duration="2000" prefix="$" />
+              </span>
+            </div>
+
+            <div class="mini-card profit">
+              <FaIcon name="i-ep:coin" class="mini-card-icon" />
+              <span class="mini-card-label">我的总收益:</span>
+              <span class="mini-card-value">
+                <FaCountTo :start-val="0" :end-val="total.totalProfit" :duration="2000" prefix="$" />
+              </span>
+            </div>
+          </div>
         </div>
       </div>
       <ElTable v-loading="loading" class="my-4" :data="dataList" stripe highlight-current-row height="100%" @sort-change="sortChange" @selection-change="batch.selectionDataList = $event">
@@ -428,7 +476,18 @@ const contextMenuItems = computed(() => {
         <ElTableColumn prop="orderNo" label="订单号" width="120" />
         <ElTableColumn prop="merchantName" label="商户" />
         <ElTableColumn prop="parentName" label="上级代理" width="120" />
-        <ElTableColumn prop="userName" label="代理" width="120" />
+        <ElTableColumn label="代理" min-width="140">
+          <template #default="scope">
+            <div class="flex items-center gap-1">
+              <span>
+                {{ scope.row.userName }}
+              </span>
+              <ElTag type="primary" size="small" circle>
+                {{ scope.row.userLevel }}级
+              </ElTag>
+            </div>
+          </template>
+        </ElTableColumn>
         <ElTableColumn prop="subtotal" label="小计" />
         <ElTableColumn prop="deliveryFee" label="配送费" />
         <ElTableColumn prop="tax" label="税" />
@@ -439,11 +498,16 @@ const contextMenuItems = computed(() => {
             </span>
           </template>
         </ElTableColumn>
-        <ElTableColumn prop="myProfit" label="我的分润">
+        <ElTableColumn prop="myProfit" label="我的分润" width="180">
           <template #default="scope">
-            <span class="text-red-500 font-bold">
-              {{ scope.row.myProfit }}
-            </span>
+            <div v-if="scope.row.myProfit !== '--'" class="flex items-center gap-1">
+              <span class="text-red-500 font-bold">
+                {{ scope.row.myProfit }}
+              </span>
+              <ElTag type="primary" size="small" circle>
+                {{ scope.row.myProfitLevel }}层
+              </ElTag>
+            </div>
           </template>
         </ElTableColumn>
         <!-- <ElTableColumn prop="addressInfo" label="地址" /> -->
@@ -464,12 +528,17 @@ const contextMenuItems = computed(() => {
                   <FaIcon name="i-ep:view" />
                 </ElButton>
               </ElTooltip>
+              <ElTooltip content="复制" placement="top" effect="light">
+                <ElButton type="primary" size="small" circle @click="onCopy(scope.row)">
+                  <FaIcon name="ep:connection" />
+                </ElButton>
+              </ElTooltip>
               <ElTooltip v-if="scope.row.status === 'pending'" content="删除" placement="top" effect="light">
                 <ElButton type="danger" size="small" circle @click="onDel(scope.row)">
                   <FaIcon name="i-ep:delete" />
                 </ElButton>
               </ElTooltip>
-              <ElTooltip v-if="scope.row.status === 'delivering'" content="标记完成" placement="top" effect="light">
+              <ElTooltip v-if="scope.row.status === 'delivering' && canComplete" content="标记完成" placement="top" effect="light">
                 <ElButton type="success" size="small" circle @click="onFinish(scope.row)">
                   <FaIcon name="i-ep:check" />
                 </ElButton>
@@ -624,7 +693,7 @@ const contextMenuItems = computed(() => {
 
 .table-action-buttons {
   display: flex;
-  gap: 8px; /* 增加操作按钮之间的间距 */
+  gap: 2px; /* 增加操作按钮之间的间距 */
   justify-content: center;
 
   :deep(.el-button) {
@@ -634,5 +703,104 @@ const contextMenuItems = computed(() => {
       font-size: 16px; /* 增加图标大小 */
     }
   }
+
+  :deep(.el-button+.el-button) {
+    margin-left: 5px;
+  }
+}
+
+.stats-mini-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.mini-card {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 4%);
+}
+
+.mini-card.orders {
+  background-color: #ecf5ff;
+  border: 1px solid #d9ecff;
+}
+
+.mini-card.success-orders {
+  background-color: #f0f9eb;
+  border: 1px solid #e1f3d8;
+}
+
+.mini-card.amount {
+  background-color: #fef0f0;
+  border: 1px solid #fde2e2;
+}
+
+.mini-card.success-amount {
+  background-color: #f4f4f5;
+  border: 1px solid #e9e9eb;
+}
+
+.mini-card.profit {
+  background-color: #fdf6ec;
+  border: 1px solid #faecd8;
+}
+
+.mini-card-icon {
+  margin-right: 6px;
+  font-size: 16px;
+}
+
+.mini-card.orders .mini-card-icon {
+  color: var(--el-color-primary);
+}
+
+.mini-card.success-orders .mini-card-icon {
+  color: #67c23a;
+}
+
+.mini-card.amount .mini-card-icon {
+  color: #f56c6c;
+}
+
+.mini-card.success-amount .mini-card-icon {
+  color: #909399;
+}
+
+.mini-card.profit .mini-card-icon {
+  color: #e6a23c;
+}
+
+.mini-card-label {
+  margin-right: 8px;
+  font-size: 13px;
+  color: #606266;
+}
+
+.mini-card-value {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.mini-card.orders .mini-card-value {
+  color: var(--el-color-primary);
+}
+
+.mini-card.success-orders .mini-card-value {
+  color: #67c23a;
+}
+
+.mini-card.amount .mini-card-value {
+  color: #f56c6c;
+}
+
+.mini-card.success-amount .mini-card-value {
+  color: #909399;
+}
+
+.mini-card.profit .mini-card-value {
+  color: #e6a23c;
 }
 </style>

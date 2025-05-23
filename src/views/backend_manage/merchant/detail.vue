@@ -5,6 +5,7 @@ meta:
 
 <script setup lang="ts">
 import type { FormInstance, FormRules } from 'element-plus'
+import apiAdmin from '@/api/modules/admin'
 import apiSetting from '@/api/modules/setting'
 import ImageUpload from '@/components/ImageUpload/index.vue'
 import eventBus from '@/utils/eventBus'
@@ -34,10 +35,12 @@ function createInitialFormState() {
     accessList: [] as string[],
     takeoutRate: 0,
     paymentChannelIds: [] as string[],
+    copyMerTakeoutId: '',
   }
 }
 
 const form = ref(createInitialFormState())
+const merchantList = ref<any[]>([])
 let usernameDisabled = false
 const formRules = ref<FormRules>({
   avatar: [
@@ -66,6 +69,11 @@ function getInfo() {
   apiSetting.getAllPaymentChannel({}).then((res: any) => {
     if (res.status === 1) {
       paymentChannelList.value = res.data.list
+    }
+  })
+  apiAdmin.getAllMerchant({}).then((res: any) => {
+    if (res.status === 1) {
+      merchantList.value = res.data.list
     }
   })
   if (id && id !== '0') {
@@ -167,6 +175,11 @@ function submit() {
                   <el-checkbox label="slot" value="slot" />
                   <el-checkbox label="外卖" value="takeout" />
                 </el-checkbox-group>
+              </ElFormItem>
+              <ElFormItem v-if="form.accessList.includes('takeout')" label="复制店铺商品">
+                <el-select v-model="form.copyMerTakeoutId" placeholder="请选择店铺" :filterable="true" :clearable="true">
+                  <el-option v-for="item in merchantList" :key="item.uuid" :label="item.name" :value="item.uuid" />
+                </el-select>
               </ElFormItem>
               <ElFormItem v-if="form.accessList.includes('takeout')" label="外卖抽成点位">
                 <ElInput v-model="form.takeoutRate" placeholder="请输入抽成点位" />

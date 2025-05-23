@@ -109,6 +109,51 @@ const routes: RouteRecordRaw[] = [
     ],
   },
   {
+    path: '/wallet',
+    component: Layout,
+    redirect: '/wallet/balance',
+    name: 'wallet',
+    meta: {
+      title: '我的钱包',
+      icon: 'ri:wallet-2-line',
+      auth: 'balanceDetail',
+      alwaysOpened: true,
+    },
+    children: [
+      {
+        path: 'balance',
+        name: 'backendManageBalance',
+        component: () => import('@/views/backend_manage/balance_list/list.vue'),
+        meta: {
+          title: '余额明细',
+          auth: 'balanceDetail.browse',
+        },
+      },
+      {
+        path: 'withdraw',
+        name: 'backendManageWithdraw',
+        component: () => import('@/views/backend_manage/withdraw/list.vue'),
+        meta: {
+          title: '提现列表',
+          auth: 'withdrawList.browse',
+        },
+      },
+      {
+        path: 'withdraw/detail/:id',
+        name: 'backendManageWithdrawDetail',
+        component: () => import('@/views/backend_manage/withdraw/detail.vue'),
+        meta: {
+          title: '新增提现',
+          menu: false,
+          activeMenu: '/backend_manage/withdraw',
+          cache: true,
+          noCache: 'backendManageWithdraw',
+          copyright: false,
+        },
+      },
+    ],
+  },
+  {
     path: '/log_manage',
     component: Layout,
     redirect: '/log_manage/operation_log',

@@ -11,6 +11,7 @@ interface ImportMetaEnv {
   /**
    * 接口请求地址，会设置到 axios 的 baseURL 参数上
    * VITE_APP_API_BASEURL = http://localhost:82
+   * VITE_APP_API_BASEURL = https://php.aiservice.work
    */
   readonly VITE_APP_API_BASEURL: string
   /**

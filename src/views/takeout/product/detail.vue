@@ -120,12 +120,9 @@ function onUploadSuccess(res: any) {
 }
 
 function onSubmit() {
-  btnDisabled.value = true
   submit().then(() => {
     emits('success')
     onCancel()
-  }).finally(() => {
-    btnDisabled.value = false
   })
 }
 
@@ -139,6 +136,7 @@ function submit() {
   return new Promise<void>((resolve, reject) => {
     formRef.value?.validate((valid) => {
       if (valid) {
+        btnDisabled.value = true
         loading.value = true
         apiTakeout.editProduct({ form: form.value }).then((res: any) => {
           if (res.status === 1) {
@@ -150,6 +148,7 @@ function submit() {
           resolve()
         }).finally(() => {
           loading.value = false
+          btnDisabled.value = false
         })
       }
       else {

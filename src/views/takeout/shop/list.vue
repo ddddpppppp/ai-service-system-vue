@@ -86,6 +86,7 @@ onMounted(() => {
 
 function getDataList() {
   loading.value = true
+  pagination.value.size = 16
   const params = {
     ...getParams(),
     ...(search.value.name && { name: search.value.name }),

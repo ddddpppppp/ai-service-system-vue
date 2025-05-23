@@ -1,382 +1,497 @@
 <script setup>
-import { ref } from 'vue'
+import apiTakeout from '@/api/modules/takeout'
+import router from '@/router'
+import { BarChart, LineChart } from 'echarts/charts'
+import {
+  GridComponent,
+  LegendComponent,
+  TitleComponent,
+  TooltipComponent,
+} from 'echarts/components'
+import { use } from 'echarts/core'
+import { CanvasRenderer } from 'echarts/renderers'
+import { computed, onMounted, ref } from 'vue'
+import VChart from 'vue-echarts'
 
-const cards = ref([
-  { label: '会话接听率', value: '86.21%', subText: '接听总量: 25位' },
-  { label: '当前排队人数', value: '86', subText: '等待时间: 3秒', unit: '位' },
-  {
-    label: '平均等待时间',
-    value: '45.5',
-    subText: '客户总数: 25位',
-    unit: '秒',
-  },
-  { label: '挂机率', value: '8.21%', subText: '接听总量: 25位' },
+// Register ECharts components
+use([
+  CanvasRenderer,
+  BarChart,
+  LineChart,
+  TitleComponent,
+  TooltipComponent,
+  LegendComponent,
+  GridComponent,
 ])
 
-const chatTrends = ref([
-  { day: '周一', value: 50, hours: '1小时' },
-  { day: '周二', value: 50, hours: '2小时' },
-  { day: '周三', value: 70, hours: '3小时' },
-  { day: '周四', value: 110, hours: '4小时' },
-  { day: '周五', value: 140, hours: '5小时' },
-  { day: '周六', value: 180, hours: '6小时' },
-])
+// 获取当前日期及之前的7天时间范围
+const dateRange = ref(getLast7Days())
 
-const botResponses = ref([
-  { time: '16:00-17:00', value: 40 },
-  { time: '17:00-18:00', value: 100 },
-  { time: '18:00-19:00', value: 70 },
-  { time: '19:00-20:00', value: 120 },
-  { time: '20:00-21:00', value: 90 },
-  { time: '21:00-22:00', value: 80 },
-  { time: '22:00-23:00', value: 110 },
-])
+// Team performance data
+const teamPeriod = ref('month')
 
-const systemStatus = ref([
-  {
-    status: '健康',
-    api: 'API调用成功率',
-    error: '错误率',
-    delay: '延迟监控',
-    time: '记录时间',
-  },
-  {
-    status: '健康',
-    api: 'API调用成功率',
-    error: '错误率',
-    delay: '延迟监控',
-    time: '记录时间',
-  },
-  {
-    status: '健康',
-    api: 'API调用成功率',
-    error: '错误率',
-    delay: '延迟监控',
-    time: '记录时间',
-  },
-  {
-    status: '健康',
-    api: 'API调用成功率',
-    error: '错误率',
-    delay: '延迟监控',
-    time: '记录时间',
-  },
-  {
-    status: '健康',
-    api: 'API调用成功率',
-    error: '错误率',
-    delay: '延迟监控',
-    time: '记录时间',
-  },
-])
+// Wallet data
+const wallet = ref({
+  balance: 0,
+  balanceFrozen: 0,
+})
 
-const dateRange = ref('2025-04-01 至 20205-04-30')
-const conversationType = ref('全部任务')
+// Team sales data
+const teamSales = ref([])
+
+// Dashboard data
+const personalStats = ref({
+  orderCount: 0,
+  orderTrend: { value: 0, trend: 'up' },
+  paidOrderCount: 0,
+  paidOrderTrend: { value: 0, trend: 'up' },
+  paidAmount: 0,
+  paidAmountTrend: { value: 0, trend: 'up' },
+  conversionRate: 0,
+  conversionRateTrend: { value: 0, trend: 'up' },
+})
+
+const teamStats = ref({
+  orderCount: 0,
+  orderTrend: { value: 0, trend: 'up' },
+  paidOrderCount: 0,
+  paidOrderTrend: { value: 0, trend: 'up' },
+  paidAmount: 0,
+  paidAmountTrend: { value: 0, trend: 'up' },
+  conversionRate: 0,
+  conversionRateTrend: { value: 0, trend: 'up' },
+})
+
+// Chart data
+const chartData = ref({
+  labels: [],
+  orderData: [],
+  paidOrderData: [],
+  amountData: [],
+})
+
+// ECharts option for team performance
+const teamChartOption = computed(() => {
+  // Get the primary color from CSS variable
+  // Create a cohesive color palette based on the primary color
+  const colors = [
+    '#09090b', // Primary color for first series
+    '#09090b', // Lighter shade for second series
+    '#09090b', // Slightly darker for line series
+  ]
+
+  return {
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: {
+        type: 'shadow',
+      },
+    },
+    legend: {
+      data: ['订单量', '已支付订单量', '已支付订单金额'],
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
+      containLabel: true,
+    },
+    xAxis: [
+      {
+        type: 'category',
+        data: chartData.value.labels || [],
+      },
+    ],
+    yAxis: [
+      {
+        type: 'value',
+        name: '订单数量',
+        position: 'left',
+      },
+      {
+        type: 'value',
+        name: '金额',
+        position: 'right',
+        axisLabel: {
+          formatter: '{value} 元',
+        },
+      },
+    ],
+    series: [
+      {
+        name: '订单量',
+        type: 'bar',
+        barWidth: 20,
+        itemStyle: {
+          color: colors[0], // Explicitly set color for first series
+        },
+        data: chartData.value.orderData || [],
+      },
+      {
+        name: '已支付订单量',
+        type: 'bar',
+        barWidth: 20,
+        itemStyle: {
+          color: colors[1], // Explicitly set color for second series
+        },
+        data: chartData.value.paidOrderData || [],
+      },
+      {
+        name: '已支付订单金额',
+        type: 'line',
+        yAxisIndex: 1,
+        smooth: true,
+        symbolSize: 8,
+        lineStyle: {
+          width: 3,
+          color: colors[2], // Explicitly set line color
+        },
+        itemStyle: {
+          color: colors[2], // Explicitly set point color
+        },
+        data: chartData.value.amountData || [],
+      },
+    ],
+    color: colors,
+  }
+})
+
+onMounted(() => {
+  getDashboardData()
+})
+
+async function getDashboardData() {
+  const res = await apiTakeout.getDashboard({
+    startDate: dateRange.value[0],
+    endDate: dateRange.value[1],
+    period: teamPeriod.value,
+  })
+
+  if (res && res.status === 1 && res.data) {
+    // Update personal stats
+    personalStats.value = res.data.personal || personalStats.value
+
+    // Update team stats
+    teamStats.value = res.data.team || teamStats.value
+
+    // Update chart data
+    chartData.value = res.data.chart || chartData.value
+
+    // Update wallet data
+    wallet.value = res.data.wallet || wallet.value
+
+    // Update team sales data
+    teamSales.value = res.data.teamSales || []
+  }
+}
+
+// Format number with commas
+function formatNumber(num) {
+  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+}
+
+// 获取最近7天的日期范围函数
+function getLast7Days() {
+  const end = new Date()
+  const start = new Date()
+  start.setDate(start.getDate() - 6) // 当前日期算一天，所以减6天
+
+  // 格式化日期为 YYYY/MM/DD 格式
+  const formatDate = (date) => {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}/${month}/${day}`
+  }
+
+  return [formatDate(start), formatDate(end)]
+}
+
+function toWithdraw() {
+  router.push({ name: 'backendManageWithdraw' })
+}
 </script>
 
 <template>
-  <div class="dashboard-wrapper">
-    <!-- 顶部标题和筛选器 -->
-    <div class="dashboard-header">
-      <div class="title">
-        11/16-12/21数据（全部会话数据分析...）
-      </div>
-      <div class="filters">
-        <div class="filter-item">
-          <span class="filter-label">会话任务：</span>
-          <el-select v-model="conversationType" placeholder="选择任务类型">
-            <el-option label="全部任务" value="全部任务" />
-          </el-select>
-        </div>
-        <div class="filter-item">
-          <span class="filter-label">日期选择：</span>
-          <el-select v-model="dateRange" placeholder="选择日期范围">
-            <el-option :label="dateRange" :value="dateRange" />
-          </el-select>
-        </div>
-      </div>
+  <div class="container">
+    <!-- Header with FaPageHeader -->
+    <FaPageHeader title="看板" class="mb-0" />
+
+    <!-- Date Filter -->
+    <div class="date-filter-container">
+      <el-date-picker
+        v-model="dateRange"
+        type="daterange"
+        range-separator="至"
+        start-placeholder="开始日期"
+        end-placeholder="结束日期"
+        format="YYYY/MM/DD"
+        value-format="YYYY/MM/DD"
+        @change="getDashboardData"
+      />
     </div>
-
-    <!-- 顶部统计卡片 -->
-    <el-row :gutter="20" class="stat-cards">
-      <el-col v-for="(card, index) in cards" :key="index" :span="6">
-        <el-card shadow="hover">
-          <div class="card-content">
-            <div class="card-info">
-              <div class="card-title">
-                {{ card.label }}
-              </div>
-              <div class="card-value">
-                {{ card.value }}<span v-if="card.unit">{{ card.unit }}</span>
-              </div>
-              <div class="card-subtext">
-                {{ card.subText }}
-              </div>
-            </div>
-            <div class="card-chart">
-              <div
-                class="circle-progress"
-                :class="{ 'high-rate': index === 0 || index === 3 }"
-              />
-            </div>
-          </div>
-        </el-card>
-      </el-col>
-    </el-row>
-
-    <!-- 中部图表 -->
-    <el-row :gutter="20" class="charts-row">
-      <el-col :span="12">
-        <el-card shadow="hover">
-          <div class="chart-title">
-            会话趋势
-          </div>
-          <div class="bar-chart">
-            <div
-              v-for="(item, index) in chatTrends"
-              :key="index"
-              class="chart-column"
-            >
-              <div class="y-axis-label">
-                {{ item.hours }}
-              </div>
-              <div class="bar" :style="{ height: `${item.value}px` }" />
-              <div class="x-axis-label">
-                {{ item.day }}
-              </div>
-            </div>
-          </div>
-        </el-card>
-      </el-col>
-
-      <el-col :span="12">
-        <el-card shadow="hover">
-          <div class="chart-title">
-            机器人响应时间
-          </div>
-          <div class="response-stats">
-            <span class="stat-item">平均响应时间 <strong>15.5</strong>秒</span>
-            <span class="stat-item">最长响应时间 <strong>45.5</strong>秒</span>
-          </div>
-          <div class="response-chart">
-            <div
-              v-for="(item, index) in botResponses"
-              :key="index"
-              class="chart-column"
-            >
-              <div
-                class="bar"
-                :style="{ height: `${item.value}px` }"
-                :class="{ highlight: index === 1 }"
-              />
-              <div class="x-axis-label time-label">
-                {{ item.time }}
-              </div>
-            </div>
-          </div>
-          <div class="time-segment-label">
-            时间段
-          </div>
-        </el-card>
-      </el-col>
-    </el-row>
-
-    <!-- 底部系统状态 -->
-    <el-card shadow="hover" class="system-status-card">
-      <div class="chart-title">
-        系统健康状态
+    <div class="dashboard">
+      <!-- Stat Cards - First Row -->
+      <div class="mb-4 flex-center gap-4">
+        <FaDigitalCard
+          title="订单量"
+          icon="i-ep:shopping-cart"
+          :digital="formatNumber(personalStats.orderCount)"
+          :description="`较上个周期${personalStats.orderTrend.trend === 'up' ? '上升' : '下降'}${personalStats.orderTrend.value}%`"
+          :trend="personalStats.orderTrend.trend"
+        />
+        <FaDigitalCard
+          title="已支付订单量"
+          icon="i-ep:money"
+          :digital="formatNumber(personalStats.paidOrderCount)"
+          :description="`较上个周期${personalStats.paidOrderTrend.trend === 'up' ? '上升' : '下降'}${personalStats.paidOrderTrend.value}%`"
+          :trend="personalStats.paidOrderTrend.trend"
+        />
+        <FaDigitalCard
+          title="已支付订单金额"
+          icon="i-ep:document"
+          :digital="`＄${formatNumber(personalStats.paidAmount)}`"
+          :description="`较上个周期${personalStats.paidAmountTrend.trend === 'up' ? '上升' : '下降'}${personalStats.paidAmountTrend.value}%`"
+          :trend="personalStats.paidAmountTrend.trend"
+        />
+        <FaDigitalCard
+          title="订单转化率"
+          icon="i-ep:data-analysis"
+          :digital="`${personalStats.conversionRate}%`"
+          :description="`较上个周期${personalStats.conversionRateTrend.trend === 'up' ? '上升' : '下降'}${personalStats.conversionRateTrend.value}%`"
+          :trend="personalStats.conversionRateTrend.trend"
+        />
       </div>
-      <el-table :data="systemStatus" style="width: 100%;">
-        <el-table-column prop="status" label="健康情况" />
-        <el-table-column prop="api" label="API调用成功率" />
-        <el-table-column prop="error" label="错误率" />
-        <el-table-column prop="delay" label="延迟监控" />
-        <el-table-column prop="time" label="记录时间" />
-      </el-table>
-    </el-card>
+
+      <!-- Stat Cards - Second Row -->
+      <div class="mb-6 flex-center gap-4">
+        <FaDigitalCard
+          title="团队订单量"
+          icon="i-ep:shopping-bag"
+          :digital="formatNumber(teamStats.orderCount)"
+          :description="`较上个周期${teamStats.orderTrend.trend === 'up' ? '上升' : '下降'}${teamStats.orderTrend.value}%`"
+          :trend="teamStats.orderTrend.trend"
+        />
+        <FaDigitalCard
+          title="团队已支付订单量"
+          icon="i-ep:credit-card"
+          :digital="formatNumber(teamStats.paidOrderCount)"
+          :description="`较上个周期${teamStats.paidOrderTrend.trend === 'up' ? '上升' : '下降'}${teamStats.paidOrderTrend.value}%`"
+          :trend="teamStats.paidOrderTrend.trend"
+        />
+        <FaDigitalCard
+          title="团队已支付订单金额"
+          icon="i-ep:wallet"
+          :digital="`＄${formatNumber(teamStats.paidAmount)}`"
+          :description="`较上个周期${teamStats.paidAmountTrend.trend === 'up' ? '上升' : '下降'}${teamStats.paidAmountTrend.value}%`"
+          :trend="teamStats.paidAmountTrend.trend"
+        />
+        <FaDigitalCard
+          title="团队订单转化率"
+          title-tips="已支付订单量/订单总量"
+          icon="i-ep:data-line"
+          :digital="`${teamStats.conversionRate}%`"
+          :description="`较上个周期${teamStats.conversionRateTrend.trend === 'up' ? '上升' : '下降'}${teamStats.conversionRateTrend.value}%`"
+          :trend="teamStats.conversionRateTrend.trend"
+        />
+      </div>
+
+      <!-- Team Performance Section with ECharts -->
+      <el-row :gutter="20" class="dashboard-section">
+        <el-col :span="24">
+          <el-card shadow="hover">
+            <template #header>
+              <div class="card-header">
+                <span>团队业绩统计</span>
+                <el-radio-group v-model="teamPeriod" size="small" @change="getDashboardData">
+                  <el-radio-button value="day">
+                    日
+                  </el-radio-button>
+                  <el-radio-button value="week">
+                    周
+                  </el-radio-button>
+                  <el-radio-button value="month">
+                    月
+                  </el-radio-button>
+                </el-radio-group>
+              </div>
+            </template>
+
+            <!-- Team Performance Chart with ECharts -->
+            <div class="echarts-container">
+              <VChart class="chart" :option="teamChartOption" autoresize />
+            </div>
+          </el-card>
+        </el-col>
+      </el-row>
+
+      <!-- Wallet and Team Sales Section -->
+      <el-row :gutter="20" class="dashboard-section">
+        <el-col :xs="24" :md="8">
+          <el-card shadow="hover" class="section-card wallet-card">
+            <template #header>
+              <div class="card-header">
+                <span>我的钱包</span>
+              </div>
+            </template>
+
+            <div class="wallet-content">
+              <div class="wallet-item">
+                <div class="wallet-label">
+                  钱包余额
+                </div>
+                <div class="wallet-value">
+                  ${{ formatNumber(wallet.balance) }}
+                </div>
+              </div>
+              <div class="wallet-item">
+                <div class="wallet-label">
+                  冻结余额
+                </div>
+                <div class="wallet-value">
+                  ${{ formatNumber(wallet.balanceFrozen) }}
+                </div>
+              </div>
+              <el-button type="primary" class="wallet-button" @click="toWithdraw">
+                提现
+              </el-button>
+            </div>
+          </el-card>
+        </el-col>
+
+        <el-col :xs="24" :md="16">
+          <el-card shadow="hover" class="section-card">
+            <template #header>
+              <div class="card-header">
+                <span>团队订单情况</span>
+              </div>
+            </template>
+
+            <el-table :data="teamSales" style="width: 100%;" height="400">
+              <el-table-column prop="name" label="名称" />
+              <el-table-column prop="orderCount" label="订单量" />
+              <el-table-column prop="successCount" label="订单成功数量" />
+              <el-table-column prop="successAmount" label="订单成功金额">
+                <template #default="scope">
+                  ¥{{ formatNumber(scope.row.successAmount) }}
+                </template>
+              </el-table-column>
+              <el-table-column prop="profit" label="利润">
+                <template #default="scope">
+                  ¥{{ formatNumber(scope.row.profit) }}
+                </template>
+              </el-table-column>
+            </el-table>
+          </el-card>
+        </el-col>
+      </el-row>
+    </div>
   </div>
 </template>
 
 <style scoped>
-.dashboard-wrapper {
-  min-height: 100vh;
+.dashboard {
+  min-height: calc(100vh - 100px);
   padding: 20px;
-  background: #f5f7fa;
 }
 
-.dashboard-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
+.date-filter-container {
+  position: absolute;
+  top: 1.1rem;
+  right: 1rem;
+  margin-bottom: 24px;
 }
 
-.title {
-  font-size: 18px;
-  font-weight: bold;
+.mb-0 {
+  margin-bottom: 0;
 }
 
-.filters {
-  display: flex;
-  gap: 20px;
+.mb-4 {
+  margin-bottom: 16px;
 }
 
-.filter-item {
-  display: flex;
-  align-items: center;
+.mb-6 {
+  margin-bottom: 24px;
 }
 
-.filter-label {
-  margin-right: 10px;
-  white-space: nowrap;
-}
-
-.stat-cards {
-  margin-bottom: 20px;
-}
-
-.card-content {
-  display: flex;
-  justify-content: space-between;
-}
-
-.card-info {
-  flex: 1;
-}
-
-.card-title {
-  margin-bottom: 10px;
-  font-size: 14px;
-  color: #606266;
-}
-
-.card-value {
-  margin-bottom: 5px;
-  font-size: 30px;
-  font-weight: bold;
-  color: #303133;
-}
-
-.card-subtext {
-  font-size: 12px;
-  color: #909399;
-}
-
-.card-chart {
+.flex-center {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 80px;
-  height: 80px;
 }
 
-.circle-progress {
-  position: relative;
-  width: 70px;
-  height: 70px;
-  background: conic-gradient(#409eff 0% 86%, #e9e9eb 86% 100%);
-  border-radius: 50%;
+.gap-4 {
+  gap: 16px;
 }
 
-.circle-progress::after {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 50px;
-  height: 50px;
-  content: "";
-  background: white;
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
+.dashboard-section {
+  margin-bottom: 24px;
 }
 
-.high-rate {
-  background: conic-gradient(#409eff 0% 86%, #e9e9eb 86% 100%);
+.section-card {
+  max-height: 360px;
 }
 
-.charts-row {
-  margin-bottom: 20px;
-}
-
-.chart-title {
-  margin-bottom: 20px;
-  font-size: 16px;
-  font-weight: bold;
-  color: #303133;
-}
-
-.bar-chart,
-.response-chart {
+.card-header {
   display: flex;
-  align-items: flex-end;
-  justify-content: space-around;
-  height: 250px;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.chart-column {
+.echarts-container {
+  width: 100%;
+  height: 400px;
+}
+
+.chart {
+  width: 100%;
+  height: 100%;
+}
+
+.wallet-card {
+  height: 100%;
+}
+
+.wallet-content {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  width: 40px;
+  padding: 16px;
 }
 
-.y-axis-label {
-  width: 100%;
-  margin-bottom: 5px;
-  font-size: 12px;
-  color: #909399;
-  text-align: center;
+.wallet-item {
+  margin-bottom: 16px;
 }
 
-.bar {
-  width: 30px;
-  background-color: #000;
-  border-radius: 4px 4px 0 0;
-}
-
-.highlight {
-  background-color: #000;
-}
-
-.x-axis-label {
-  margin-top: 8px;
-  font-size: 12px;
-  color: #606266;
-}
-
-.time-label {
-  width: 60px;
-  margin-left: 20px;
-  text-align: right;
-  white-space: nowrap;
-  transform: rotate(320deg);
-  transform-origin: left;
-}
-
-.time-segment-label {
-  margin-top: 20px;
-  margin-right: 20px;
-  color: #606266;
-  text-align: right;
-}
-
-.response-stats {
-  display: flex;
-  justify-content: space-around;
-  margin-bottom: 20px;
-}
-
-.stat-item {
+.wallet-label {
+  margin-bottom: 4px;
   font-size: 14px;
-  color: #606266;
+  color: #666;
 }
 
-.stat-item strong {
-  font-size: 18px;
-  color: #303133;
+.wallet-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
 }
 
-.system-status-card {
-  margin-top: 20px;
+.wallet-button {
+  align-self: flex-start;
+  margin-top: auto;
+}
+
+/* Override Element Plus styles to match the primary color */
+:deep(.el-button--primary) {
+  --el-button-bg-color: hsl(var(--primary));
+  --el-button-border-color: hsl(var(--primary));
+  --el-button-hover-bg-color: hsl(var(--primary));
+  --el-button-hover-border-color: hsl(var(--primary));
+  --el-button-active-bg-color: hsl(var(--primary));
+  --el-button-active-border-color: hsl(var(--primary));
+}
+
+:deep(.el-radio-button__orig-radio:checked + .el-radio-button__inner) {
+  background-color: hsl(var(--primary));
+  border-color: hsl(var(--primary));
+  box-shadow: -1px 0 0 0 hsl(var(--primary));
 }
 </style>

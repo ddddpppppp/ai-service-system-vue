@@ -36,10 +36,10 @@ function createInitialFormState() {
     username: '',
     password: '',
     roleId: 0,
-    takeoutRate: 0,
+    takeoutRate: '',
   }
 }
-
+const takeoutRatePlaceholder = ref(0)
 const form = ref(createInitialFormState())
 const roleList = ref([{ id: 0, name: '请选择角色' }])
 let usernameDisabled = false
@@ -77,6 +77,11 @@ function getInfo() {
       }
       if (res.data.takeout) {
         takeout.value = true
+        apiAdmin.getMyTakeoutRate({}).then((res) => {
+          if (res.status === 1) {
+            takeoutRatePlaceholder.value = res.data.rate
+          }
+        })
       }
     }
   }).catch((e) => {
@@ -128,6 +133,15 @@ function submit() {
   return new Promise<void>((resolve, reject) => {
     formRef.value?.validate((valid) => {
       if (valid) {
+        if (takeout.value) {
+          if (Number(form.value.takeoutRate) > takeoutRatePlaceholder.value) {
+            ElMessage.error({
+              message: `抽成点位不能超过${takeoutRatePlaceholder.value}点`,
+              center: true,
+            })
+            reject(new Error(`抽成点位不能超过${takeoutRatePlaceholder.value}点`))
+          }
+        }
         btnDisabled.value = true
         loading.value = true
         apiSetting.editAdmin({ form: form.value }).then((res: any) => {
@@ -186,7 +200,7 @@ function submit() {
                 </el-radio-group>
               </ElFormItem>
               <ElFormItem v-if="takeout" label="外卖代理抽成">
-                <ElInput v-model="form.takeoutRate" placeholder="请输入抽成点位" />
+                <ElInput v-model="form.takeoutRate" :placeholder="`请输入抽成点位，不超过${takeoutRatePlaceholder}`" />
               </ElFormItem>
             </ElForm>
           </div>

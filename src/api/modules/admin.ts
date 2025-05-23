@@ -10,4 +10,11 @@ export default {
   getAllAdmin: (data: any) => api.post('shop/admin/getAllAdmin', data).then((res) => {
     return res
   }),
+  getAllMerchant: (data: any) => api.post('shop/admin/getAllMerchant', data).then((res) => {
+    return res
+  }),
+  getMyTakeoutRate: (data: any) => api.post('shop/admin/getMyTakeoutRate', data).then((res) => {
+    return res
+  }),
+
 }

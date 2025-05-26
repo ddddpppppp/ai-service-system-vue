@@ -1,10 +1,12 @@
 import type { Route } from '#/global'
 import type { RouteRecordRaw } from 'vue-router'
 import { $t } from '@/locales'
+import storage from '@/utils/storage'
 // import pinia from '@/store'
 // import useSettingsStore from '@/store/modules/settings'
 import generatedRoutes from 'virtual:generated-pages'
 import { setupLayouts } from 'virtual:meta-layouts'
+import Ai from './modules/ai.ts'
 import BackendManage from './modules/backend_manage.ts'
 import Config from './modules/config.ts'
 // import MultilevelMenuExample from './modules/multilevel.menu.example'
@@ -36,6 +38,11 @@ const constantRoutes: RouteRecordRaw[] = [
 const systemRoutes: RouteRecordRaw[] = [
   {
     path: '/',
+    redirect: () => {
+      // 从本地存储获取重定向路径，如果不存在则使用默认路径
+      const redirectPath = storage.local.get('redirectPath')
+      return redirectPath || '/slot/slot_dashboard'
+    },
     component: () => import('@/layouts/index.vue'),
     meta: {
       breadcrumb: false,
@@ -74,6 +81,15 @@ const asyncRoutes: Route.recordMainRaw[] = [
     },
     children: [
       ...Takeout,
+    ],
+  },
+  {
+    meta: {
+      title: 'AI',
+      icon: 'solar:radar-2-bold-duotone',
+    },
+    children: [
+      ...Ai,
     ],
   },
   {

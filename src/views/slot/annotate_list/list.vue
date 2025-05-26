@@ -113,6 +113,7 @@ onBeforeUnmount(() => {
 function getDataList() {
   loading.value = true
   const params = {
+    type: 'annotate',
     ...getParams(),
     ...(search.value.content && { content: search.value.content }),
     ...(search.value.status && { status: search.value.status }),

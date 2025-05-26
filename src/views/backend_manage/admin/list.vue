@@ -6,6 +6,7 @@ meta:
 <script setup lang="ts">
 import apiSetting from '@/api/modules/setting'
 import eventBus from '@/utils/eventBus'
+import storage from '@/utils/storage'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 defineOptions({
@@ -107,7 +108,7 @@ function onEdit(row: any) {
 }
 
 function onDel(row: any) {
-  ElMessageBox.confirm(`确认冻结「${row.name}」吗？`, '确认信息').then(() => {
+  ElMessageBox.confirm(`确认冻结「${row.nickname}」吗？`, '确认信息').then(() => {
     apiSetting.delAdmin({ id: row.uuid }).then(() => {
       getDataList()
       ElMessage.success({
@@ -135,8 +136,8 @@ function onDelBatch() {
 }
 
 function onRecovery(row: any) {
-  ElMessageBox.confirm(`确认恢复「${row.name}」吗？`, '确认信息').then(() => {
-    apiSetting.delAdmin({ id: row.uuid }).then(() => {
+  ElMessageBox.confirm(`确认恢复「${row.nickname}」吗？`, '确认信息').then(() => {
+    apiSetting.recoveryAdmin({ id: row.uuid }).then(() => {
       getDataList()
       ElMessage.success({
         message: '恢复成功',
@@ -199,7 +200,7 @@ function onRecoveryBatch() {
           <template #icon>
             <FaIcon name="i-ep:plus" />
           </template>
-          新增员工
+          {{ storage.local.get('redirectPath') === '/takeout/takeout_dashboard' ? '新增代理' : '新增员工' }}
         </ElButton>
         <!--        <ElButton v-if="batch.enable" size="default" :disabled="!batch.selectionDataList.length" @click="onDelBatch"> -->
         <!--          删除 -->
@@ -215,19 +216,19 @@ function onRecoveryBatch() {
       </ElSpace>
       <ElTable v-loading="loading" class="my-4" :data="dataList" stripe highlight-current-row border height="100%" @sort-change="sortChange" @selection-change="batch.selectionDataList = $event">
         <ElTableColumn v-if="batch.enable" type="selection" align="center" fixed />
-        <ElTableColumn prop="nickname" label="昵称" />
-        <ElTableColumn prop="username" label="登录账号" />
-        <ElTableColumn prop="roleName" label="角色" />
-        <ElTableColumn prop="depth" label="层级" />
-        <ElTableColumn prop="statusName" label="状态">
+        <ElTableColumn prop="nickname" label="昵称" min-width="150" header-align="center" align="center" />
+        <ElTableColumn prop="username" label="登录账号" min-width="120" header-align="center" align="center" />
+        <ElTableColumn prop="roleName" label="角色" min-width="120" header-align="center" align="center" />
+        <ElTableColumn prop="depth" label="层级" min-width="120" header-align="center" align="center" />
+        <ElTableColumn prop="statusName" label="状态" min-width="120" header-align="center" align="center">
           <template #default="scope">
             <ElButton :type="scope.row.statusClass" size="small">
               {{ scope.row.statusName }}
             </ElButton>
           </template>
         </ElTableColumn>
-        <ElTableColumn prop="createdAt" label="生成时间" />
-        <ElTableColumn prop="updatedAt" label="更新日期" />
+        <ElTableColumn prop="createdAt" label="生成时间" min-width="180" header-align="center" align="center" />
+        <ElTableColumn prop="updatedAt" label="更新日期" min-width="180" header-align="center" align="center" />
 
         <ElTableColumn label="操作" width="250" align="center" fixed="right">
           <template #default="scope">

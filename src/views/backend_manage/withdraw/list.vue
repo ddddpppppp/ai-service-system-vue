@@ -6,7 +6,7 @@ meta:
 <script setup lang="ts">
 import apiSetting from '@/api/modules/setting'
 import eventBus from '@/utils/eventBus'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElDialog, ElImage, ElMessage, ElMessageBox } from 'element-plus'
 
 defineOptions({
   name: 'BackendManageWithdrawList',
@@ -51,6 +51,15 @@ const loading = ref(false)
 const dataList = ref([])
 const balance = ref(0)
 const isAccess = ref(false)
+const uploadFileAction = String(inject('uploadFileAction'))
+const payProofImage = ref('')
+const uploadDialogVisible = ref(false)
+const currentRow = ref<any>(null)
+
+// 添加预览相关的状态变量
+const previewVisible = ref(false)
+const previewImageUrl = ref('')
+
 onMounted(() => {
   getDataList()
   if (formMode.value === 'router') {
@@ -117,6 +126,18 @@ function onDisable(row: any) {
   }).catch(() => { })
 }
 
+function onCancel(row: any) {
+  ElMessageBox.confirm(`确认取消「${row.nickname}」的提现吗？`, '确认信息').then(() => {
+    apiSetting.cancelWithdraw({ id: row.withdrawNo }).then(() => {
+      getDataList()
+      ElMessage.success({
+        message: '取消成功',
+        center: true,
+      })
+    })
+  })
+}
+
 function onDisableBatch() {
   ElMessageBox.confirm(`确认批量拒绝吗？`, '确认信息').then(() => {
     const ids: any[] = []
@@ -133,16 +154,35 @@ function onDisableBatch() {
   }).catch(() => { })
 }
 
+function onUpdatePayProof(res: any) {
+  payProofImage.value = res.data.url
+}
+
 function onEnable(row: any) {
-  ElMessageBox.confirm(`确认通过「${row.nickname}」的提现吗？`, '确认信息').then(() => {
-    apiSetting.enableWithdraw({ id: row.withdrawNo }).then(() => {
+  currentRow.value = row
+  payProofImage.value = ''
+  uploadDialogVisible.value = true
+}
+
+function confirmEnable() {
+  if (!payProofImage.value) {
+    ElMessage.warning('请先上传支付凭证')
+    return
+  }
+
+  ElMessageBox.confirm(`确认通过「${currentRow.value.nickname}」的提现吗？`, '确认信息').then(() => {
+    apiSetting.enableWithdraw({
+      id: currentRow.value.withdrawNo,
+      payProof: payProofImage.value, // 添加支付凭证
+    }).then(() => {
       getDataList()
       ElMessage.success({
         message: '通过成功',
         center: true,
       })
+      uploadDialogVisible.value = false
     })
-  }).catch(() => { })
+  }).catch(() => {})
 }
 
 function onEnableBatch() {
@@ -159,6 +199,15 @@ function onEnableBatch() {
       })
     })
   }).catch(() => { })
+}
+
+// 实现 onPreview 方法
+function onPreview(qrcodeUrl: string) {
+  if (!qrcodeUrl) {
+    return
+  }
+  previewImageUrl.value = qrcodeUrl
+  previewVisible.value = true
 }
 </script>
 
@@ -235,33 +284,59 @@ function onEnableBatch() {
         </div>
       </div>
       <ElTable
-        v-loading="loading" class="my-4" :data="dataList" stripe highlight-current-row border height="100%"
+        v-loading="loading" class="my-4" :data="dataList" height="100%" highlight-current-row border
         @sort-change="sortChange" @selection-change="batch.selectionDataList = $event"
       >
         <ElTableColumn v-if="batch.enable" type="selection" align="center" fixed />
-        <ElTableColumn prop="withdrawNo" label="提现单号" />
-        <ElTableColumn prop="merchantName" label="所属商户" />
-        <ElTableColumn prop="nickname" label="昵称" />
-        <ElTableColumn prop="amount" label="提现金额" />
-        <ElTableColumn prop="account" label="提现账号" />
-        <ElTableColumn prop="statusName" label="状态">
+        <ElTableColumn prop="withdrawNo" label="提现单号" min-width="125" header-align="center" align="center" />
+        <ElTableColumn prop="merchantName" label="所属商户" min-width="120" header-align="center" align="center" />
+        <ElTableColumn prop="nickname" label="昵称" min-width="120" header-align="center" align="center" />
+        <ElTableColumn prop="amount" label="提现金额" min-width="120" header-align="center" align="center" />
+        <ElTableColumn prop="account" label="提现账号" min-width="350" header-align="center" align="center" />
+        <ElTableColumn prop="qrcode" label="提现地址二维码" min-width="125" header-align="center" align="center">
+          <template #default="scope">
+            <ElButton v-if="scope.row.qrcode" type="primary" size="small" @click="onPreview(scope.row.qrcode)">
+              查看
+            </ElButton>
+            <span v-else>
+              暂无
+            </span>
+          </template>
+        </ElTableColumn>
+        <ElTableColumn prop="payProof" label="转账凭证" min-width="90" header-align="center" align="center">
+          <template #default="scope">
+            <ElButton v-if="scope.row.payProof" type="primary" size="small" @click="onPreview(scope.row.payProof)">
+              查看
+            </ElButton>
+            <span v-else>
+              暂无
+            </span>
+          </template>
+        </ElTableColumn>
+        <ElTableColumn prop="statusName" label="状态" min-width="90" header-align="center" align="center">
           <template #default="scope">
             <ElButton :type="scope.row.statusClass" size="small">
               {{ scope.row.statusName }}
             </ElButton>
           </template>
         </ElTableColumn>
-        <ElTableColumn prop="createdAt" label="生成时间" />
-        <ElTableColumn prop="updatedAt" label="更新日期" />
+        <ElTableColumn prop="createdAt" label="生成时间" min-width="170" header-align="center" align="center" />
+        <ElTableColumn prop="updatedAt" label="更新日期" min-width="180" header-align="center" align="center" />
 
-        <ElTableColumn v-if="isAccess" label="操作" width="120" align="center" fixed="right">
+        <ElTableColumn label="操作" width="140" align="center" fixed="right">
           <template #default="scope">
-            <ElButton v-if="scope.row.status === 'pending'" type="danger" size="small" plain @click="onDisable(scope.row)">
-              拒绝
-            </ElButton>
-            <ElButton v-else type="primary" size="small" plain @click="onEnable(scope.row)">
-              通过
-            </ElButton>
+            <div v-if="scope.row.status === 'pending'" class="flex items-center justify-center gap-1">
+              <ElButton v-if="isAccess" type="danger" size="small" plain @click="onDisable(scope.row)">
+                拒绝
+              </ElButton>
+              <ElButton v-if="isAccess" type="primary" size="small" plain @click="onEnable(scope.row)">
+                通过
+              </ElButton>
+              <ElButton v-if="!isAccess" type="danger" size="small" plain @click="onCancel(scope.row)">
+                取消
+              </ElButton>
+            </div>
+            <span v-else>--</span>
           </template>
         </ElTableColumn>
       </ElTable>
@@ -271,6 +346,46 @@ function onEnableBatch() {
         background @size-change="sizeChange" @current-change="currentChange"
       />
     </FaPageMain>
+
+    <!-- 将对话框移到这里，确保它是根元素的一部分，而不是单独的根元素 -->
+    <ElDialog v-model="uploadDialogVisible" title="上传支付凭证" width="400px">
+      <div class="upload-container">
+        <ImageUpload
+          v-model="payProofImage"
+          name="file"
+          :width="150"
+          :height="150"
+          :action="uploadFileAction"
+          @on-success="onUpdatePayProof"
+        />
+      </div>
+      <template #footer>
+        <span class="dialog-footer">
+          <ElButton @click="uploadDialogVisible = false">取消</ElButton>
+          <ElButton type="primary" @click="confirmEnable">确认</ElButton>
+        </span>
+      </template>
+    </ElDialog>
+
+    <!-- 二维码预览对话框 -->
+    <ElDialog
+      v-model="previewVisible"
+      title="图片预览"
+      width="600px"
+      :z-index="2000"
+
+      append-to-body
+    >
+      <div class="flex justify-center">
+        <ElImage
+          :src="previewImageUrl"
+          fit="contain"
+          :preview-src-list="[previewImageUrl]"
+          :initial-index="0"
+          class="max-h-300 max-w-full"
+        />
+      </div>
+    </ElDialog>
   </div>
 </template>
 

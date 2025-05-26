@@ -44,6 +44,9 @@ export default {
   getMessageList: (data: any) => api.post('shop/slot/getMessageList', data).then((res) => {
     return res
   }),
+  getRawMessageList: (data: any) => api.post('shop/slot/getRawMessageList', data).then((res) => {
+    return res
+  }),
   submitConversationAnnotated: (data: any) => api.post('shop/slot/submitConversationAnnotated', data).then((res) => {
     return res
   }),

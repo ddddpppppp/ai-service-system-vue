@@ -213,7 +213,7 @@ function toWithdraw() {
 </script>
 
 <template>
-  <div class="container">
+  <div class="dashboard-container">
     <!-- Header with FaPageHeader -->
     <FaPageHeader title="看板" class="mb-0" />
 
@@ -295,36 +295,6 @@ function toWithdraw() {
           :trend="teamStats.conversionRateTrend.trend"
         />
       </div>
-
-      <!-- Team Performance Section with ECharts -->
-      <el-row :gutter="20" class="dashboard-section">
-        <el-col :span="24">
-          <el-card shadow="hover">
-            <template #header>
-              <div class="card-header">
-                <span>团队业绩统计</span>
-                <el-radio-group v-model="teamPeriod" size="small" @change="getDashboardData">
-                  <el-radio-button value="day">
-                    日
-                  </el-radio-button>
-                  <el-radio-button value="week">
-                    周
-                  </el-radio-button>
-                  <el-radio-button value="month">
-                    月
-                  </el-radio-button>
-                </el-radio-group>
-              </div>
-            </template>
-
-            <!-- Team Performance Chart with ECharts -->
-            <div class="echarts-container">
-              <VChart class="chart" :option="teamChartOption" autoresize />
-            </div>
-          </el-card>
-        </el-col>
-      </el-row>
-
       <!-- Wallet and Team Sales Section -->
       <el-row :gutter="20" class="dashboard-section">
         <el-col :xs="24" :md="8">
@@ -382,6 +352,34 @@ function toWithdraw() {
                 </template>
               </el-table-column>
             </el-table>
+          </el-card>
+        </el-col>
+      </el-row>
+      <!-- Team Performance Section with ECharts -->
+      <el-row :gutter="20" class="dashboard-section">
+        <el-col :span="24">
+          <el-card shadow="hover">
+            <template #header>
+              <div class="card-header">
+                <span>团队业绩统计</span>
+                <el-radio-group v-model="teamPeriod" size="small" @change="getDashboardData">
+                  <el-radio-button value="day">
+                    日
+                  </el-radio-button>
+                  <el-radio-button value="week">
+                    周
+                  </el-radio-button>
+                  <el-radio-button value="month">
+                    月
+                  </el-radio-button>
+                </el-radio-group>
+              </div>
+            </template>
+
+            <!-- Team Performance Chart with ECharts -->
+            <div class="echarts-container">
+              <VChart class="chart" :option="teamChartOption" autoresize />
+            </div>
           </el-card>
         </el-col>
       </el-row>

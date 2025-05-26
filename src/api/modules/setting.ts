@@ -82,6 +82,9 @@ export default {
   enableWithdraw: (data: any) => api.post('shop/setting/enableWithdraw', data).then((res) => {
     return res
   }),
+  cancelWithdraw: (data: any) => api.post('shop/setting/cancelWithdraw', data).then((res) => {
+    return res
+  }),
 
   getOperationLogList: (data: any) => api.post('shop/setting/getOperationLogList', data).then((res) => {
     return res

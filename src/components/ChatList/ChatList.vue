@@ -26,7 +26,7 @@ const messageList = ref<any[]>([])
 const conversation = ref<any>({})
 
 const messageOrder = ref(0)
-
+const sendAt = ref('')
 // Mock categories for dropdown selection
 const labelOptions = ref([])
 
@@ -45,6 +45,7 @@ const resizeObserver = ref<ResizeObserver | null>(null)
 watch(() => props.conversationId, () => {
   messageList.value = []
   messageOrder.value = 0
+  sendAt.value = ''
   getConversationDetail()
   getMessageList()
 })
@@ -133,7 +134,7 @@ function getConversationDetail() {
   })
 }
 
-function getMessageList() {
+async function getMessageList() {
   loading.value = true
   // 获取容器元素
   const container = messageContainer.value
@@ -143,50 +144,54 @@ function getMessageList() {
   // 保存当前scrollTop和scrollHeight
   const prevScrollTop = container.scrollTop
   const prevScrollHeight = container.scrollHeight
-
-  apiDataManage.getMessageList({ id: props.conversationId, messageOrder: messageOrder.value }).then((res: any) => {
-    if (res.status === 1) {
-      loading.value = false
-      totalMsgLength.value = res.data.total
-      if (messageOrder.value > 0) {
-        // 上拉加载
-        messageList.value = [...res.data.list, ...messageList.value]
-      }
-      else {
-        messageList.value = res.data.list || []
-        // 首次加载时滚动到底部，也使用动画效果
-        nextTick(() => {
-          scrollToBottom()
-        })
-      }
-      messageOrder.value = messageList.value[0].messageOrder
-
-      // 设置ResizeObserver监听容器高度变化，保持滚动位置
-      nextTick(() => {
-        resizeObserver.value = new ResizeObserver(() => {
-          const newScrollHeight = container.scrollHeight
-          const heightDiff = newScrollHeight - prevScrollHeight
-          container.scrollTop = prevScrollTop + heightDiff
-
-          // 调整后断开观察，避免重复触发
-          resizeObserver.value?.unobserve(container)
-          resizeObserver.value = null
-        })
-        resizeObserver.value.observe(container)
-      })
+  let res = null
+  if (props.type === 'annotated') {
+    res = await apiDataManage.getMessageList({ id: props.conversationId, messageOrder: messageOrder.value })
+  }
+  else {
+    res = await apiDataManage.getRawMessageList({ id: props.conversationId, sendAt: sendAt.value })
+  }
+  if (res.status === 1) {
+    loading.value = false
+    totalMsgLength.value = res.data.total
+    if (messageOrder.value > 0 || sendAt.value !== '') {
+      // 上拉加载
+      messageList.value = [...res.data.list, ...messageList.value]
     }
     else {
-      ElMessage.error({
-        message: res.statusText || '获取会话详情失败',
-        center: true,
+      messageList.value = res.data.list || []
+      // 首次加载时滚动到底部，也使用动画效果
+      nextTick(() => {
+        scrollToBottom()
       })
     }
-  }).catch(() => {
+    if (props.type === 'annotated') {
+      messageOrder.value = messageList.value[0].messageOrder
+    }
+    else {
+      sendAt.value = messageList.value[0].sentAt
+    }
+
+    // 设置ResizeObserver监听容器高度变化，保持滚动位置
+    nextTick(() => {
+      resizeObserver.value = new ResizeObserver(() => {
+        const newScrollHeight = container.scrollHeight
+        const heightDiff = newScrollHeight - prevScrollHeight
+        container.scrollTop = prevScrollTop + heightDiff
+
+        // 调整后断开观察，避免重复触发
+        resizeObserver.value?.unobserve(container)
+        resizeObserver.value = null
+      })
+      resizeObserver.value.observe(container)
+    })
+  }
+  else {
     ElMessage.error({
-      message: '获取会话详情失败',
+      message: res.statusText || '获取会话详情失败',
       center: true,
     })
-  })
+  }
 }
 
 defineExpose({
@@ -282,7 +287,7 @@ function updateAnnotations(messageId: string, annotations: any) {
       <template v-else>
         <div class="chat-message-wrapper">
           <!-- 根据发送者类型调整布局 -->
-          <div v-for="message in messageList" :key="message.messageId" class="chat-row" :class="{ 'chat-row-reverse': message.senderRole === 'assistant' }">
+          <div v-for="message in messageList" :key="message.messageId" :data-id="message.messageId" class="chat-row" :class="{ 'chat-row-reverse': message.senderRole === 'assistant' }">
             <!-- 消息内容 -->
             <div class="message-column">
               <div class="chat-message" :class="getMessageClass(message.senderRole)">

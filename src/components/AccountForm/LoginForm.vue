@@ -13,11 +13,13 @@
     "form": {
       "account": "用户名",
       "password": "密码",
+      "verificationCode": "验证码",
       "login": "登录"
     },
     "rules": {
       "account": "请输入用户名",
-      "password": "请输入密码"
+      "password": "请输入密码",
+      "verificationCode": "请输入验证码"
     }
   },
   "zh-tw": {
@@ -33,11 +35,13 @@
     "form": {
       "account": "用戶名",
       "password": "密碼",
+      "verificationCode": "驗證碼",
       "login": "登入"
     },
     "rules": {
       "account": "請輸入用戶名",
-      "password": "請輸入密碼"
+      "password": "請輸入密碼",
+      "verificationCode": "請輸入驗證碼"
     }
   },
   "en": {
@@ -53,17 +57,20 @@
     "form": {
       "account": "Account",
       "password": "Password",
+      "verificationCode": "Verification Code",
       "login": "Login"
     },
     "rules": {
       "account": "Please enter the account",
-      "password": "Please enter the password"
+      "password": "Please enter the password",
+      "verificationCode": "Please enter the verification code"
     }
   }
 }
 </i18n>
 
 <script setup lang="ts">
+import apiApi from '@/api/modules/api'
 import useUserStore from '@/store/modules/user'
 import { FormControl, FormField, FormItem, FormMessage } from '@/ui/shadcn/ui/form'
 import storage from '@/utils/storage'
@@ -94,22 +101,51 @@ const loading = ref(false)
 
 // 登录方式，default 账号密码登录，qrcode 扫码登录
 const type = ref<'default' | 'qrcode'>('default')
+const verificationCode = ref({
+  imageUrl: '',
+  uuid: '',
+})
+const isCodeLoading = ref(false)
+
+onMounted(() => {
+  getVerificationCode()
+})
 
 const form = useForm({
   validationSchema: toTypedSchema(z.object({
     account: z.string().min(1, t('rules.account')),
     password: z.string().min(1, t('rules.password')),
+    verificationCode: z.string().min(1, t('rules.verificationCode')),
     remember: z.boolean(),
   })),
   initialValues: {
     account: props.account ?? storage.local.get('login_account') ?? '',
     password: '',
+    verificationCode: '',
     remember: storage.local.has('login_account'),
   },
 })
+function getVerificationCode() {
+  isCodeLoading.value = true
+  apiApi.getVerificationCode({}).then((res) => {
+    verificationCode.value.imageUrl = res.data.imageUrl
+    verificationCode.value.uuid = res.data.uuid
+  }).finally(() => {
+    isCodeLoading.value = false
+  })
+}
+
+// 添加图片加载完成的处理函数
+function handleImageLoaded() {
+  setTimeout(() => {
+    isCodeLoading.value = false
+  }, 400)
+}
+
 const onSubmit = form.handleSubmit((values) => {
   loading.value = true
-  userStore.login(values).then(() => {
+  const data = Object.assign(verificationCode.value, values)
+  userStore.login(data).then(() => {
     if (values.remember) {
       storage.local.set('login_account', values.account)
     }
@@ -169,6 +205,30 @@ const onSubmit = form.handleSubmit((values) => {
             </Transition>
           </FormItem>
         </FormField>
+        <FormField v-slot="{ componentField, errors }" name="verificationCode">
+          <FormItem class="relative pb-6 space-y-0">
+            <FormControl>
+              <div class="flex-center-between gap-2">
+                <FaInput type="text" :placeholder="t('form.verificationCode')" class="w-2/3" :class="errors.length && 'border-destructive'" v-bind="componentField" />
+                <div class="verification-code-container relative h-10 w-1/3">
+                  <div v-if="isCodeLoading" class="absolute inset-0 flex-center rounded bg-muted">
+                    <FaIcon name="i-mdi:loading" class="animate-spin" />
+                  </div>
+                  <img
+                    v-show="!isCodeLoading"
+                    :src="verificationCode.imageUrl"
+                    class="verification-code-img h-full w-full"
+                    @click="getVerificationCode"
+                    @load="handleImageLoaded"
+                  >
+                </div>
+              </div>
+            </FormControl>
+            <Transition enter-active-class="transition-opacity" enter-from-class="opacity-0" leave-active-class="transition-opacity" leave-to-class="opacity-0">
+              <FormMessage class="absolute bottom-1 text-xs" />
+            </Transition>
+          </FormItem>
+        </FormField>
         <div class="mb-4 flex-center-between">
           <div class="flex-center-start">
             <FormField v-slot="{ componentField }" type="checkbox" name="remember">
@@ -219,3 +279,15 @@ const onSubmit = form.handleSubmit((values) => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.verification-code-img {
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.verification-code-container {
+  overflow: hidden;
+  border-radius: 4px;
+}
+</style>

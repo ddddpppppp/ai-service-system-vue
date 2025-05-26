@@ -34,6 +34,7 @@ function createInitialFormState() {
     password: '',
     accessList: [] as string[],
     takeoutRate: 0,
+    walletFreezeDays: '',
     paymentChannelIds: [] as string[],
     copyMerTakeoutId: '',
   }
@@ -183,6 +184,9 @@ function submit() {
               </ElFormItem>
               <ElFormItem v-if="form.accessList.includes('takeout')" label="外卖抽成点位">
                 <ElInput v-model="form.takeoutRate" placeholder="请输入抽成点位" />
+              </ElFormItem>
+              <ElFormItem v-if="form.accessList.includes('takeout')" label="钱包冻结天数">
+                <ElInput v-model="form.walletFreezeDays" placeholder="请输入冻结天数" />
               </ElFormItem>
               <ElFormItem label="支付渠道">
                 <el-checkbox-group v-model="form.paymentChannelIds">

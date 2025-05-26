@@ -7,7 +7,7 @@ meta:
 import type { FormInstance, FormRules } from 'element-plus'
 import apiSetting from '@/api/modules/setting'
 import eventBus from '@/utils/eventBus'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 defineOptions({
   name: 'BackendManageWithdrawDetail',
@@ -17,6 +17,7 @@ const route = useRoute()
 const router = useRouter()
 
 const loading = ref(false)
+const uploadFileAction = String(inject('uploadFileAction'))
 const formRef = useTemplateRef<FormInstance>('formRef')
 const btnDisabled = ref<boolean>(false)
 // 创建初始表单状态的函数
@@ -25,6 +26,7 @@ function createInitialFormState() {
     id: route.params.id as string,
     amount: '',
     account: '',
+    qrcode: '',
     status: '',
   }
 }
@@ -56,7 +58,7 @@ const formRules = ref<FormRules>({
     },
   ],
   account: [
-    { required: true, message: '请输入提现账号', trigger: 'blur' },
+    { required: true, message: '请输入提现地址', trigger: 'blur' },
   ],
 })
 
@@ -97,23 +99,29 @@ function goBack() {
   router.push({ name: 'backendManageWithdraw' })
 }
 
+function onUpdateAvatar(res: any) {
+  form.value.qrcode = res.data.url
+}
+
 function submit() {
   return new Promise<void>((resolve, reject) => {
     formRef.value?.validate((valid) => {
       if (valid) {
-        btnDisabled.value = true
-        loading.value = true
-        apiSetting.editWithdraw({ form: form.value }).then((res: any) => {
-          if (res.status === 1) {
-            ElMessage.success({
-              message: res.statusText,
-              center: true,
-            })
-          }
-          resolve()
-        }).finally(() => {
-          btnDisabled.value = false
-          loading.value = false
+        ElMessageBox.confirm(`确认提现到「${form.value.account}」吗？`).then(() => {
+          btnDisabled.value = true
+          loading.value = true
+          apiSetting.editWithdraw({ form: form.value }).then((res: any) => {
+            if (res.status === 1) {
+              ElMessage.success({
+                message: res.statusText,
+                center: true,
+              })
+            }
+            resolve()
+          }).finally(() => {
+            btnDisabled.value = false
+            loading.value = false
+          })
         })
       }
       else {
@@ -162,7 +170,7 @@ function submit() {
                 </div>
                 <ol>
                   <li>每次允许提现金额要大于 <span class="highlight">$100</span> ，金额可精确到分。</li>
-                  <li>暂仅支持提现至加密货币。</li>
+                  <li>暂仅支持提现至加密货币 <span class="highlight">USDT/TRC20</span> 网络。</li>
                   <li>提现申请提交后预计1-3个工作日内进行审理转账。</li>
                 </ol>
               </div>
@@ -174,7 +182,7 @@ function submit() {
       <ElRow type="flex" justify="center">
         <ElCol :md="24" :lg="16">
           <div v-loading="loading">
-            <ElForm ref="formRef" :model="form" :rules="formRules" label-width="120px" label-suffix="：">
+            <ElForm ref="formRef" :model="form" :rules="formRules" label-width="130px" label-suffix="：">
               <ElFormItem label="提现金额" prop="amount">
                 <ElInput v-model="form.amount" placeholder="请输入提现金额" />
                 <div class="balance-info">
@@ -183,13 +191,16 @@ function submit() {
                     <span class="balance-value">${{ balanceTotal.balance }} </span>
                   </div>
                   <div class="balance-item">
-                    <span class="balance-label">提现冻结中：</span>
+                    <span class="balance-label">冻结中：</span>
                     <span class="balance-value">${{ balanceTotal.balanceFrozen }} </span>
                   </div>
                 </div>
               </ElFormItem>
-              <ElFormItem label="提现账号" prop="account">
-                <ElInput v-model="form.account" placeholder="请输入提现账号" />
+              <ElFormItem label="提现地址" prop="account">
+                <ElInput v-model="form.account" placeholder="请输入提现地址" />
+              </ElFormItem>
+              <ElFormItem label="提现地址二维码" prop="qrcode">
+                <ImageUpload v-model="form.qrcode" name="file" :width="150" :height="150" :action="uploadFileAction" @on-success="onUpdateAvatar" />
               </ElFormItem>
             </ElForm>
           </div>

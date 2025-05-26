@@ -215,9 +215,9 @@ function onRecoveryBatch() {
         @sort-change="sortChange" @selection-change="batch.selectionDataList = $event"
       >
         <ElTableColumn v-if="batch.enable" type="selection" align="center" fixed />
-        <ElTableColumn prop="name" label="名称" />
-        <ElTableColumn prop="type" label="类型" />
-        <ElTableColumn prop="rate" label="费率" width="100">
+        <ElTableColumn prop="name" label="名称" min-width="150" header-align="center" align="center" />
+        <ElTableColumn prop="type" label="类型" min-width="120" header-align="center" align="center" />
+        <ElTableColumn prop="rate" label="费率" width="100" header-align="center" align="center">
           <template #default="scope">
             <ElInput v-if="scope.row.id > 0" v-model="scope.row.rate" type="number" @change="onEdit(scope.row, 'rate')">
               <template #suffix>
@@ -227,13 +227,13 @@ function onRecoveryBatch() {
             <span v-else>--</span>
           </template>
         </ElTableColumn>
-        <ElTableColumn prop="chargeFee" label="手续费" width="100">
+        <ElTableColumn prop="chargeFee" label="手续费" width="100" header-align="center" align="center">
           <template #default="scope">
             <ElInput v-if="scope.row.id > 0" v-model="scope.row.chargeFee" type="number" @change="onEdit(scope.row, 'chargeFee')" />
             <span v-else>--</span>
           </template>
         </ElTableColumn>
-        <ElTableColumn prop="guarantee" label="保证金" width="100">
+        <ElTableColumn prop="guarantee" label="保证金" width="100" header-align="center" align="center">
           <template #default="scope">
             <ElInput v-if="scope.row.id > 0" v-model="scope.row.guarantee" type="number" @change="onEdit(scope.row, 'guarantee')">
               <template #suffix>
@@ -243,7 +243,7 @@ function onRecoveryBatch() {
             <span v-else>--</span>
           </template>
         </ElTableColumn>
-        <ElTableColumn prop="freezeTime" label="冻结日期" width="100">
+        <ElTableColumn prop="freezeTime" label="冻结日期" width="100" header-align="center" align="center">
           <template #default="scope">
             <ElInput v-if="scope.row.id > 0" v-model="scope.row.freezeTime" type="number" @change="onEdit(scope.row, 'freezeTime')">
               <template #suffix>
@@ -253,7 +253,7 @@ function onRecoveryBatch() {
             <span v-else>--</span>
           </template>
         </ElTableColumn>
-        <ElTableColumn prop="countTime" label="结算日期" width="100">
+        <ElTableColumn prop="countTime" label="结算日期" width="100" header-align="center" align="center">
           <template #default="scope">
             <ElInput v-if="scope.row.id > 0" v-model="scope.row.countTime" type="number" @change="onEdit(scope.row, 'countTime')">
               <template #suffix>
@@ -263,20 +263,20 @@ function onRecoveryBatch() {
             <span v-else>--</span>
           </template>
         </ElTableColumn>
-        <ElTableColumn prop="sort" label="排序">
+        <ElTableColumn prop="sort" label="排序" header-align="center" align="center">
           <template #default="scope">
             <ElInput v-if="scope.row.id > 0" v-model="scope.row.sort" type="number" @change="onEdit(scope.row, 'sort')" />
             <span v-else>--</span>
           </template>
         </ElTableColumn>
-        <ElTableColumn prop="remark" label="备注" width="150">
+        <ElTableColumn prop="remark" label="备注" width="150" header-align="center" align="center">
           <template #default="scope">
             <ElInput v-if="scope.row.id > 0" v-model="scope.row.remark" @change="onEdit(scope.row, 'remark')" />
             <span v-else>--</span>
           </template>
         </ElTableColumn>
 
-        <ElTableColumn prop="statusName" label="状态">
+        <ElTableColumn prop="statusName" label="状态" header-align="center" align="center">
           <template #default="scope">
             <ElButton v-if="scope.row.id > 0" :type="scope.row.statusClass" size="small">
               {{ scope.row.statusName }}
@@ -284,11 +284,11 @@ function onRecoveryBatch() {
             <span v-else>--</span>
           </template>
         </ElTableColumn>
-        <ElTableColumn prop="orderCount" label="订单量" />
-        <ElTableColumn prop="orderSuccessCount" label="成功量" />
-        <ElTableColumn prop="orderAmount" label="订单金额" width="200" />
-        <ElTableColumn prop="orderSuccessAmount" label="成功金额" width="200" />
-        <ElTableColumn prop="orderSuccessRate" label="成功率" width="100" />
+        <ElTableColumn prop="orderCount" label="订单量" header-align="center" align="center" />
+        <ElTableColumn prop="orderSuccessCount" label="成功量" header-align="center" align="center" />
+        <ElTableColumn prop="orderAmount" label="订单金额" width="200" header-align="center" align="center" />
+        <ElTableColumn prop="orderSuccessAmount" label="成功金额" width="200" header-align="center" align="center" />
+        <ElTableColumn prop="orderSuccessRate" label="成功率" width="100" header-align="center" align="center" />
 
         <ElTableColumn label="操作" width="80" align="center" fixed="right">
           <template #default="scope">

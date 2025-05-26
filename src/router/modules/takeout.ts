@@ -22,7 +22,7 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/takeout/dashboard/dashboard.vue'),
         meta: {
           auth: 'takeoutDashboard.browse',
-          title: 'Dashboard',
+          title: '数据看板',
         },
       },
     ],

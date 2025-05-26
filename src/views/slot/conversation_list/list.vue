@@ -1,7 +1,7 @@
 <route lang="yaml">
-meta:
-  enabled: false
-</route>
+  meta:
+    enabled: false
+  </route>
 
 <script setup lang="ts">
 import apiDataManage from '@/api/modules/slot'
@@ -388,8 +388,8 @@ function toggleSelectionMode() {
                     {{ item.username?.charAt(0) || 'U' }}
                   </el-avatar>
                   <!-- <div v-if="item.sender === 'assistant'" class="user-type-badge">
-                    机
-                  </div> -->
+                      机
+                    </div> -->
                 </div>
                 <div class="user-info">
                   <div class="user-header">
@@ -519,365 +519,365 @@ function toggleSelectionMode() {
   </div>
 </template>
 
-<style scoped>
-.absolute-container {
-  position: absolute;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: 100%;
-}
+  <style scoped>
+  .absolute-container {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+  }
 
-.search-form {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
-  margin-bottom: -18px;
+  .search-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+    margin-bottom: -18px;
 
-  :deep(.el-form-item) {
-    grid-column: auto / span 1;
+    :deep(.el-form-item) {
+      grid-column: auto / span 1;
 
-    &:last-child {
-      grid-column-end: -1;
+      &:last-child {
+        grid-column-end: -1;
 
-      .el-form-item__content {
-        justify-content: flex-end;
+        .el-form-item__content {
+          justify-content: flex-end;
+        }
       }
     }
   }
-}
 
-.el-divider {
-  width: calc(100% + 40px);
-  margin-inline: -20px;
-}
+  .el-divider {
+    width: calc(100% + 40px);
+    margin-inline: -20px;
+  }
 
-.vue-json-bg {
-  padding: 1rem;
-  background-color: #f4f4f4;
-  border-radius: 5px;
-}
+  .vue-json-bg {
+    padding: 1rem;
+    background-color: #f4f4f4;
+    border-radius: 5px;
+  }
 
-:deep(.highlight-text) {
-  padding: 2px 0;
-  font-weight: bold;
-  color: #ff7d00;
-  background-color: #fef9e7;
-  border-radius: 2px;
-}
+  :deep(.highlight-text) {
+    padding: 2px 0;
+    font-weight: bold;
+    color: #ff7d00;
+    background-color: #fef9e7;
+    border-radius: 2px;
+  }
 
-.cursor-pointer {
-  cursor: pointer;
-}
+  .cursor-pointer {
+    cursor: pointer;
+  }
 
-.popover-message {
-  padding: 4px 8px;
-  margin-bottom: 6px;
-  font-size: 12px;
-  line-height: 1.4;
-  word-break: break-word;
-  white-space: pre-wrap;
-  border-radius: 4px;
-}
+  .popover-message {
+    padding: 4px 8px;
+    margin-bottom: 6px;
+    font-size: 12px;
+    line-height: 1.4;
+    word-break: break-word;
+    white-space: pre-wrap;
+    border-radius: 4px;
+  }
 
-.pop-message-user {
-  text-align: left;
-  background-color: #f0f0f0;
-}
+  .pop-message-user {
+    text-align: left;
+    background-color: #f0f0f0;
+  }
 
-.pop-message-assistant {
-  text-align: left;
-  background-color: #e1f3ff;
-}
+  .pop-message-assistant {
+    text-align: left;
+    background-color: #e1f3ff;
+  }
 
-.content-preview {
-  max-width: 300px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+  .content-preview {
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 
-:deep(.conversation-popover) {
-  max-width: 500px;
-  max-height: 400px;
-  overflow: visible;
-}
+  :deep(.conversation-popover) {
+    max-width: 500px;
+    max-height: 400px;
+    overflow: visible;
+  }
 
-:deep(.conversation-popover .el-popover__content) {
-  max-height: 400px;
-  padding: 10px;
-}
+  :deep(.conversation-popover .el-popover__content) {
+    max-height: 400px;
+    padding: 10px;
+  }
 
-:deep(.el-popover.conversation-popover) {
-  padding: 0;
-}
+  :deep(.el-popover.conversation-popover) {
+    padding: 0;
+  }
 
-.conversation-content-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 100%;
-  max-height: 360px;
-  padding: 5px;
-  overflow-y: auto;
-}
+  .conversation-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    max-height: 360px;
+    padding: 5px;
+    overflow-y: auto;
+  }
 
-.conversation-container {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  background-color: #fff;  /* Ensure background is solid */
-  border: 1px solid rgb(230 230 250 / 70%);  /* Subtle border for definition */
-  border-radius: 8px;
-}
+  .conversation-container {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: #fff;  /* Ensure background is solid */
+    border: 1px solid rgb(230 230 250 / 70%);  /* Subtle border for definition */
+    border-radius: 8px;
+  }
 
-.user-list {
-  display: flex;
-  flex-direction: column;
-  width: 340px;
-  height: 100%;
-  background-color: #f9f9f9;
-  border-right: 1px solid #e6e6e6;
-}
+  .user-list {
+    display: flex;
+    flex-direction: column;
+    width: 340px;
+    height: 100%;
+    background-color: #f9f9f9;
+    border-right: 1px solid #e6e6e6;
+  }
 
-.user-list-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px;
-  border-bottom: 1px solid #e6e6e6;
-}
+  .user-list-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    border-bottom: 1px solid #e6e6e6;
+  }
 
-.search-box {
-  flex: 1;
-  margin-right: 10px;
-}
+  .search-box {
+    flex: 1;
+    margin-right: 10px;
+  }
 
-.user-list-content {
-  flex: 1;
-  overflow-y: auto;
-}
+  .user-list-content {
+    flex: 1;
+    overflow-y: auto;
+  }
 
-.filter-options {
-  cursor: pointer;
-}
+  .filter-options {
+    cursor: pointer;
+  }
 
-.user-item {
-  display: flex;
-  align-items: center;
-  padding: 12px;
-  cursor: pointer;
-  border-bottom: 1px solid #f0f0f0;
-}
+  .user-item {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+  }
 
-.user-item:hover {
-  background-color: #f5f7fa;
-}
+  .user-item:hover {
+    background-color: #f5f7fa;
+  }
 
-.user-item.active {
-  background-color: #ecf5ff;
-}
+  .user-item.active {
+    background-color: #ecf5ff;
+  }
 
-.user-item-content {
-  display: flex;
-  flex: 1;
-  cursor: pointer;
-}
+  .user-item-content {
+    display: flex;
+    flex: 1;
+    cursor: pointer;
+  }
 
-.selection-checkbox {
-  display: flex;
-  align-items: center;
-}
+  .selection-checkbox {
+    display: flex;
+    align-items: center;
+  }
 
-.user-avatar {
-  position: relative;
-  margin-right: 12px;
-}
+  .user-avatar {
+    position: relative;
+    margin-right: 12px;
+  }
 
-.user-type-badge {
-  position: absolute;
-  right: -2px;
-  bottom: -2px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  font-size: 10px;
-  color: #fff;
-  background-color: #409eff;
-  border-radius: 50%;
-}
+  .user-type-badge {
+    position: absolute;
+    right: -2px;
+    bottom: -2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    font-size: 10px;
+    color: #fff;
+    background-color: #409eff;
+    border-radius: 50%;
+  }
 
-.user-info {
-  flex: 1;
-  min-width: 0;
-}
+  .user-info {
+    flex: 1;
+    min-width: 0;
+  }
 
-.user-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 4px;
-}
+  .user-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
 
-.user-name {
-  width: 120px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 13px;
-  white-space: nowrap;
-}
+  .user-name {
+    width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 13px;
+    white-space: nowrap;
+  }
 
-.message-time {
-  font-size: 12px;
-  color: #909399;
-}
+  .message-time {
+    font-size: 12px;
+    color: #909399;
+  }
 
-.message-preview {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
+  .message-preview {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
 
-.preview-content {
-  flex: 1;
-  width: 240px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 12px;
-  color: #606266;
-  white-space: nowrap;
-}
+  .preview-content {
+    flex: 1;
+    width: 240px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 12px;
+    color: #606266;
+    white-space: nowrap;
+  }
 
-.unread-badge {
-  margin-left: 5px;
-}
+  .unread-badge {
+    margin-left: 5px;
+  }
 
-.chat-window {
-  flex: 1;
-  height: 100%;
-  overflow: hidden;
-  box-shadow: 0 0 10px rgb(143 143 143 / 15%);  /* 添加阴影 */
-}
+  .chat-window {
+    flex: 1;
+    height: 100%;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgb(143 143 143 / 15%);  /* 添加阴影 */
+  }
 
-.filter-content {
-  max-height: 500px;
-  overflow-y: auto;
-}
+  .filter-content {
+    max-height: 500px;
+    overflow-y: auto;
+  }
 
-.form-label {
-  font-size: 14px;
-  color: #606266;
-}
+  .form-label {
+    font-size: 14px;
+    color: #606266;
+  }
 
-:deep(.el-select) {
-  width: 100%;
-}
+  :deep(.el-select) {
+    width: 100%;
+  }
 
-:deep(.el-date-editor.el-input),
-:deep(.el-date-editor.el-input__wrapper) {
-  width: 100%;
-}
+  :deep(.el-date-editor.el-input),
+  :deep(.el-date-editor.el-input__wrapper) {
+    width: 100%;
+  }
 
-/* 抽屉内样式 */
-:deep(.el-drawer__header) {
-  padding: 16px 20px;
-  margin-bottom: 0;
-  border-bottom: 1px solid #e4e7ed;
-}
+  /* 抽屉内样式 */
+  :deep(.el-drawer__header) {
+    padding: 16px 20px;
+    margin-bottom: 0;
+    border-bottom: 1px solid #e4e7ed;
+  }
 
-:deep(.el-drawer__body) {
-  padding: 0;
-}
+  :deep(.el-drawer__body) {
+    padding: 0;
+  }
 
-/* 批量操作 */
-.batch-operations {
-  display: flex;
-  flex-direction: column;
-}
+  /* 批量操作 */
+  .batch-operations {
+    display: flex;
+    flex-direction: column;
+  }
 
-/* 操作按钮样式 */
-.operation-btn {
-  height: 36px;
-  font-weight: 500;
-  border-radius: 4px;
-  transition: all 0.25s;
-}
+  /* 操作按钮样式 */
+  .operation-btn {
+    height: 36px;
+    font-weight: 500;
+    border-radius: 4px;
+    transition: all 0.25s;
+  }
 
-.operation-btn:hover {
-  box-shadow: 0 4px 8px rgb(0 0 0 / 12%);
-  transform: translateY(-2px);
-}
+  .operation-btn:hover {
+    box-shadow: 0 4px 8px rgb(0 0 0 / 12%);
+    transform: translateY(-2px);
+  }
 
-.operation-btn:active {
-  transform: translateY(0);
-}
+  .operation-btn:active {
+    transform: translateY(0);
+  }
 
-/* flex 工具类 */
-.flex {
-  display: flex;
-}
+  /* flex 工具类 */
+  .flex {
+    display: flex;
+  }
 
-.items-center {
-  align-items: center;
-}
+  .items-center {
+    align-items: center;
+  }
 
-.justify-center {
-  justify-content: center;
-}
+  .justify-center {
+    justify-content: center;
+  }
 
-/* 添加右边距 */
-.mr-3 {
-  margin-right: 12px;
-}
+  /* 添加右边距 */
+  .mr-3 {
+    margin-right: 12px;
+  }
 
-.mr-2 {
-  margin-right: 8px;
-}
+  .mr-2 {
+    margin-right: 8px;
+  }
 
-/* 确保复选框不受影响 */
-:deep(.el-checkbox__input) {
-  z-index: 2;
-}
+  /* 确保复选框不受影响 */
+  :deep(.el-checkbox__input) {
+    z-index: 2;
+  }
 
-/* 添加自定义复选框样式 */
-.custom-checkbox {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-  border: 1px solid #dcdfe6;
-  border-radius: 2px;
-  transition: all 0.2s;
-}
+  /* 添加自定义复选框样式 */
+  .custom-checkbox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    border: 1px solid #dcdfe6;
+    border-radius: 2px;
+    transition: all 0.2s;
+  }
 
-.custom-checkbox.checked {
-  background-color: var(--el-color-primary);
-  border-color: var(--el-color-primary);
-}
+  .custom-checkbox.checked {
+    background-color: var(--el-color-primary);
+    border-color: var(--el-color-primary);
+  }
 
-.custom-checkbox .check-icon {
-  font-size: 12px;
-  color: white;
-}
+  .custom-checkbox .check-icon {
+    font-size: 12px;
+    color: white;
+  }
 
-/* 添加左边距 */
-.ml-4 {
-  margin-left: 16px;
-}
+  /* 添加左边距 */
+  .ml-4 {
+    margin-left: 16px;
+  }
 
-/* 操作弹窗样式 */
-:deep(.operations-popover) {
-  padding: 0;
-  overflow: hidden;
-}
+  /* 操作弹窗样式 */
+  :deep(.operations-popover) {
+    padding: 0;
+    overflow: hidden;
+  }
 
-:deep(.el-button+.el-button) {
-  margin-left: 0;
-}
-</style>
+  :deep(.el-button+.el-button) {
+    margin-left: 0;
+  }
+  </style>

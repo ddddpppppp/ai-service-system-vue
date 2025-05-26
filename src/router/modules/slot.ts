@@ -18,12 +18,12 @@ const routes: RouteRecordRaw[] = [
     },
     children: [
       {
-        path: 'slot',
+        path: 'slot_dashboard',
         name: 'slotDashboard',
         component: () => import('@/views/slot/dashboard/dashboard.vue'),
         meta: {
           auth: 'slotDashboard.browse',
-          title: 'Dashboard',
+          title: '数据看板',
         },
       },
     ],

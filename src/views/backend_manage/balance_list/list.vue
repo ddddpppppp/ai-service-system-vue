@@ -202,26 +202,26 @@ function sortChange({ prop, order }: { prop: string, order: string }) {
         @sort-change="sortChange" @selection-change="batch.selectionDataList = $event"
       >
         <ElTableColumn v-if="batch.enable" type="selection" align="center" fixed />
-        <ElTableColumn prop="merName" label="商户" />
-        <ElTableColumn prop="adminName" label="员工" />
-        <ElTableColumn v-if="type === 'balance'" prop="historyMoney" label="历史余额" />
-        <ElTableColumn prop="money" label="钱包变化">
+        <ElTableColumn prop="merName" label="商户" min-width="120" header-align="center" align="center" />
+        <ElTableColumn prop="adminName" label="员工" min-width="120" header-align="center" align="center" />
+        <ElTableColumn v-if="type === 'balance'" prop="historyMoney" label="历史余额" min-width="120" header-align="center" align="center" />
+        <ElTableColumn prop="money" label="钱包变化" min-width="120" header-align="center" align="center">
           <template #default="scope">
             <span :class="{ 'text-red-500': scope.row.money < 0, 'text-green-500': scope.row.money > 0 }">
               {{ scope.row.money > 0 ? `+${scope.row.money}` : scope.row.money }}
             </span>
           </template>
         </ElTableColumn>
-        <ElTableColumn v-if="type === 'freeze'" prop="status" label="状态">
+        <ElTableColumn v-if="type === 'freeze'" prop="status" label="状态" min-width="120" header-align="center" align="center">
           <template #default="scope">
             <ElTag :type="scope.row.statusClass">
               {{ scope.row.statusName }}
             </ElTag>
           </template>
         </ElTableColumn>
-        <ElTableColumn v-if="type === 'balance'" prop="afterMoney" label="变化后余额" />
-        <ElTableColumn prop="remark" label="明细" />
-        <ElTableColumn prop="createdAt" label="变更时间" />
+        <ElTableColumn v-if="type === 'balance'" prop="afterMoney" label="变化后余额" min-width="120" header-align="center" align="center" />
+        <ElTableColumn prop="remark" label="明细" min-width="250" header-align="center" align="center" />
+        <ElTableColumn prop="createdAt" label="变更时间" min-width="120" header-align="center" align="center" />
       </ElTable>
       <ElPagination
         :current-page="pagination.page" :total="pagination.total" :page-size="pagination.size"

@@ -50,12 +50,22 @@ const useUserStore = defineStore(
         message: res.statusText,
         center: true,
       })
+
+      // 保存用户信息
       storage.local.set('account', res.data.nickname)
       storage.local.set('token', res.data.token)
       storage.local.set('avatar', res.data.avatar)
+
+      // 如果接口返回了重定向路径，则保存它
+      if (res.data.redirectPath) {
+        storage.local.set('redirectPath', res.data.redirectPath)
+      }
+
       account.value = res.data.nickname
       token.value = res.data.token
       avatar.value = res.data.avatar
+
+      return res // 返回响应，以便在登录表单中可以使用
     }
 
     // 手动登出

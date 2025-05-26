@@ -471,54 +471,54 @@ const contextMenuItems = computed(() => {
           </div>
         </div>
       </div>
-      <ElTable v-loading="loading" class="my-4" :data="dataList" stripe highlight-current-row height="100%" @sort-change="sortChange" @selection-change="batch.selectionDataList = $event">
+      <ElTable v-loading="loading" class="my-4" :data="dataList" highlight-current-row border height="100%" @sort-change="sortChange" @selection-change="batch.selectionDataList = $event">
         <ElTableColumn v-if="batch.enable" type="selection" align="center" fixed />
-        <ElTableColumn prop="orderNo" label="订单号" width="120" />
-        <ElTableColumn prop="merchantName" label="商户" />
-        <ElTableColumn prop="parentName" label="上级代理" width="120" />
-        <ElTableColumn label="代理" min-width="140">
+        <ElTableColumn prop="orderNo" label="订单号" min-width="120" align="center" header-align="center" />
+        <ElTableColumn prop="merchantName" label="商户" min-width="120" align="center" header-align="center" />
+        <ElTableColumn prop="parentName" label="上级代理" min-width="120" align="center" header-align="center" />
+        <ElTableColumn label="代理" min-width="150" align="center" header-align="center">
           <template #default="scope">
             <div class="flex items-center gap-1">
-              <span>
-                {{ scope.row.userName }}
-              </span>
               <ElTag type="primary" size="small" circle>
                 {{ scope.row.userLevel }}级
               </ElTag>
+              <span>
+                {{ scope.row.userName }}
+              </span>
             </div>
           </template>
         </ElTableColumn>
-        <ElTableColumn prop="subtotal" label="小计" />
-        <ElTableColumn prop="deliveryFee" label="配送费" />
-        <ElTableColumn prop="tax" label="税" />
-        <ElTableColumn prop="total" label="总价">
+        <ElTableColumn prop="subtotal" label="小计" min-width="120" align="center" header-align="center" />
+        <ElTableColumn prop="deliveryFee" label="配送费" min-width="120" align="center" header-align="center" />
+        <ElTableColumn prop="tax" label="税" min-width="120" align="center" header-align="center" />
+        <ElTableColumn prop="total" label="总价" min-width="120" align="center" header-align="center">
           <template #default="scope">
             <span class="text-red-500 font-bold">
               {{ scope.row.total }}
             </span>
           </template>
         </ElTableColumn>
-        <ElTableColumn prop="myProfit" label="我的分润" width="180">
+        <ElTableColumn prop="myProfit" label="我的分润" min-width="140" align="center" header-align="center">
           <template #default="scope">
             <div v-if="scope.row.myProfit !== '--'" class="flex items-center gap-1">
+              <ElTag type="primary" size="small" circle>
+                {{ scope.row.myProfitRate }}%
+              </ElTag>
               <span class="text-red-500 font-bold">
                 {{ scope.row.myProfit }}
               </span>
-              <ElTag type="primary" size="small" circle>
-                {{ scope.row.myProfitLevel }}层
-              </ElTag>
             </div>
           </template>
         </ElTableColumn>
         <!-- <ElTableColumn prop="addressInfo" label="地址" /> -->
-        <ElTableColumn prop="statusName" label="状态">
+        <ElTableColumn prop="statusName" label="状态" min-width="120" align="center" header-align="center">
           <template #default="scope">
             <ElTag :type="scope.row.statusClass">
               {{ scope.row.statusName }}
             </ElTag>
           </template>
         </ElTableColumn>
-        <ElTableColumn prop="createdAt" label="生成时间" width="170" />
+        <ElTableColumn prop="createdAt" label="生成时间" min-width="170" align="center" header-align="center" />
         <ElTableColumn prop="updatedAt" label="更新日期" width="170" />
         <ElTableColumn label="操作" width="150" align="center" fixed="right">
           <template #default="scope">

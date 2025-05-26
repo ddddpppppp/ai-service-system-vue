@@ -1,4 +1,5 @@
 import type { RouteRecordRaw } from 'vue-router'
+import storage from '@/utils/storage'
 
 function Layout() {
   return import('@/layouts/index.vue')
@@ -44,7 +45,14 @@ const routes: RouteRecordRaw[] = [
         name: 'backendManageAdmin',
         component: () => import('@/views/backend_manage/admin/list.vue'),
         meta: {
-          title: '员工管理',
+          title: () => {
+            // 从本地存储获取重定向路径，如果不存在则使用默认路径
+            const redirectPath = storage.local.get('redirectPath')
+            if (redirectPath === '/takeout/takeout_dashboard') {
+              return '代理管理'
+            }
+            return '员工管理'
+          },
           auth: 'staffManagement.browse',
         },
       },
@@ -53,7 +61,14 @@ const routes: RouteRecordRaw[] = [
         name: 'backendManageAdminDetail',
         component: () => import('@/views/backend_manage/admin/detail.vue'),
         meta: {
-          title: '员工编辑',
+          title: () => {
+            // 从本地存储获取重定向路径，如果不存在则使用默认路径
+            const redirectPath = storage.local.get('redirectPath')
+            if (redirectPath === '/takeout/takeout_dashboard') {
+              return '代理编辑'
+            }
+            return '员工编辑'
+          },
           menu: false,
           activeMenu: '/backend_manage/admin',
           cache: true,

@@ -449,7 +449,7 @@ const contextMenuItems = computed(() => {
               <FaIcon name="i-ep:money" class="mini-card-icon" />
               <span class="mini-card-label">总金额:</span>
               <span class="mini-card-value">
-                <FaCountTo :start-val="0" :end-val="total.totalOrderAmount" :duration="2000" prefix="$" />
+                <FaCountTo :start-val="0" :end-val="total.totalOrderAmount" :duration="2000" prefix="$" :decimals="2" />
               </span>
             </div>
 
@@ -457,7 +457,7 @@ const contextMenuItems = computed(() => {
               <FaIcon name="i-ep:wallet" class="mini-card-icon" />
               <span class="mini-card-label">成功总金额:</span>
               <span class="mini-card-value">
-                <FaCountTo :start-val="0" :end-val="total.totalSuccessOrderAmount" :duration="2000" prefix="$" />
+                <FaCountTo :start-val="0" :end-val="total.totalSuccessOrderAmount" :duration="2000" prefix="$" :decimals="2" />
               </span>
             </div>
 
@@ -465,7 +465,7 @@ const contextMenuItems = computed(() => {
               <FaIcon name="i-ep:coin" class="mini-card-icon" />
               <span class="mini-card-label">我的总收益:</span>
               <span class="mini-card-value">
-                <FaCountTo :start-val="0" :end-val="total.totalProfit" :duration="2000" prefix="$" />
+                <FaCountTo :start-val="0" :end-val="total.totalProfit" :duration="2000" prefix="$" :decimals="2" />
               </span>
             </div>
           </div>

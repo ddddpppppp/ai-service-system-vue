@@ -220,6 +220,11 @@ function onRecoveryBatch() {
         <ElTableColumn prop="username" label="登录账号" min-width="120" header-align="center" align="center" />
         <ElTableColumn prop="roleName" label="角色" min-width="120" header-align="center" align="center" />
         <ElTableColumn prop="depth" label="层级" min-width="120" header-align="center" align="center" />
+        <ElTableColumn prop="totalProfit" label="分润" min-width="120" header-align="center" align="center">
+          <template #default="scope">
+            ${{ scope.row.totalProfit }}
+          </template>
+        </ElTableColumn>
         <ElTableColumn prop="statusName" label="状态" min-width="120" header-align="center" align="center">
           <template #default="scope">
             <ElButton :type="scope.row.statusClass" size="small">

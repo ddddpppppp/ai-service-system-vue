@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc --noEmit && vite build --mode production && electron-builder",
+    "build": "vue-tsc --noEmit && vite build --mode production",
     "build:test": "vue-tsc -b && vite build --mode test",
     "serve": "http-server ./dist -o",
     "serve:test": "http-server ./dist-test -o",

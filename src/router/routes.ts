@@ -10,7 +10,6 @@ import Ai from './modules/ai.ts'
 import BackendManage from './modules/backend_manage.ts'
 import Config from './modules/config.ts'
 // import MultilevelMenuExample from './modules/multilevel.menu.example'
-import Slot from './modules/slot.ts'
 import Takeout from './modules/takeout.ts'
 
 // 固定路由（默认路由）
@@ -63,16 +62,6 @@ const systemRoutes: RouteRecordRaw[] = [
 
 // 动态路由（异步路由、导航栏路由）
 const asyncRoutes: Route.recordMainRaw[] = [
-  {
-    meta: {
-      title: 'Slot',
-      auth: 'slotDashboard.browse',
-      icon: 'solar:gamepad-old-bold-duotone',
-    },
-    children: [
-      ...Slot,
-    ],
-  },
   {
     meta: {
       title: '外卖',

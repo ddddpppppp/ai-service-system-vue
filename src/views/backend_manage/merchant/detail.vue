@@ -171,12 +171,12 @@ function submit() {
               <ElFormItem label="登录密码" prop="password">
                 <ElInput v-model="form.password" placeholder="请输入登录密码，不输入就不更改密码" />
               </ElFormItem>
-              <ElFormItem label="权限">
+              <!-- <ElFormItem label="权限">
                 <el-checkbox-group v-model="form.accessList">
                   <el-checkbox label="slot" value="slot" />
                   <el-checkbox label="外卖" value="takeout" />
                 </el-checkbox-group>
-              </ElFormItem>
+              </ElFormItem> -->
               <ElFormItem v-if="form.accessList.includes('takeout')" label="复制店铺商品">
                 <el-select v-model="form.copyMerTakeoutId" placeholder="请选择店铺" :filterable="true" :clearable="true">
                   <el-option v-for="item in merchantList" :key="item.uuid" :label="item.name" :value="item.uuid" />

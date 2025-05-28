@@ -429,7 +429,7 @@ const contextMenuItems = computed(() => {
         </div>
         <div class="flex items-center gap-2">
           <div class="stats-mini-cards">
-            <div class="mini-card orders">
+            <div class="orders mini-card">
               <FaIcon name="i-ep:document" class="mini-card-icon" />
               <span class="mini-card-label">订单总数:</span>
               <span class="mini-card-value">
@@ -474,6 +474,8 @@ const contextMenuItems = computed(() => {
       <ElTable v-loading="loading" class="my-4" :data="dataList" highlight-current-row border height="100%" @sort-change="sortChange" @selection-change="batch.selectionDataList = $event">
         <ElTableColumn v-if="batch.enable" type="selection" align="center" fixed />
         <ElTableColumn prop="orderNo" label="订单号" min-width="120" align="center" header-align="center" />
+        <ElTableColumn prop="paymentMethod" label="支付通道" min-width="120" align="center" header-align="center" />
+        <ElTableColumn prop="paymentNo" label="支付订单号" min-width="120" align="center" header-align="center" />
         <ElTableColumn prop="merchantName" label="商户" min-width="120" align="center" header-align="center" />
         <ElTableColumn prop="parentName" label="上级代理" min-width="120" align="center" header-align="center" />
         <ElTableColumn label="代理" min-width="150" align="center" header-align="center">
@@ -519,7 +521,7 @@ const contextMenuItems = computed(() => {
           </template>
         </ElTableColumn>
         <ElTableColumn prop="createdAt" label="生成时间" min-width="170" align="center" header-align="center" />
-        <ElTableColumn prop="updatedAt" label="更新日期" width="170" />
+        <ElTableColumn prop="updatedAt" label="更新日期" width="170" header-align="center" />
         <ElTableColumn label="操作" width="150" align="center" fixed="right">
           <template #default="scope">
             <div class="table-action-buttons">
@@ -533,7 +535,7 @@ const contextMenuItems = computed(() => {
                   <FaIcon name="ep:connection" />
                 </ElButton>
               </ElTooltip>
-              <ElTooltip v-if="scope.row.status === 'pending'" content="删除" placement="top" effect="light">
+              <ElTooltip v-if="scope.row.status === 'cancelled'" content="删除" placement="top" effect="light">
                 <ElButton type="danger" size="small" circle @click="onDel(scope.row)">
                   <FaIcon name="i-ep:delete" />
                 </ElButton>

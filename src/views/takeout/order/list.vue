@@ -328,7 +328,7 @@ const contextMenuItems = computed(() => {
     },
     {
       label: '待支付',
-      index: 'waitPay',
+      index: 'pending',
     },
     {
       label: '送货中',

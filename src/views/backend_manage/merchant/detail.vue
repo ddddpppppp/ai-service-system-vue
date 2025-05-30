@@ -177,15 +177,15 @@ function submit() {
                   <el-checkbox label="外卖" value="takeout" />
                 </el-checkbox-group>
               </ElFormItem> -->
-              <ElFormItem v-if="form.accessList.includes('takeout')" label="复制店铺商品">
+              <ElFormItem label="复制店铺商品">
                 <el-select v-model="form.copyMerTakeoutId" placeholder="请选择店铺" :filterable="true" :clearable="true">
                   <el-option v-for="item in merchantList" :key="item.uuid" :label="item.name" :value="item.uuid" />
                 </el-select>
               </ElFormItem>
-              <ElFormItem v-if="form.accessList.includes('takeout')" label="外卖抽成点位">
+              <ElFormItem label="外卖抽成点位">
                 <ElInput v-model="form.takeoutRate" placeholder="请输入抽成点位" />
               </ElFormItem>
-              <ElFormItem v-if="form.accessList.includes('takeout')" label="钱包冻结天数">
+              <ElFormItem label="钱包冻结天数">
                 <ElInput v-model="form.walletFreezeDays" placeholder="请输入冻结天数" />
               </ElFormItem>
               <ElFormItem label="支付渠道">

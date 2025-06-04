@@ -14,4 +14,3 @@ dist-electron
 pnpm-lock.yaml
 .env.development
 .env.production
-deploy.sh

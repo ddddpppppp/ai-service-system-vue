@@ -9,8 +9,8 @@ NC='\033[0m' # No Color
 # Configuration variables
 SERVER_USER="root"
 SERVER_HOST="47.89.129.250"
-SERVER_PORT="42519"
-REMOTE_PATH="/www/wwwroot/backend.doordash.group"
+SERVER_PORT="22"
+REMOTE_PATH="/www/wwwroot/slot.aiservice.work"
 PROJECT_NAME="ai-system-admin-v2"
 BUILD_COMMAND="npm run build" # or "yarn build" if using yarn
 SSH_KEY_PATH="~/.ssh/my_server_id_ed25519"

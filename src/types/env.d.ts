@@ -1,7 +1,7 @@
 interface ImportMetaEnv {
   // Auto generate by env-parse
   /**
-   * 应用配置面板
+   * 应用配置面板Add commentMore actions
    */
   readonly VITE_APP_SETTING: boolean
   /**

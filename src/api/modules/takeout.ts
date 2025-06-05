@@ -87,4 +87,14 @@ export default {
   getOrder: (data: any) => api.post('shop/takeout/getOrder', data).then((res) => {
     return res
   }),
+
+  getOtherOrderTotal: (data: any) => api.post('shop/takeout/getOtherOrderTotal', data).then((res) => {
+    return res
+  }),
+  getOtherOrderList: (data: any) => api.post('shop/takeout/getOtherOrderList', data).then((res) => {
+    return res
+  }),
+  editOtherOrder: (data: any) => api.post('shop/takeout/editOtherOrder', data).then((res) => {
+    return res
+  }),
 }

@@ -104,6 +104,29 @@ const routes: RouteRecordRaw[] = [
       },
     ],
   },
+  {
+    path: '/takeout_other',
+    component: Layout,
+    redirect: '/',
+    name: 'takeoutOther',
+    meta: {
+      title: '其他管理',
+      auth: 'takeoutOtherOrder',
+      icon: 'hugeicons:delivery-box-02',
+      alwaysOpened: true,
+    },
+    children: [
+      {
+        path: 'takeout_other_order',
+        name: 'takeoutOtherOrder',
+        component: () => import('@/views/takeout/other_order/list.vue'),
+        meta: {
+          auth: 'takeoutOtherOrder.browse',
+          title: '其他订单',
+        },
+      },
+    ],
+  },
 ]
 
 export default routes

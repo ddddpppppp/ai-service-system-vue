@@ -1,21 +1,17 @@
 <script setup lang="ts">
 import type { FormInstance, FormRules } from 'element-plus'
+import apiSetting from '@/api/modules/setting'
 import apiTakeout from '@/api/modules/takeout'
-import ImageUpload from '@/components/ImageUpload/index.vue'
 import { ElMessage } from 'element-plus'
-import { inject, ref, useTemplateRef, watch } from 'vue'
+import { ref, useTemplateRef, watch } from 'vue'
 
 export interface Props {
   id?: number | string
-  type?: 'home' | 'shop'
-  storeId?: number | string
 }
 const props = withDefaults(
   defineProps<Props>(),
   {
     id: '',
-    type: 'home',
-    storeId: '',
   },
 )
 
@@ -29,7 +25,6 @@ const visible = defineModel<boolean>({
   default: false,
 })
 
-const uploadFileAction = String(inject('uploadFileAction'))
 const loading = ref(false)
 const formRef = useTemplateRef<FormInstance>('formRef')
 
@@ -37,30 +32,25 @@ const formRef = useTemplateRef<FormInstance>('formRef')
 function createInitialFormState() {
   return {
     id: props.id,
-    name: '',
-    image: '',
-    storeId: props.storeId,
-    createdAt: '',
-    updatedAt: '',
+    title: '',
+    description: '',
+    money: '',
+    returnUrl: '',
+    paymentChannel: '',
   }
 }
 
 const form = ref(createInitialFormState())
-const storeList = ref([
-  {
-    storeId: '',
-    name: '全部',
-  },
-])
+const paymentChannelList = ref([] as any[])
 const formRules = ref<FormRules>({
-  name: [
-    { required: true, message: '请输入分类名称，例如蛋糕，咖啡', trigger: 'blur' },
+  title: [
+    { required: true, message: '请输入标题', trigger: 'blur' },
   ],
-  image: [
-    { required: true, message: '请上传分类图片', trigger: 'blur' },
+  description: [
+    { required: true, message: '请输入描述', trigger: 'blur' },
   ],
-  storeId: [
-    { required: true, message: '请选择店铺', trigger: 'change' },
+  money: [
+    { required: true, message: '请输入金额', trigger: 'blur' },
   ],
 })
 
@@ -81,25 +71,9 @@ onMounted(() => {
 })
 
 function getInfo() {
-  if (props.type === 'shop') {
-    form.value.storeId = props.storeId
-    apiTakeout.getAllStore().then((res: any) => {
-      storeList.value = res.data.list
-    })
-  }
-  if (props.id && props.id !== '') {
-    loading.value = true
-    apiTakeout.getCategory({ id: props.id }).then((res: any) => {
-      loading.value = false
-      if (res.status === 1) {
-        form.value = res.data.category
-      }
-    })
-  }
-}
-
-function onUploadSuccess(res: any) {
-  form.value.image = res.data.url
+  apiSetting.getAllPaymentChannel({}).then((res: any) => {
+    paymentChannelList.value = res.data.list
+  })
 }
 
 function onSubmit() {
@@ -123,7 +97,7 @@ function submit() {
     formRef.value?.validate((valid) => {
       if (valid) {
         loading.value = true
-        apiTakeout.editCategory({ form: form.value }).then((res: any) => {
+        apiTakeout.editOtherOrder({ form: form.value }).then((res: any) => {
           if (res.status === 1) {
             ElMessage.success({
               message: res.statusText,
@@ -148,23 +122,29 @@ function submit() {
     <el-dialog
       v-model="visible"
       width="500px"
-      :title="id ? '编辑分类' : '新增分类'"
+      :title="id ? '编辑订单' : '新增订单'"
       :close-on-click-modal="true"
       destroy-on-close
       class="conversation-drawer"
     >
       <div v-loading="loading" class="takeout-category-main">
         <ElForm ref="formRef" :model="form" :rules="formRules" label-width="120px" label-suffix="：">
-          <ElFormItem label="分类名称" prop="name">
-            <ElInput v-model="form.name" placeholder="请输入分类名称，例如中餐，蛋糕，咖啡" />
-          </ElFormItem>
-          <ElFormItem v-if="type === 'shop'" label="店铺" prop="storeId">
-            <ElSelect v-model="form.storeId" placeholder="请选择店铺">
-              <ElOption v-for="item in storeList" :key="item.storeId" :label="item.name" :value="item.storeId" />
+          <ElFormItem label="支付渠道" prop="paymentChannel">
+            <ElSelect v-model="form.paymentChannel" placeholder="请选择支付渠道">
+              <ElOption v-for="item in paymentChannelList" :key="item.id" :label="item.name" :value="item.id" />
             </ElSelect>
           </ElFormItem>
-          <ElFormItem label="分类图片" prop="image">
-            <ImageUpload v-model="form.image" :action="uploadFileAction" :width="100" :height="100" :notip="true" @on-success="onUploadSuccess" />
+          <ElFormItem label="标题" prop="title">
+            <ElInput v-model="form.title" placeholder="请输入标题" />
+          </ElFormItem>
+          <ElFormItem label="描述" prop="description">
+            <ElInput v-model="form.description" placeholder="请输入描述" />
+          </ElFormItem>
+          <ElFormItem label="金额" prop="money">
+            <ElInput v-model="form.money" placeholder="请输入金额" />
+          </ElFormItem>
+          <ElFormItem label="返回地址" prop="returnUrl">
+            <ElInput v-model="form.returnUrl" placeholder="支付成功或者失败跳转的页面，如果为空，则不跳转" />
           </ElFormItem>
         </ElForm>
       </div>

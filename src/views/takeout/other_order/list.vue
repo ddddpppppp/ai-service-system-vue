@@ -8,10 +8,10 @@ import apiTakeout from '@/api/modules/takeout'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import TakeoutOrderDetail from './detail.vue'
+import TakeoutOtherOrderDetail from './detail.vue'
 
 defineOptions({
-  name: 'TakeoutOrderList',
+  name: 'TakeoutOtherOrderList',
 })
 
 const { pagination, getParams, onSizeChange, onCurrentChange, onSortChange } = usePagination()
@@ -48,12 +48,6 @@ const dataList = ref([
     status: '',
   },
 ])
-const storeList = ref([
-  {
-    storeId: '',
-    name: '全部',
-  },
-])
 // 详情
 const formModeProps = ref<{
   visible: boolean
@@ -78,7 +72,6 @@ onMounted(() => {
   if (route.query.storeId) {
     search.value.storeId = route.query.storeId as string
   }
-  getDataStore()
   getDataList()
   getDataTotal()
 })
@@ -91,13 +84,12 @@ async function getDataList(isExport = false) {
   const params = {
     ...getParams(),
     ...(search.value.name && { name: search.value.name }),
-    ...(search.value.storeId && { storeId: search.value.storeId }),
     ...(search.value.dateData && { dateData: search.value.dateData }),
     ...(search.value.userName && { userName: search.value.userName }),
     ...(search.value.agentName && { agentName: search.value.agentName }),
     ...(search.value.status && { status: search.value.status }),
   }
-  const res = await apiTakeout.getOrderList(params)
+  const res = await apiTakeout.getOtherOrderList(params)
   loading.value = false
   if (isExport) {
     return res.data.list
@@ -110,21 +102,14 @@ async function getDataTotal() {
   const params = {
     ...getParams(),
     ...(search.value.name && { name: search.value.name }),
-    ...(search.value.storeId && { storeId: search.value.storeId }),
     ...(search.value.dateData && { dateData: search.value.dateData }),
     ...(search.value.userName && { userName: search.value.userName }),
     ...(search.value.agentName && { agentName: search.value.agentName }),
     ...(search.value.status && { status: search.value.status }),
   }
-  const res = await apiTakeout.getOrderTotal(params)
+  const res = await apiTakeout.getOtherOrderTotal(params)
   pagination.value.total = res.data.total.totalOrder
   total.value = res.data.total
-}
-
-function getDataStore() {
-  apiTakeout.getAllStore().then((res: any) => {
-    storeList.value = res.data.list
-  })
 }
 
 // 每页数量切换
@@ -142,14 +127,14 @@ function sortChange({ prop, order }: { prop: string, order: string }) {
   onSortChange(prop, order).then(() => getDataList())
 }
 
-function onEdit(row: any) {
-  formModeProps.value.id = row.orderNo
+function onAddOrder() {
+  formModeProps.value.id = 0
   formModeProps.value.visible = true
 }
 
 function onCopy(row: any) {
-  if (navigator.clipboard && row.checkoutUrl) {
-    navigator.clipboard.writeText(row.checkoutUrl)
+  if (navigator.clipboard && row.url) {
+    navigator.clipboard.writeText(row.url)
       .then(() => {
         ElMessage.success({
           message: '复制成功',
@@ -331,8 +316,8 @@ const contextMenuItems = computed(() => {
       index: 'pending',
     },
     {
-      label: '送货中',
-      index: 'delivering',
+      label: '冻结中',
+      index: 'frozen',
     },
     {
       label: '已完成',
@@ -355,11 +340,6 @@ const contextMenuItems = computed(() => {
           <ElForm :model="search" size="default" label-width="100px" inline-message inline class="search-form">
             <ElFormItem label="订单号">
               <ElInput v-model="search.name" placeholder="请输入订单号，支持模糊查询" clearable @keydown.enter="currentChange()" @clear="currentChange()" />
-            </ElFormItem>
-            <ElFormItem label="店铺">
-              <ElSelect v-model="search.storeId" placeholder="请选择店铺" clearable>
-                <ElOption v-for="item in storeList" :key="item.storeId" :label="item.name" :value="item.storeId" />
-              </ElSelect>
             </ElFormItem>
             <ElFormItem label="日期">
               <ElDatePicker v-model="search.dateData" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" value-format="YYYY-MM-DD" />
@@ -413,10 +393,10 @@ const contextMenuItems = computed(() => {
       <div class="mb-4 flex items-center justify-between">
         <div class="actions-container">
           <ElButtonGroup v-if="batch.enable">
-            <!-- <ElButton size="default" :disabled="!batch.selectionDataList.length" @click="onDelBatch">
-              <FaIcon name="i-ep:delete" class="mr-1" />
-              删除
-            </ElButton> -->
+            <ElButton size="default" @click="onAddOrder">
+              <FaIcon name="i-ep:plus" class="mr-1" />
+              添加订单
+            </ElButton>
             <ElButton v-if="canComplete" size="default" :disabled="!batch.selectionDataList.length" @click="onFinishBatch">
               <FaIcon name="i-ep:check" class="mr-1" />
               标记完成
@@ -490,9 +470,6 @@ const contextMenuItems = computed(() => {
             </div>
           </template>
         </ElTableColumn>
-        <ElTableColumn prop="subtotal" label="小计" min-width="120" align="center" header-align="center" />
-        <ElTableColumn prop="deliveryFee" label="配送费" min-width="120" align="center" header-align="center" />
-        <ElTableColumn prop="tax" label="税" min-width="120" align="center" header-align="center" />
         <ElTableColumn prop="total" label="总价" min-width="120" align="center" header-align="center">
           <template #default="scope">
             <span class="text-red-500 font-bold">
@@ -512,7 +489,7 @@ const contextMenuItems = computed(() => {
             </div>
           </template>
         </ElTableColumn>
-        <!-- <ElTableColumn prop="addressInfo" label="地址" /> -->
+        <ElTableColumn prop="description" label="描述" align="center" header-align="center" :min-width="150" />
         <ElTableColumn prop="statusName" label="状态" min-width="120" align="center" header-align="center">
           <template #default="scope">
             <ElTag :type="scope.row.statusClass">
@@ -525,21 +502,11 @@ const contextMenuItems = computed(() => {
         <ElTableColumn label="操作" width="150" align="center" fixed="right">
           <template #default="scope">
             <div class="table-action-buttons">
-              <ElTooltip content="查看详情" placement="top" effect="light">
-                <ElButton type="primary" size="small" circle @click="onEdit(scope.row)">
-                  <FaIcon name="i-ep:view" />
-                </ElButton>
-              </ElTooltip>
               <ElTooltip content="复制" placement="top" effect="light">
                 <ElButton type="primary" size="small" circle @click="onCopy(scope.row)">
                   <FaIcon name="ep:connection" />
                 </ElButton>
               </ElTooltip>
-              <!-- <ElTooltip v-if="scope.row.status === 'cancelled'" content="删除" placement="top" effect="light">
-                <ElButton type="danger" size="small" circle @click="onDel(scope.row)">
-                  <FaIcon name="i-ep:delete" />
-                </ElButton>
-              </ElTooltip> -->
               <ElTooltip v-if="scope.row.status === 'delivering' && canComplete" content="标记完成" placement="top" effect="light">
                 <ElButton type="success" size="small" circle @click="onFinish(scope.row)">
                   <FaIcon name="i-ep:check" />
@@ -556,7 +523,7 @@ const contextMenuItems = computed(() => {
       </ElTable>
       <ElPagination :current-page="pagination.page" :total="pagination.total" :page-size="pagination.size" :page-sizes="pagination.sizes" :layout="pagination.layout" :hide-on-single-page="false" class="pagination" background @size-change="sizeChange" @current-change="currentChange" />
     </FaPageMain>
-    <TakeoutOrderDetail :id="formModeProps.id" v-model="formModeProps.visible" @success="getDataList" />
+    <TakeoutOtherOrderDetail :id="formModeProps.id" v-model="formModeProps.visible" @success="getDataList" />
   </div>
 </template>
 

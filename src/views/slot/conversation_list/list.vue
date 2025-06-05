@@ -4,10 +4,25 @@
   </route>
 
 <script setup lang="ts">
+import type { WebSocketService } from '@/utils/WebSocketService'
 import apiDataManage from '@/api/modules/slot'
-import { debounce } from '@/utils/helper'
+// 导入事件总线
+import eventBus from '@/utils/eventBus'
+// import { debounce } from '@/utils/helper'
 import { ElMessage, ElMessageBox } from 'element-plus'
+// 按需导入 Scroll 组件
+import { Scroll } from 'view-ui-plus'
+import { inject } from 'vue'
 import FormMode from './detail.vue'
+// 如果需要样式，可以单独导入
+import 'view-ui-plus/dist/styles/viewuiplus.css'
+
+defineOptions({
+  name: 'SlotConversationList',
+})
+// 获取全局 WebSocket 服务
+const wsServiceProvider = inject<{ instance: WebSocketService | null }>('wsService')
+const wsService = wsServiceProvider?.instance
 
 // 定义会话项的类型接口
 interface ConversationItem {
@@ -22,15 +37,12 @@ interface ConversationItem {
   [key: string]: any
 }
 
-defineOptions({
-  name: 'SlotConversationList',
-})
-
 const { pagination, getParams } = usePagination()
 
 // 表格是否自适应高度
 const tableAutoHeight = ref(true)
 
+const loading = ref(false)
 // 搜索
 const searchDefault = {
   nickname: '',
@@ -56,12 +68,7 @@ const isAllSelected = ref(false)
 const selectionMode = ref(false)
 
 // 列表
-const loading = ref(false)
 const dataList = ref<ConversationItem[]>([])
-
-// 创建一个 ref 来引用容器元素
-const contactContainer = ref<HTMLElement | null>(null)
-const scrollThreshold = 100 // 滚动到距离底部100px内时加载更多
 
 const statusList = ref([
   {
@@ -129,18 +136,18 @@ function resetFilter() {
 }
 
 onMounted(() => {
-  if (contactContainer.value) {
-    contactContainer.value.addEventListener('scroll', handleScroll)
-    pagination.value.page = 1
-    pagination.value.size = 20
-    getDataList()
-  }
+  pagination.value.page = 1
+  pagination.value.size = 20
+  getDataList()
+
+  // 添加事件监听
+  eventBus.on('message-sent', handleMessageSent)
+  onReceiveMessage()
 })
 
 onUnmounted(() => {
-  if (contactContainer.value) {
-    contactContainer.value.removeEventListener('scroll', handleScroll)
-  }
+  // 移除事件监听
+  eventBus.off('message-sent', handleMessageSent)
 })
 
 function searchData() {
@@ -148,52 +155,22 @@ function searchData() {
   getDataList()
 }
 
-// 使用防抖包装滚动处理函数
-function handleScroll() {
-  // 检查是否已经在加载或不应该触发加载
-  if (!contactContainer.value || loading.value) {
-    return
-  }
-
-  // 检查是否滚动到底部附近
-  if (contactContainer.value.scrollTop + contactContainer.value.clientHeight >= contactContainer.value.scrollHeight - scrollThreshold) {
+// 修改为使用 Scroll 组件的方式
+function handleReachBottom() {
+  return new Promise((resolve) => {
+    // 检查是否已经在加载或不应该触发加载
     // 最后一条数据了自动放弃加载
     if (dataList.value.length >= pagination.value.total || dataList.value.length === 0) {
       return
     }
-
-    // 立即设置加载状态，防止重复触发
-    loading.value = true
-
-    // 延迟执行实际加载逻辑
-    debounce(async () => {
-      try {
-        // 记住当前滚动位置和内容高度
-        const prevScrollHeight = contactContainer.value!.scrollHeight
-
-        // 加载更多消息
-        pagination.value.page += 1
-        await getDataList()
-
-        // 等待DOM更新
-        await nextTick()
-
-        // 保持滚动位置
-        const newScrollHeight = contactContainer.value!.scrollHeight
-        contactContainer.value!.scrollTop = newScrollHeight - prevScrollHeight + contactContainer.value!.scrollTop
-      }
-      catch (error) {
-        console.error('Failed to load more messages:', error)
-      }
-      finally {
-        loading.value = false
-      }
-    }, 1000)()
-  }
+    // 加载更多消息
+    pagination.value.page += 1
+    getDataList()
+    resolve(true)
+  })
 }
 
 function getDataList() {
-  loading.value = true
   const params = {
     ...getParams(),
     ...(search.value.nickname && { nickname: search.value.nickname }),
@@ -204,8 +181,8 @@ function getDataList() {
     ...(search.value.startTime && { startTime: search.value.startTime }),
     ...(search.value.endTime && { endTime: search.value.endTime }),
   }
+  loading.value = true
   apiDataManage.getConversationList(params).then((res: any) => {
-    loading.value = false
     if (pagination.value.page === 1) {
       dataList.value = res.data.list
     }
@@ -213,24 +190,28 @@ function getDataList() {
       dataList.value = [...dataList.value, ...res.data.list]
     }
     pagination.value.total = res.data.total
+  }).finally(() => {
+    loading.value = false
   })
 }
 
 function onChatList(row: ConversationItem) {
+  row.unreadMessageCount = 0
   formModeProps.value.type = 'chat'
   formModeProps.value.id = row.conversationId
+  apiDataManage.readAllMsg({ sessionId: row.sessionId })
 }
 
-function onDelBatch() {
-  ElMessageBox.confirm(`确认批量删除这些对话吗？删除后无法找回`, '确认信息').then(() => {
+function onReadBatch() {
+  ElMessageBox.confirm(`确认批量已读这些对话吗？`, '确认信息').then(() => {
     const ids: string[] = []
     batch.value.selectionDataList.forEach((item) => {
-      ids.push(item.conversationId)
+      ids.push(item.sessionId)
     })
-    apiDataManage.delConversation({ ids }).then(() => {
+    apiDataManage.readAllMsg({ ids }).then(() => {
       getDataList()
       ElMessage.success({
-        message: '删除成功',
+        message: '已读成功',
         center: true,
       })
     })
@@ -280,6 +261,95 @@ function toggleSelectionMode() {
     batch.value.selectionDataList = []
     isAllSelected.value = false
   }
+}
+
+// 添加一个日期格式化函数
+function formatDateTime(dateTimeStr: string): string {
+  if (!dateTimeStr) {
+    return ''
+  }
+
+  const date = new Date(dateTimeStr)
+  const month = date.getMonth() + 1 // 月份从0开始
+  const day = date.getDate()
+  const hours = date.getHours().toString().padStart(2, '0')
+  const minutes = date.getMinutes().toString().padStart(2, '0')
+
+  return `${month}-${day} ${hours}:${minutes}`
+}
+
+// 处理消息发送事件，将用户置顶
+function handleMessageSent(data: { conversationId: string, message: any }) {
+  // 找到对应的会话
+  const index = dataList.value.findIndex(item => Number.parseInt(item.conversationId) === Number.parseInt(data.conversationId))
+
+  if (index !== -1) {
+    // 找到了会话，将其从当前位置移除
+    const conversation = dataList.value[index]
+
+    // 更新会话的最新消息内容和时间
+    conversation.content = data.message.textContent || '[图片]'
+    conversation.endTime = formatDateTime(data.message.sentAt)
+
+    // 从数组中移除
+    dataList.value.splice(index, 1)
+
+    // 添加到数组开头（置顶）
+    dataList.value.unshift(conversation)
+
+    return conversation
+  }
+
+  return null
+}
+
+function onReceiveMessage() {
+  wsService?.on('game_new_message', (event) => {
+    try {
+      let data = JSON.parse(event.data)
+      data = data.data
+
+      // 处理新消息：更新会话列表并置顶
+      if (data && data.conversationId) {
+        // 构造与handleMessageSent兼容的数据格式
+        const messageData = {
+          conversationId: data.conversationId,
+          message: {
+            textContent: data.textContent,
+            sentAt: data.sentAt,
+            contentType: data.contentType,
+          },
+        }
+
+        // 复用handleMessageSent方法进行置顶操作
+        const conversation = handleMessageSent(messageData)
+
+        // 如果找到了会话，更新未读消息计数
+        if (conversation) {
+          // 如果当前打开的会话就是收到消息的会话，则将消息添加到聊天列表
+          if (Number.parseInt(formModeProps.value.id) === Number.parseInt(data.conversationId)) {
+            // 通过事件总线通知ChatList组件添加新消息
+            eventBus.emit('new-message-received', data)
+            apiDataManage.readAllMsg({ sessionId: data.sessionId })
+          }
+          else {
+          // 未读消息数+1
+            if (!conversation.unreadMessageCount) {
+              conversation.unreadMessageCount = 0
+            }
+            conversation.unreadMessageCount += 1
+          }
+        }
+      }
+    }
+    catch (error) {
+      console.error('Failed to process new message:', error)
+      ElMessage.error({
+        message: 'Unknown error occurred',
+        center: true,
+      })
+    }
+  })
 }
 </script>
 
@@ -341,15 +411,15 @@ function toggleSelectionMode() {
                       </div>
                     </el-button>
                     <el-button
-                      type="danger"
+                      type="success"
                       size="small"
                       class="operation-btn w-full"
                       :disabled="batch.selectionDataList.length === 0 || !selectionMode"
-                      @click="onDelBatch"
+                      @click="onReadBatch"
                     >
                       <div class="flex items-center justify-center">
-                        <FaIcon name="tabler:trash" class="mr-2" />
-                        删除选中
+                        <FaIcon name="tabler:check" class="mr-2" />
+                        已读
                       </div>
                     </el-button>
                   </div>
@@ -365,44 +435,54 @@ function toggleSelectionMode() {
             </div>
           </div>
 
-          <div ref="contactContainer" v-loading.body="loading" class="user-list-content">
-            <div
-              v-for="(item, index) in dataList"
-              :key="index"
-              class="user-item"
-              :class="{ active: formModeProps.id === item.conversationId }"
-              @click="selectionMode ? toggleSelection(item, !isItemSelected(item)) : onChatList(item)"
+          <div v-loading="loading" class="user-list-content">
+            <!-- 替换为 Scroll 组件 -->
+            <Scroll
+              loading-text="loading..."
+              :on-reach-bottom="handleReachBottom"
+              :distance-to-edge="10"
             >
-              <div v-if="selectionMode" class="selection-checkbox mr-2">
-                <div
-                  class="custom-checkbox"
-                  :class="{ checked: isItemSelected(item) }"
-                  @click.stop="toggleSelection(item, !isItemSelected(item))"
-                >
-                  <FaIcon v-if="isItemSelected(item)" name="tabler:check" class="check-icon" />
-                </div>
-              </div>
-              <div class="user-item-content" :class="{ 'ml-2': !selectionMode }">
-                <div class="user-avatar">
-                  <el-avatar :size="40" :src="item.avatar">
-                    {{ item.username?.charAt(0) || 'U' }}
-                  </el-avatar>
-                  <!-- <div v-if="item.sender === 'assistant'" class="user-type-badge">
-                      机
-                    </div> -->
-                </div>
-                <div class="user-info">
-                  <div class="user-header">
-                    <span class="user-name">{{ item.username || '未命名用户' }}</span>
-                    <span class="message-time">{{ item.endTime }}</span>
-                  </div>
-                  <div class="message-preview">
-                    <span class="preview-content">{{ item.content || '暂无消息' }}</span>
-                    <!-- <el-badge v-if="item.unreadCount" :value="item.unreadCount" class="unread-badge" /> -->
+              <div
+                v-for="(item, index) in dataList"
+                :key="index"
+                class="user-item"
+                :class="{ active: formModeProps.id === item.conversationId }"
+                @click="selectionMode ? toggleSelection(item, !isItemSelected(item)) : onChatList(item)"
+              >
+                <div v-if="selectionMode" class="selection-checkbox mr-2">
+                  <div
+                    class="custom-checkbox"
+                    :class="{ checked: isItemSelected(item) }"
+                    @click.stop="toggleSelection(item, !isItemSelected(item))"
+                  >
+                    <FaIcon v-if="isItemSelected(item)" name="tabler:check" class="check-icon" />
                   </div>
                 </div>
+                <div class="user-item-content" :class="{ 'ml-2': !selectionMode }">
+                  <div class="user-avatar">
+                    <el-avatar :size="40" :src="item.avatar">
+                      {{ item.username?.charAt(0) || 'U' }}
+                    </el-avatar>
+                    <!-- <div v-if="item.sender === 'assistant'" class="user-type-badge">
+                        机
+                      </div> -->
+                  </div>
+                  <div class="user-info">
+                    <div class="user-header">
+                      <span class="user-name">{{ item.username || '未命名用户' }}</span>
+                      <span class="message-time">{{ item.endTime }}</span>
+                    </div>
+                    <div class="message-preview">
+                      <span class="preview-content">{{ item.content || '暂无消息' }}</span>
+                      <el-badge v-if="item.unreadMessageCount" :value="item.unreadMessageCount" class="unread-badge" />
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
+              <!-- <div v-if="loading" class="loading-more py-2 text-center">
+                加载更多...
+              </div> -->
+            </Scroll>
           </div>
         </div>
 
@@ -656,8 +736,20 @@ function toggleSelectionMode() {
   }
 
   .user-list-content {
+    position: relative;
+    display: flex; /* 添加flex布局 */
     flex: 1;
-    overflow-y: auto;
+    flex-direction: column; /* 垂直方向布局 */
+    height: 100%; /* 修改为100%，让它填满父容器的剩余空间 */
+  }
+
+  /* 确保Scroll组件占满整个容器 */
+  .user-list-content :deep(.ivu-scroll-container) {
+    height: 100% !important;
+  }
+
+  .user-list-content :deep(.ivu-scroll-wrapper) {
+    height: 100% !important;
   }
 
   .filter-options {
@@ -744,7 +836,7 @@ function toggleSelectionMode() {
 
   .preview-content {
     flex: 1;
-    width: 240px;
+    width: 205px;
     overflow: hidden;
     text-overflow: ellipsis;
     font-size: 12px;
@@ -879,5 +971,13 @@ function toggleSelectionMode() {
 
   :deep(.el-button+.el-button) {
     margin-left: 0;
+  }
+
+  /* 添加 Scroll 组件相关样式 */
+  .loading-more {
+    padding: 10px 0;
+    font-size: 12px;
+    color: #909399;
+    text-align: center;
   }
   </style>

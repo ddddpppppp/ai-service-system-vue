@@ -2,11 +2,17 @@
 import type { WebSocketService } from '@/utils/WebSocketService'
 import apiDataManage from '@/api/modules/slot'
 import avatar from '@/assets/images/avatar.png'
-import { debounce, getCurrentTime } from '@/utils/helper'
+// 导入事件总线
+import eventBus from '@/utils/eventBus'
+import { getCurrentTime } from '@/utils/helper'
 import { Loading } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import { inject, nextTick, onMounted, onUnmounted, ref } from 'vue'
+// 按需导入 Scroll 组件
+import { Scroll } from 'view-ui-plus'
+import { inject, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import MessageAnnotation from './components/MessageAnnotation.vue'
+// 如果需要样式，可以单独导入
+import 'view-ui-plus/dist/styles/viewuiplus.css'
 
 const props = withDefaults(defineProps<Props>(), {
   conversationId: '',
@@ -31,16 +37,11 @@ const sendAt = ref('')
 const labelOptions = ref([])
 
 // 创建一个 ref 来引用容器元素
-const messageContainer = ref<HTMLElement | null>(null)
 
-const isLoading = ref(false) // 防止重复加载
 const loading = ref(false) // 防止重复加载
-const scrollThreshold = 10 // 滚动到距离顶部100px内时加载更多
 
 // 总消息数量
 const totalMsgLength = ref(0)
-
-const resizeObserver = ref<ResizeObserver | null>(null)
 
 watch(() => props.conversationId, () => {
   messageList.value = []
@@ -52,66 +53,106 @@ watch(() => props.conversationId, () => {
 
 // 滚动到底部函数
 function scrollToBottom() {
-  if (messageContainer.value) {
-    const container = messageContainer.value as HTMLElement
-    container.scrollTop = container.scrollHeight
-  }
+  nextTick(() => {
+    const scrollWrapper = document.querySelector('.chat-conversation-wrapper .ivu-scroll-container')
+    if (scrollWrapper) {
+      scrollWrapper.scrollTo({
+        top: scrollWrapper.scrollHeight,
+        behavior: 'smooth',
+      })
+    }
+  })
 }
 
-// 使用防抖包装滚动处理函数
+// 修改处理滚动到顶部加载更多数据的函数
 function handleScroll() {
-  // 检查是否已经在加载或不应该触发加载
-  if (!messageContainer.value || isLoading.value) {
-    return
-  }
-
-  // 检查是否滚动到顶部附近
-  if (messageContainer.value.scrollTop <= scrollThreshold) {
+  return new Promise<void>((resolve) => {
     // 最后一条数据了自动放弃加载
     if (messageList.value.length >= totalMsgLength.value || messageList.value.length === 0) {
+      resolve()
       return
     }
 
-    // 立即设置加载状态，防止重复触发
-    isLoading.value = true
-    loading.value = true
+    // 记录当前第一条消息的引用
+    const firstMessageId = messageList.value[0]?.messageId
+    const oldHeight = document.querySelector('.chat-conversation-wrapper .ivu-scroll-content')?.scrollHeight || 0
 
-    // 延迟执行实际加载逻辑
-    debounce(async () => {
-      try {
-        // 加载更多消息
-        await getMessageList()
+    // 加载更多消息
+    getMessageList().then(() => {
+      // 等待DOM更新
+      nextTick(() => {
+        // 计算新增内容的高度，并调整滚动位置
+        const newHeight = document.querySelector('.chat-conversation-wrapper .ivu-scroll-content')?.scrollHeight || 0
+        const heightDiff = newHeight - oldHeight
 
-        // 等待DOM更新
-        await nextTick()
-      }
-      catch (error) {
-        console.error('Failed to load more messages:', error)
-      }
-      finally {
-        isLoading.value = false
-      }
-    }, 1000)()
-  }
+        // 获取滚动容器
+        const scrollWrapper = document.querySelector('.chat-conversation-wrapper .ivu-scroll-wrapper')
+        if (scrollWrapper && heightDiff > 0) {
+          // 设置滚动位置，保持相对位置不变
+          scrollWrapper.scrollTop = heightDiff
+        }
+
+        // 如果可以找到之前的第一条消息，滚动到它的位置
+        if (firstMessageId) {
+          const firstMessage = document.querySelector(`[data-id="${firstMessageId}"]`)
+          if (firstMessage) {
+            // 使用较小的延迟确保DOM完全更新
+            setTimeout(() => {
+              firstMessage.scrollIntoView({ behavior: 'auto', block: 'center' })
+            }, 50)
+          }
+        }
+
+        resolve()
+      })
+    }).catch((error) => {
+      console.error('Failed to load more messages:', error)
+      resolve()
+    })
+  })
 }
 
 // 注册和移除滚动事件监听器
 onMounted(() => {
-  if (messageContainer.value) {
-    messageContainer.value.addEventListener('scroll', handleScroll)
+  getConversationDetail()
+  getMessageList()
 
-    getConversationDetail()
-    getMessageList()
-  }
+  // 添加事件监听，处理新消息
+  eventBus.on('new-message-received', handleNewMessage)
 })
 
 onUnmounted(() => {
-  if (messageContainer.value) {
-    messageContainer.value.removeEventListener('scroll', handleScroll)
-    resizeObserver.value?.unobserve(messageContainer.value)
-    resizeObserver.value = null
-  }
+  // 移除事件监听
+  eventBus.off('new-message-received', handleNewMessage)
 })
+
+// 处理接收到的新消息
+function handleNewMessage(message: any) {
+  if (Number.parseInt(message.conversationId) === Number.parseInt(props.conversationId as string)) {
+    // 构建消息对象并添加到列表
+    const newMessage = {
+      conversationId: message.conversationId,
+      messageId: message.uniqueMessageId || message.messageId,
+      messageOrder: messageList.value.length + 1,
+      senderRole: message.senderRole,
+      contentType: message.contentType,
+      textContent: message.textContent || '',
+      attachment: message.attachment || '',
+      mediaAttachments: null,
+      sentAt: message.sentAt,
+      username: message.username,
+      avatar: message.avatar,
+      annotations: message.labels ? JSON.parse(message.labels) : [],
+    }
+
+    messageList.value.push(newMessage)
+
+    // 消息添加后滚动到底部
+    nextTick(() => {
+      scrollToBottom()
+    })
+  }
+}
 
 // Fetch conversation details
 function getConversationDetail() {
@@ -135,24 +176,17 @@ function getConversationDetail() {
 }
 
 async function getMessageList() {
-  loading.value = true
   // 获取容器元素
-  const container = messageContainer.value
-  if (!container) {
-    return
-  }
-  // 保存当前scrollTop和scrollHeight
-  const prevScrollTop = container.scrollTop
-  const prevScrollHeight = container.scrollHeight
   let res = null
+  loading.value = true
   if (props.type === 'annotated') {
     res = await apiDataManage.getMessageList({ id: props.conversationId, messageOrder: messageOrder.value })
   }
   else {
     res = await apiDataManage.getRawMessageList({ id: props.conversationId, sendAt: sendAt.value })
   }
+  loading.value = false
   if (res.status === 1) {
-    loading.value = false
     totalMsgLength.value = res.data.total
     if (messageOrder.value > 0 || sendAt.value !== '') {
       // 上拉加载
@@ -160,7 +194,7 @@ async function getMessageList() {
     }
     else {
       messageList.value = res.data.list || []
-      // 首次加载时滚动到底部，也使用动画效果
+      // 首次加载时滚动到底部
       nextTick(() => {
         scrollToBottom()
       })
@@ -171,20 +205,6 @@ async function getMessageList() {
     else {
       sendAt.value = messageList.value[0].sentAt
     }
-
-    // 设置ResizeObserver监听容器高度变化，保持滚动位置
-    nextTick(() => {
-      resizeObserver.value = new ResizeObserver(() => {
-        const newScrollHeight = container.scrollHeight
-        const heightDiff = newScrollHeight - prevScrollHeight
-        container.scrollTop = prevScrollTop + heightDiff
-
-        // 调整后断开观察，避免重复触发
-        resizeObserver.value?.unobserve(container)
-        resizeObserver.value = null
-      })
-      resizeObserver.value.observe(container)
-    })
   }
   else {
     ElMessage.error({
@@ -246,6 +266,13 @@ defineExpose({
           newMessage.textContent = message.content
         }
         messageList.value.push(newMessage)
+
+        // 发送消息后触发事件，通知用户需要置顶
+        eventBus.emit('message-sent', {
+          conversationId: props.conversationId,
+          message: newMessage,
+        })
+
         // 在消息添加到列表后，使用nextTick等待DOM更新，然后滚动到底部
         nextTick(() => {
           scrollToBottom()
@@ -276,11 +303,32 @@ function trim(text: string) {
 function updateAnnotations(messageId: string, annotations: any) {
   annotationsMap.value[messageId] = annotations
 }
+
+function handleCloseImage() {
+  nextTick(() => {
+    const domImageMask = document.querySelector('.el-image-viewer__mask') // 获取遮罩层dom
+    if (!domImageMask) {
+      return
+    }
+    domImageMask.addEventListener('click', () => {
+      // 点击遮罩层时调用关闭按钮的 click 事件
+      const domImageClose = document.querySelector('.el-image-viewer__close')
+      if (domImageClose) {
+        (domImageClose as HTMLElement).click()
+      }
+    })
+  })
+}
 </script>
 
 <template>
-  <div class="chat-container" :class="{ 'border-radius-8': props.type === 'annotated' }">
-    <div ref="messageContainer" v-loading="loading" :scrollbar="true" class="chat-messageList-container">
+  <div v-loading="loading" class="chat-container" :class="{ 'border-radius-8': props.type === 'annotated' }">
+    <Scroll
+      loading-text="loading..."
+      :on-reach-top="handleScroll"
+      :distance-to-edge="10"
+      class="chat-messageList-container"
+    >
       <div v-if="!messageList.length" class="chat-empty-state">
         <el-empty description="暂无会话记录" />
       </div>
@@ -311,6 +359,7 @@ function updateAnnotations(messageId: string, annotations: any) {
                         loading="lazy"
                         style="max-width: 380px; max-height: 380px;"
                         class="message-image"
+                        @click.stop="handleCloseImage"
                       >
                         <template #placeholder>
                           <div class="image-slot">
@@ -352,7 +401,7 @@ function updateAnnotations(messageId: string, annotations: any) {
         </div>
       </template>
       <div class="message-list-bottom-spacer" />
-    </div>
+    </Scroll>
   </div>
 </template>
 
@@ -369,16 +418,37 @@ function updateAnnotations(messageId: string, annotations: any) {
 }
 
 .chat-messageList-container {
-  position: relative;
   display: flex;
   flex: 1;
   flex-direction: column;
   gap: 14px;
-  height: 100%;
+  width: 100% !important;
+  height: 100% !important;
   padding: 18px;
+  padding: 18px 0;
   overflow: scroll;
   overflow-y: auto;
   scroll-behavior: smooth;
+
+  /* 确保 Scroll 组件内部元素占满整个容器 */
+  :deep(.ivu-scroll) {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  :deep(.ivu-scroll-container) {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  :deep(.ivu-scroll-wrapper) {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  :deep(.ivu-scroll-content) {
+    width: 100% !important;
+  }
 }
 
 .chat-empty-state {
@@ -392,6 +462,7 @@ function updateAnnotations(messageId: string, annotations: any) {
   display: flex;
   flex-direction: column;
   width: 100%;
+  padding: 0 10px;
   margin-bottom: 16px;
 }
 

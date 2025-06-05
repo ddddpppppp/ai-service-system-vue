@@ -41,6 +41,9 @@ export default {
   getConversation: (data: any) => api.post('shop/slot/getConversation', data).then((res) => {
     return res
   }),
+  readAllMsg: (data: any) => api.post('shop/slot/readAllMsg', data).then((res) => {
+    return res
+  }),
   getMessageList: (data: any) => api.post('shop/slot/getMessageList', data).then((res) => {
     return res
   }),

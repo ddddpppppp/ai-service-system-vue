@@ -832,6 +832,7 @@ function onReceiveMessage() {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    width: 245px;
   }
 
   .preview-content {
@@ -979,5 +980,10 @@ function onReceiveMessage() {
     font-size: 12px;
     color: #909399;
     text-align: center;
+  }
+
+  /* 调整徽标位置 */
+  :deep(.unread-badge .el-badge__content) {
+    transform: translateY(30%);  /* 垂直居中 */
   }
   </style>

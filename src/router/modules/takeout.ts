@@ -122,7 +122,7 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/takeout/other_order/list.vue'),
         meta: {
           auth: 'takeoutOtherOrder.browse',
-          title: '其他订单',
+          title: '手动拉单',
         },
       },
     ],

@@ -2,6 +2,7 @@
 import type { FormInstance, FormRules } from 'element-plus'
 import apiSetting from '@/api/modules/setting'
 import apiTakeout from '@/api/modules/takeout'
+import { InfoFilled } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { ref, useTemplateRef, watch } from 'vue'
 
@@ -129,16 +130,32 @@ function submit() {
     >
       <div v-loading="loading" class="takeout-category-main">
         <ElForm ref="formRef" :model="form" :rules="formRules" label-width="120px" label-suffix="：">
+          <div class="mb-4 border-l-4 border-blue-400 rounded-md bg-blue-50 p-3">
+            <div class="flex items-center">
+              <el-icon class="mr-2 text-blue-500">
+                <InfoFilled />
+              </el-icon>
+              <span class="text-blue-700 font-medium">提示：</span>
+            </div>
+            <div class="ml-6 mt-1 text-sm text-blue-600">
+              手动添加订单并非外卖订单，用于接受转账需求服务。
+            </div>
+          </div>
           <ElFormItem label="支付渠道" prop="paymentChannel">
             <ElSelect v-model="form.paymentChannel" placeholder="请选择支付渠道">
               <ElOption v-for="item in paymentChannelList" :key="item.id" :label="item.name" :value="item.id" />
             </ElSelect>
           </ElFormItem>
           <ElFormItem label="标题" prop="title">
-            <ElInput v-model="form.title" placeholder="请输入标题" />
+            <ElInput v-model="form.title" placeholder="请输入标题，用于支付页面展示" class="w-full" />
+            <!-- <div class="w-full flex items-center gap-2">
+              <FaLinkPreview :url="payDetailImg" link-class="text-[#18794E] font-bold">
+                <FaIcon name="hugeicons:help-circle" />
+              </FaLinkPreview>
+            </div> -->
           </ElFormItem>
           <ElFormItem label="描述" prop="description">
-            <ElInput v-model="form.description" placeholder="请输入描述" />
+            <ElInput v-model="form.description" placeholder="请输入描述，用于支付页面展示" />
           </ElFormItem>
           <ElFormItem label="金额" prop="money">
             <ElInput v-model="form.money" placeholder="请输入金额" />

@@ -12,5 +12,3 @@ dist-electron
 .cursorrules
 .cursorignore
 pnpm-lock.yaml
-.env.development
-.env.production

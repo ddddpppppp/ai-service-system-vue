@@ -340,7 +340,7 @@ function handleCloseImage() {
             <div class="message-column">
               <div class="chat-message" :class="getMessageClass(message.senderRole)">
                 <div class="message-avatar">
-                  <el-avatar :size="38" :src="message.senderRole === 'assistant' ? avatar : message.avatar" />
+                  <el-avatar :size="38" style="background-color: #f5f5f5;" :src="message.senderRole === 'assistant' ? avatar : message.avatar" />
                 </div>
                 <div class="message-content">
                   <div class="message-header">

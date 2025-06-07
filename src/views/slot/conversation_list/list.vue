@@ -332,8 +332,8 @@ function onReceiveMessage() {
             eventBus.emit('new-message-received', data)
             apiDataManage.readAllMsg({ sessionId: data.sessionId })
           }
-          else {
-          // 未读消息数+1
+          else if (Number.parseInt(data.isRead) === -1) {
+            // 未读消息数+1
             if (!conversation.unreadMessageCount) {
               conversation.unreadMessageCount = 0
             }

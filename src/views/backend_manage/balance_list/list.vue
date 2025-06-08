@@ -27,6 +27,7 @@ const formMode = ref<'router' | 'dialog' | 'drawer'>('router')
 // 搜索
 const searchDefault = {
   content: '',
+  nickname: '',
 }
 const search = ref({ ...searchDefault })
 
@@ -84,6 +85,7 @@ function getDataList() {
   const params = {
     ...getParams(),
     ...(search.value.content && { content: search.value.content }),
+    ...(search.value.nickname && { nickname: search.value.nickname }),
   }
   if (type.value === 'balance') {
     apiSetting.getBalanceList(params).then((res: any) => {
@@ -129,6 +131,12 @@ function sortChange({ prop, order }: { prop: string, order: string }) {
       <FaSearchBar :show-toggle="false">
         <template #default="{ fold, toggle }">
           <ElForm :model="search" size="default" label-width="100px" inline-message inline class="search-form">
+            <ElFormItem label="员工">
+              <ElInput
+                v-model="search.nickname" placeholder="请输入员工名称，支持模糊查询" clearable @keydown.enter="currentChange()"
+                @clear="currentChange()"
+              />
+            </ElFormItem>
             <ElFormItem label="明细">
               <ElInput
                 v-model="search.content" placeholder="请输入明细内容，支持模糊查询" clearable @keydown.enter="currentChange()"

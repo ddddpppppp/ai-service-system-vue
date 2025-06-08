@@ -343,12 +343,12 @@ function toWithdraw() {
               <el-table-column prop="successCount" label="订单成功数量" />
               <el-table-column prop="successAmount" label="订单成功金额">
                 <template #default="scope">
-                  ¥{{ formatNumber(scope.row.successAmount) }}
+                  ${{ formatNumber(scope.row.successAmount) }}
                 </template>
               </el-table-column>
               <el-table-column prop="profit" label="利润">
                 <template #default="scope">
-                  ¥{{ formatNumber(scope.row.profit) }}
+                  ${{ formatNumber(scope.row.profit) }}
                 </template>
               </el-table-column>
             </el-table>

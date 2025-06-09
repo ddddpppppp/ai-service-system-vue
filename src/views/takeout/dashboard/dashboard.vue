@@ -337,16 +337,16 @@ function toWithdraw() {
               </div>
             </template>
 
-            <el-table :data="teamSales" style="width: 100%;" height="400">
+            <el-table :data="teamSales" style="width: 100%;" height="270">
               <el-table-column prop="name" label="名称" />
               <el-table-column prop="orderCount" label="订单量" />
-              <el-table-column prop="successCount" label="订单成功数量" />
-              <el-table-column prop="successAmount" label="订单成功金额">
+              <el-table-column prop="successCount" label="订单成功数量" sortable />
+              <el-table-column prop="successAmount" label="订单成功金额" sortable>
                 <template #default="scope">
                   ${{ formatNumber(scope.row.successAmount) }}
                 </template>
               </el-table-column>
-              <el-table-column prop="profit" label="利润">
+              <el-table-column prop="profit" label="利润" sortable>
                 <template #default="scope">
                   ${{ formatNumber(scope.row.profit) }}
                 </template>

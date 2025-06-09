@@ -224,6 +224,18 @@ function onFinishBatch() {
   }).catch(() => {})
 }
 
+function onRefund(row: any) {
+  ElMessageBox.confirm(`确认标记「${row.orderNo}」退款吗？`, '确认信息').then(() => {
+    apiTakeout.refundOrder({ id: row.orderNo }).then(() => {
+      getDataList()
+      ElMessage.success({
+        message: '标记退款成功',
+        center: true,
+      })
+    })
+  }).catch(() => {})
+}
+
 function onCancel(row: any) {
   ElMessageBox.confirm(`确认标记「${row.orderNo}」取消吗？`, '确认信息').then(() => {
     apiTakeout.cancelOrder({ id: row.orderNo }).then(() => {
@@ -543,6 +555,11 @@ const contextMenuItems = computed(() => {
               <ElTooltip v-if="scope.row.status === 'delivering' && canComplete" content="标记完成" placement="top" effect="light">
                 <ElButton type="success" size="small" circle @click="onFinish(scope.row)">
                   <FaIcon name="i-ep:check" />
+                </ElButton>
+              </ElTooltip>
+              <ElTooltip v-if="scope.row.canRefund" content="标记退款" placement="top" effect="light">
+                <ElButton type="warning" size="small" circle @click="onRefund(scope.row)">
+                  <FaIcon name="i-ep:close" />
                 </ElButton>
               </ElTooltip>
               <ElTooltip v-if="scope.row.status === 'pending'" content="标记取消" placement="top" effect="light">

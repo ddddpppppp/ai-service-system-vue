@@ -143,7 +143,7 @@ function submit() {
           </div>
           <ElFormItem label="支付渠道" prop="paymentChannel">
             <ElSelect v-model="form.paymentChannel" placeholder="请选择支付渠道">
-              <ElOption v-for="item in paymentChannelList" :key="item.id" :label="item.name" :value="item.id" />
+              <ElOption v-for="item in paymentChannelList" :key="item.id" :label="item.type" :value="item.id" />
             </ElSelect>
           </ElFormItem>
           <ElFormItem label="标题" prop="title">

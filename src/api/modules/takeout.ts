@@ -81,6 +81,9 @@ export default {
   cancelOrder: (data: any) => api.post('shop/takeout/cancelOrder', data).then((res) => {
     return res
   }),
+  refundOrder: (data: any) => api.post('shop/takeout/refundOrder', data).then((res) => {
+    return res
+  }),
   delOrder: (data: any) => api.post('shop/takeout/delOrder', data).then((res) => {
     return res
   }),
@@ -95,6 +98,9 @@ export default {
     return res
   }),
   editOtherOrder: (data: any) => api.post('shop/takeout/editOtherOrder', data).then((res) => {
+    return res
+  }),
+  refundOtherOrder: (data: any) => api.post('shop/takeout/refundOtherOrder', data).then((res) => {
     return res
   }),
 }

@@ -1,6 +1,9 @@
 import api from '../index'
 
 export default {
+  getAllChromeFacebook: (data: any) => api.post('shop/slot/getAllChromeFacebook', data).then((res) => {
+    return res
+  }),
   getChromeFacebookList: (data: any) => api.post('shop/slot/getChromeFacebookList', data).then((res) => {
     return res
   }),

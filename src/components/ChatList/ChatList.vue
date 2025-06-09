@@ -5,7 +5,7 @@ import avatar from '@/assets/images/avatar.png'
 // 导入事件总线
 import eventBus from '@/utils/eventBus'
 import { getCurrentTime } from '@/utils/helper'
-import { Loading } from '@element-plus/icons-vue'
+import { ChatDotSquare, ChatLineSquare, Close, Loading, User } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 // 按需导入 Scroll 组件
 import { Scroll } from 'view-ui-plus'
@@ -42,6 +42,9 @@ const loading = ref(false) // 防止重复加载
 
 // 总消息数量
 const totalMsgLength = ref(0)
+
+// 添加面板状态管理
+const showUserInfoPanel = ref(false)
 
 watch(() => props.conversationId, () => {
   messageList.value = []
@@ -112,10 +115,16 @@ function handleScroll() {
   })
 }
 
-// 注册和移除滚动事件监听器
+// 初始化时从localStorage读取状态
 onMounted(() => {
   getConversationDetail()
   getMessageList()
+
+  // 从localStorage读取面板状态
+  const savedPanelState = localStorage.getItem('chatUserInfoPanelOpen')
+  if (savedPanelState !== null) {
+    showUserInfoPanel.value = JSON.parse(savedPanelState)
+  }
 
   // 添加事件监听，处理新消息
   eventBus.on('new-message-received', handleNewMessage)
@@ -319,89 +328,229 @@ function handleCloseImage() {
     })
   })
 }
+
+// 添加切换面板函数
+function toggleUserInfoPanel() {
+  showUserInfoPanel.value = !showUserInfoPanel.value
+  // 保存状态到localStorage
+  localStorage.setItem('chatUserInfoPanelOpen', JSON.stringify(showUserInfoPanel.value))
+}
 </script>
 
 <template>
   <div v-loading="loading" class="chat-container" :class="{ 'border-radius-8': props.type === 'annotated' }">
-    <Scroll
-      loading-text="loading..."
-      :on-reach-top="handleScroll"
-      :distance-to-edge="10"
-      class="chat-messageList-container"
-    >
-      <div v-if="!messageList.length" class="chat-empty-state">
-        <el-empty description="暂无会话记录" />
-      </div>
-      <template v-else>
-        <div class="chat-message-wrapper">
-          <!-- 根据发送者类型调整布局 -->
-          <div v-for="message in messageList" :key="message.messageId" :data-id="message.messageId" class="chat-row" :class="{ 'chat-row-reverse': message.senderRole === 'assistant' }">
-            <!-- 消息内容 -->
-            <div class="message-column">
-              <div class="chat-message" :class="getMessageClass(message.senderRole)">
-                <div class="message-avatar">
-                  <el-avatar :size="38" style="background-color: #f5f5f5;" :src="message.senderRole === 'assistant' ? avatar : message.avatar" />
-                </div>
-                <div class="message-content">
-                  <div class="message-header">
-                    <span class="sender-name">{{ getSenderName(message.senderRole, message) }}</span>
-                  </div>
-                  <div class="message-body">
-                    <div v-if="trim(message.textContent)">
-                      {{ trim(message.textContent) }}
+    <div class="chat-layout-wrapper">
+      <!-- 聊天消息区域 -->
+      <div class="chat-main-section" :class="{ 'has-side-panel': showUserInfoPanel }">
+        <Scroll
+          loading-text="loading..."
+          :on-reach-top="handleScroll"
+          :distance-to-edge="10"
+          class="chat-messageList-container"
+        >
+          <div v-if="!messageList.length" class="chat-empty-state">
+            <el-empty description="暂无会话记录" />
+          </div>
+          <template v-else>
+            <div class="chat-message-wrapper">
+              <!-- 根据发送者类型调整布局 -->
+              <div v-for="message in messageList" :key="message.messageId" :data-id="message.messageId" class="chat-row" :class="{ 'chat-row-reverse': message.senderRole === 'assistant' || message.senderRole === 'bot' }">
+                <!-- 消息内容 -->
+                <div class="message-column">
+                  <div class="chat-message" :class="getMessageClass(message.senderRole)">
+                    <div class="message-avatar">
+                      <el-avatar :size="38" style="background-color: #f5f5f5;" :src="message.senderRole === 'assistant' || message.senderRole === 'bot' ? avatar : message.avatar" />
                     </div>
-                    <div v-if="message.attachment">
-                      <el-image
-                        :src="message.attachment"
-                        alt="image"
-                        fit="contain"
-                        :preview-src-list="[message.attachment]"
-                        loading="lazy"
-                        style="max-width: 380px; max-height: 380px;"
-                        class="message-image"
-                        @click.stop="handleCloseImage"
-                      >
-                        <template #placeholder>
-                          <div class="image-slot">
-                            <el-icon><Loading /></el-icon>
-                            <span>加载中...</span>
-                          </div>
-                        </template>
-                        <template #error>
-                          <div class="image-slot">
-                            <FaIcon name="i-ph:image-broken-duotone" />
-                            <span>加载失败</span>
-                          </div>
-                        </template>
-                      </el-image>
+                    <div class="message-content">
+                      <div class="message-header">
+                        <span class="sender-name">{{ getSenderName(message.senderRole, message) }}</span>
+                      </div>
+                      <div class="message-body">
+                        <div v-if="trim(message.textContent)">
+                          {{ trim(message.textContent) }}
+                        </div>
+                        <div v-if="message.attachment">
+                          <el-image
+                            :src="message.attachment"
+                            alt="image"
+                            fit="contain"
+                            :preview-src-list="[message.attachment]"
+                            loading="lazy"
+                            style="max-width: 380px; max-height: 380px;"
+                            class="message-image"
+                            @click.stop="handleCloseImage"
+                          >
+                            <template #placeholder>
+                              <div class="image-slot">
+                                <el-icon><Loading /></el-icon>
+                                <span>加载中...</span>
+                              </div>
+                            </template>
+                            <template #error>
+                              <div class="image-slot">
+                                <FaIcon name="i-ph:image-broken-duotone" />
+                                <span>加载失败</span>
+                              </div>
+                            </template>
+                          </el-image>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
 
-              <!-- 时间显示 - 框外显示，根据发送者对齐 -->
-              <div
-                v-if="message.sentAt"
-                class="message-time"
-                :class="{ 'time-right': message.senderRole === 'assistant', 'time-left': message.senderRole === 'user' }"
-              >
-                {{ message.sentAt }}
+                  <!-- 时间显示 - 框外显示，根据发送者对齐 -->
+                  <div
+                    v-if="message.sentAt"
+                    class="message-time"
+                    :class="{ 'time-right': message.senderRole === 'assistant', 'time-left': message.senderRole === 'user' }"
+                  >
+                    {{ message.sentAt }}
+                  </div>
+                </div>
+
+                <!-- 用户消息时，标注区在右侧 -->
+                <MessageAnnotation
+                  v-if="props.type === 'annotated' && message.annotations.length > 0"
+                  :annotations="message.annotations"
+                  :label-options="labelOptions"
+                  :message-id="String(message.messageId)"
+                  @update:annotations="updateAnnotations"
+                />
+              </div>
+            </div>
+          </template>
+          <div class="message-list-bottom-spacer" />
+        </Scroll>
+      </div>
+
+      <!-- 右上角控制按钮 -->
+      <div class="side-panel-controls">
+        <el-button
+          v-if="!showUserInfoPanel"
+          type="primary"
+          size="small"
+          @click="toggleUserInfoPanel"
+        >
+          查看会话详情
+        </el-button>
+      </div>
+
+      <!-- 用户信息侧边面板 -->
+      <div v-if="showUserInfoPanel" class="conversation-info-panel">
+        <div class="info-panel-header">
+          <span class="info-panel-title">会话详情</span>
+          <el-button
+            type="text"
+            :icon="Close"
+            size="small"
+            @click="toggleUserInfoPanel"
+          />
+        </div>
+
+        <div v-if="conversation.chatUser || conversation.channel" class="info-panel-content">
+          <!-- 用户信息区域 -->
+          <div v-if="conversation.chatUser" class="user-info-section">
+            <div class="section-header">
+              <el-icon><User /></el-icon>
+              <span>用户资料</span>
+            </div>
+
+            <div class="user-profile-area">
+              <el-avatar :size="60" :src="conversation.chatUser?.avatar" />
+              <div class="user-details-area">
+                <div class="user-display-name">
+                  {{ conversation.chatUser?.nickname }}
+                </div>
+                <div class="user-id-text">
+                  ID: {{ conversation.chatUser?.chatUserId?.slice(0, 8) }}...
+                </div>
+                <div class="user-channel-text">
+                  渠道: {{ conversation.chatUser?.channel }}
+                </div>
               </div>
             </div>
 
-            <!-- 用户消息时，标注区在右侧 -->
-            <MessageAnnotation
-              v-if="props.type === 'annotated' && message.annotations.length > 0"
-              :annotations="message.annotations"
-              :label-options="labelOptions"
-              :message-id="String(message.messageId)"
-              @update:annotations="updateAnnotations"
-            />
+            <!-- 用户标签 -->
+            <div v-if="conversation.chatUser?.labels?.length" class="user-tags-area">
+              <div class="tags-title">
+                用户标签
+              </div>
+              <div class="tags-list">
+                <el-tag
+                  v-for="label in conversation.chatUser.labels"
+                  :key="label.id"
+                  size="small"
+                  type="success"
+                  class="user-tag-item"
+                >
+                  {{ label.label_name }}
+                </el-tag>
+              </div>
+            </div>
+          </div>
+
+          <!-- 渠道信息区域 -->
+          <div v-if="conversation.channel" class="channel-info-section">
+            <div class="section-header">
+              <el-icon><ChatDotSquare /></el-icon>
+              <span>渠道信息</span>
+            </div>
+
+            <div class="info-item-list">
+              <div class="info-item-row">
+                <span class="info-label-text">渠道名称:</span>
+                <span class="info-value-text">{{ conversation.channel.name }}</span>
+              </div>
+              <div class="info-item-row">
+                <span class="info-label-text">代理ID:</span>
+                <span class="info-value-text">{{ conversation.channel.agentId }}</span>
+              </div>
+              <div v-if="conversation.channel.remark" class="info-item-row">
+                <span class="info-label-text">渠道ID:</span>
+                <span class="info-value-text">{{ conversation.channel.remark }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 会话信息区域 -->
+          <div class="session-info-section">
+            <div class="section-header">
+              <el-icon><ChatLineSquare /></el-icon>
+              <span>会话信息</span>
+            </div>
+
+            <div class="info-item-list">
+              <div class="info-item-row">
+                <span class="info-label-text">平台:</span>
+                <el-tag size="small">
+                  {{ conversation.platform }}
+                </el-tag>
+              </div>
+              <div class="info-item-row">
+                <span class="info-label-text">开始时间:</span>
+                <span class="info-value-text">{{ conversation.startTime }}</span>
+              </div>
+              <div class="info-item-row">
+                <span class="info-label-text">结束时间:</span>
+                <span class="info-value-text">{{ conversation.endTime }}</span>
+              </div>
+              <div class="info-item-row">
+                <span class="info-label-text">语言:</span>
+                <span class="info-value-text">{{ conversation.language }}</span>
+              </div>
+              <div class="info-item-row">
+                <span class="info-label-text">时区:</span>
+                <span class="info-value-text">{{ conversation.timezone }}</span>
+              </div>
+              <div class="info-item-row">
+                <span class="info-label-text">参与人数:</span>
+                <span class="info-value-text">{{ conversation.participantCount }}</span>
+              </div>
+            </div>
           </div>
         </div>
-      </template>
-      <div class="message-list-bottom-spacer" />
-    </Scroll>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -415,6 +564,148 @@ function handleCloseImage() {
 
 .border-radius-8 {
   border-radius: 8px;
+}
+
+.chat-layout-wrapper {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+.chat-main-section {
+  flex: 1;
+  transition: width 0.3s ease;
+
+  &.has-side-panel {
+    width: calc(100% - 350px);
+  }
+}
+
+.side-panel-controls {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 100;
+}
+
+.conversation-info-panel {
+  flex-shrink: 0;
+  width: 350px;
+  height: 100%;
+  overflow-y: auto;
+  background-color: #fff;
+  border-left: 1px solid #e4e7ed;
+  box-shadow: -2px 0 8px rgb(0 0 0 / 10%);
+}
+
+.info-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  background-color: #fafafa;
+  border-bottom: 1px solid #e4e7ed;
+
+  .info-panel-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #303133;
+  }
+}
+
+.info-panel-content {
+  padding: 16px;
+}
+
+.user-info-section,
+.channel-info-section,
+.session-info-section {
+  padding: 16px;
+  margin-bottom: 24px;
+  background-color: #f9f9f9;
+  border: 1px solid #e4e7ed;
+  border-radius: 8px;
+}
+
+.section-header {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #606266;
+}
+
+.user-profile-area {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.user-details-area {
+  flex: 1;
+}
+
+.user-display-name {
+  margin-bottom: 4px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.user-id-text,
+.user-channel-text {
+  margin-bottom: 2px;
+  font-size: 12px;
+  color: #909399;
+}
+
+.user-tags-area {
+  .tags-title {
+    margin-bottom: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #606266;
+  }
+
+  .tags-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .user-tag-item {
+    margin: 0;
+  }
+}
+
+.info-item-list {
+  .info-item-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    font-size: 13px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .info-label-text {
+      flex-shrink: 0;
+      width: 80px;
+      font-weight: 500;
+      color: #606266;
+    }
+
+    .info-value-text {
+      flex: 1;
+      color: #303133;
+      word-break: break-word;
+    }
+  }
 }
 
 .chat-messageList-container {

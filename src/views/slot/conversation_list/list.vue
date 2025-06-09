@@ -12,7 +12,8 @@ import eventBus from '@/utils/eventBus'
 import { ElMessage, ElMessageBox } from 'element-plus'
 // 按需导入 Scroll 组件
 import { Scroll } from 'view-ui-plus'
-import { inject } from 'vue'
+import { inject, onMounted, onUnmounted, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import FormMode from './detail.vue'
 // 如果需要样式，可以单独导入
 import 'view-ui-plus/dist/styles/viewuiplus.css'
@@ -23,6 +24,9 @@ defineOptions({
 // 获取全局 WebSocket 服务
 const wsServiceProvider = inject<{ instance: WebSocketService | null }>('wsService')
 const wsService = wsServiceProvider?.instance
+
+// 获取路由对象
+const route = useRoute()
 
 // 定义会话项的类型接口
 interface ConversationItem {
@@ -122,6 +126,9 @@ const formModeProps = ref({
 // 改用drawer控制过滤器的显示/隐藏
 const filterDrawerVisible = ref(false)
 
+// 主页列表
+const channelList = ref([] as any[])
+
 // 重置过滤器
 function resetFilter() {
   Object.assign(search.value, {
@@ -138,11 +145,27 @@ function resetFilter() {
 onMounted(() => {
   pagination.value.page = 1
   pagination.value.size = 20
+
+  if (route.query.channel) {
+    search.value.channel = route.query.channel as string
+  }
   getDataList()
 
+  getChannelList()
   // 添加事件监听
   eventBus.on('message-sent', handleMessageSent)
   onReceiveMessage()
+})
+
+// 监听路由参数变化
+watch(() => route.query.channel, (newChannel) => {
+  console.log(newChannel)
+  if (newChannel) {
+    search.value.channel = newChannel as string
+    // 重置分页并重新加载数据
+    pagination.value.page = 1
+    getDataList()
+  }
 })
 
 onUnmounted(() => {
@@ -192,6 +215,12 @@ function getDataList() {
     pagination.value.total = res.data.total
   }).finally(() => {
     loading.value = false
+  })
+}
+
+function getChannelList() {
+  apiDataManage.getAllChromeFacebook({}).then((res: any) => {
+    channelList.value = res.data.list
   })
 }
 
@@ -545,14 +574,11 @@ function onReceiveMessage() {
 
           <div class="form-item mb-3">
             <div class="form-label mb-2">
-              <span>关键词</span>
+              <span>主页</span>
             </div>
-            <el-input
-              v-model="search.channel"
-              placeholder="官媒Id"
-              clearable
-              class="w-full"
-            />
+            <el-select v-model="search.channel" placeholder="请选择主页" class="w-full" clearable>
+              <el-option v-for="item in channelList" :key="item.channelId" :label="item.name" :value="item.channelId" />
+            </el-select>
           </div>
 
           <div class="form-item mb-3">

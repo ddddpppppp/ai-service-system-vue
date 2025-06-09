@@ -173,7 +173,12 @@ function onSetAiStatus(item: any, status: number) {
 }
 
 function onShow(row: any) {
-  window.ipcRenderer.send('show-container', row.name)
+  router.push({
+    name: 'slotConversationData',
+    query: {
+      channel: row.channelId,
+    },
+  })
 }
 
 // 批量选择功能
@@ -413,7 +418,7 @@ defineExpose({
                 代理id:{{ item.agentId }}
               </ElTag>
               <ElTag type="warning" class="ml-2">
-                备注:{{ item.remark }}
+                渠道:{{ item.remark }}
               </ElTag>
             </div>
           </div>

@@ -96,38 +96,6 @@ const configList = ref<ConfigItem[]>([
     },
   },
   {
-    title: '注册接口api配置',
-    type: 'api',
-    name: 'registerApi',
-    form: {
-      url: {
-        value: '',
-        readOnly: 0,
-      },
-      input: {
-        readOnly: 1,
-        value: {
-          username: 'string|必填|用户名',
-          password: 'string|必填|密码',
-          parentId: 'string|选填|父级id',
-          agentId: 'string|选填|代理id',
-          channelId: 'string|选填|渠道id',
-        },
-      },
-      output: {
-        readOnly: 1,
-        value: {
-          code: 'int|必返回|状态码',
-          data: {
-            userId: 'string|必返回|用户id',
-            username: 'string|必返回|用户名',
-          },
-          message: 'string|必返回|消息',
-        },
-      },
-    },
-  },
-  {
     title: '送分接口api配置',
     type: 'api',
     name: 'sendScoreApi',

@@ -175,8 +175,11 @@ function submit() {
                     <div class="placeholder-info">
                       <span class="placeholder-label">默认占位符:</span>
                       <div class="placeholder-list">
+                        <span><code>${landingPage}</code> - 落地页/游戏链接</span>
                         <span><code>${username}</code> - 游戏账号</span>
                         <span><code>${password}</code> - 游戏密码</span>
+                        <span><code>${url}</code> - 链接</span>
+                        <span><code>${amount}</code> - 金额</span>
                       </div>
                     </div>
                   </div>

@@ -20,6 +20,7 @@ const form = ref({
   name: '',
   agentId: '',
   remark: '',
+  parentId: '',
   channelId: '',
   landingPage: '',
 })
@@ -31,7 +32,10 @@ const formRules = ref<FormRules>({
     { required: true, message: '请输入代理id', trigger: 'blur' },
   ],
   remark: [
-    { required: true, message: '请输入备注', trigger: 'blur' },
+    { required: true, message: '请输入渠道id', trigger: 'blur' },
+  ],
+  parentId: [
+    { required: true, message: '请输入父级id', trigger: 'blur' },
   ],
   channelId: [
     { required: true, message: '请输入主页id', trigger: 'blur' },
@@ -93,8 +97,11 @@ defineExpose({
       <ElFormItem label="代理id" prop="agentId">
         <ElInput v-model="form.agentId" placeholder="请输入代理id" />
       </ElFormItem>
-      <ElFormItem label="备注" prop="remark">
-        <ElInput v-model="form.remark" placeholder="请输入Facebook备注" />
+      <ElFormItem label="渠道id" prop="remark">
+        <ElInput v-model="form.remark" placeholder="请输入渠道id" />
+      </ElFormItem>
+      <ElFormItem label="父级id" prop="parentId">
+        <ElInput v-model="form.parentId" placeholder="请输入父级id" />
       </ElFormItem>
       <ElFormItem label="主页id" prop="channelId">
         <ElInput v-model="form.channelId" placeholder="请输入主页id" />

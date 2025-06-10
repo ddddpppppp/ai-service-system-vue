@@ -425,14 +425,16 @@ function toggleUserInfoPanel() {
 
       <!-- 右上角控制按钮 -->
       <div class="side-panel-controls">
-        <el-button
+        <FaIcon
           v-if="!showUserInfoPanel"
-          type="primary"
-          size="small"
+          class="cursor-pointer"
+          size="10"
+          color="#18181b"
+          name="i-ph:user-focus"
           @click="toggleUserInfoPanel"
         >
           查看会话详情
-        </el-button>
+        </FaIcon>
       </div>
 
       <!-- 用户信息侧边面板 -->
@@ -508,6 +510,97 @@ function toggleUserInfoPanel() {
               <div v-if="conversation.channel.remark" class="info-item-row">
                 <span class="info-label-text">渠道ID:</span>
                 <span class="info-value-text">{{ conversation.channel.remark }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 游戏信息区域 -->
+          <div v-if="conversation.gameInfo" class="game-info-section">
+            <div class="section-header">
+              <el-icon><ChatDotSquare /></el-icon>
+              <span>游戏信息</span>
+            </div>
+
+            <div class="info-item-list">
+              <div class="info-item-row">
+                <span class="info-label-text">用户ID:</span>
+                <span class="info-value-text">{{ conversation.gameInfo.userId }}</span>
+              </div>
+              <div class="info-item-row">
+                <span class="info-label-text">用户名:</span>
+                <span class="info-value-text">{{ conversation.gameInfo.username }}</span>
+              </div>
+              <div class="info-item-row">
+                <span class="info-label-text">当前积分:</span>
+                <span class="info-value-text">{{ conversation.gameInfo.score }}</span>
+              </div>
+              <div class="info-item-row">
+                <span class="info-label-text">获胜积分:</span>
+                <span class="info-value-text">{{ conversation.gameInfo.winScore }}</span>
+              </div>
+              <div class="info-item-row">
+                <span class="info-label-text">礼品积分:</span>
+                <span class="info-value-text">{{ conversation.gameInfo.giftScore }}</span>
+              </div>
+              <div class="info-item-row">
+                <span class="info-label-text">可兑换金额:</span>
+                <span class="info-value-text">${{ conversation.gameInfo.canRedemAmount }}</span>
+              </div>
+              <div class="info-item-row">
+                <span class="info-label-text">已兑换金额:</span>
+                <span class="info-value-text">${{ conversation.gameInfo.redemAmount }}</span>
+              </div>
+              <div class="info-item-row">
+                <span class="info-label-text">总获胜积分:</span>
+                <span class="info-value-text">{{ conversation.gameInfo.totalwinScore }}</span>
+              </div>
+              <div class="info-item-row">
+                <span class="info-label-text">总礼品积分:</span>
+                <span class="info-value-text">{{ conversation.gameInfo.totalgiftScore }}</span>
+              </div>
+              <div class="info-item-row">
+                <span class="info-label-text">总返利:</span>
+                <span class="info-value-text">${{ conversation.gameInfo.totalRebate }}</span>
+              </div>
+              <div class="info-item-row">
+                <span class="info-label-text">总充值:</span>
+                <span class="info-value-text">${{ conversation.gameInfo.totalRecharge }}</span>
+              </div>
+              <div class="info-item-row">
+                <span class="info-label-text">总兑换:</span>
+                <span class="info-value-text">${{ conversation.gameInfo.totalRedeem }}</span>
+              </div>
+              <div class="info-item-row">
+                <span class="info-label-text">注册时间:</span>
+                <span class="info-value-text">{{ conversation.gameInfo.registedAt }}</span>
+              </div>
+              <div class="info-item-row">
+                <span class="info-label-text">最后登录:</span>
+                <span class="info-value-text">{{ conversation.gameInfo.lastLoginAt }}</span>
+              </div>
+              <div class="info-item-row">
+                <span class="info-label-text">离线时间:</span>
+                <span class="info-value-text">{{ conversation.gameInfo.offlineAt }}</span>
+              </div>
+              <div v-if="conversation.gameInfo.lastRechargeAt" class="info-item-row">
+                <span class="info-label-text">最后充值时间:</span>
+                <span class="info-value-text">{{ conversation.gameInfo.lastRechargeAt }}</span>
+              </div>
+              <div class="info-item-row">
+                <span class="info-label-text">最后充值金额:</span>
+                <span class="info-value-text">${{ conversation.gameInfo.lastRechargeAmount }}</span>
+              </div>
+              <div class="info-item-row">
+                <span class="info-label-text">设备ID:</span>
+                <span class="info-value-text">{{ conversation.gameInfo.deviceId }}</span>
+              </div>
+              <div class="info-item-row">
+                <span class="info-label-text">Cash App标签:</span>
+                <span class="info-value-text">{{ conversation.gameInfo.cashappTag }}</span>
+              </div>
+              <div class="info-item-row">
+                <span class="info-label-text">上级ID:</span>
+                <span class="info-value-text">{{ conversation.gameInfo.parentId }}</span>
               </div>
             </div>
           </div>
@@ -620,7 +713,8 @@ function toggleUserInfoPanel() {
 
 .user-info-section,
 .channel-info-section,
-.session-info-section {
+.session-info-section,
+.game-info-section {
   padding: 16px;
   margin-bottom: 24px;
   background-color: #f9f9f9;
@@ -695,7 +789,7 @@ function toggleUserInfoPanel() {
 
     .info-label-text {
       flex-shrink: 0;
-      width: 80px;
+      width: 100px;
       font-weight: 500;
       color: #606266;
     }

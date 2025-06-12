@@ -418,7 +418,7 @@ defineExpose({
                 代理id:{{ item.agentId }}
               </ElTag>
               <ElTag type="warning" class="ml-2">
-                渠道:{{ item.remark }}
+                主页:{{ item.remark }}
               </ElTag>
             </div>
           </div>

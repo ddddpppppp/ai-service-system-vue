@@ -402,7 +402,7 @@ function toggleUserInfoPanel() {
                   <div
                     v-if="message.sentAt"
                     class="message-time"
-                    :class="{ 'time-right': message.senderRole === 'assistant', 'time-left': message.senderRole === 'user' }"
+                    :class="{ 'time-right': message.senderRole === 'assistant' || message.senderRole === 'bot', 'time-left': message.senderRole === 'user' }"
                   >
                     {{ message.sentAt }}
                   </div>
@@ -500,7 +500,7 @@ function toggleUserInfoPanel() {
 
             <div class="info-item-list">
               <div class="info-item-row">
-                <span class="info-label-text">渠道名称:</span>
+                <span class="info-label-text">主页名称:</span>
                 <span class="info-value-text">{{ conversation.channel.name }}</span>
               </div>
               <div class="info-item-row">
@@ -508,8 +508,8 @@ function toggleUserInfoPanel() {
                 <span class="info-value-text">{{ conversation.channel.agentId }}</span>
               </div>
               <div v-if="conversation.channel.remark" class="info-item-row">
-                <span class="info-label-text">渠道ID:</span>
-                <span class="info-value-text">{{ conversation.channel.remark }}</span>
+                <span class="info-label-text">主页ID:</span>
+                <span class="info-value-text">{{ conversation.channel.channelId }}</span>
               </div>
             </div>
           </div>

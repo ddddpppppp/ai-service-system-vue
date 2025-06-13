@@ -552,11 +552,11 @@ function toggleUserInfoPanel() {
               </div>
               <div class="info-item-row">
                 <span class="info-label-text">总获胜积分:</span>
-                <span class="info-value-text">{{ conversation.gameInfo.totalwinScore }}</span>
+                <span class="info-value-text">{{ conversation.gameInfo.totalWinScore }}</span>
               </div>
               <div class="info-item-row">
                 <span class="info-label-text">总礼品积分:</span>
-                <span class="info-value-text">{{ conversation.gameInfo.totalgiftScore }}</span>
+                <span class="info-value-text">{{ conversation.gameInfo.totalGiftScore }}</span>
               </div>
               <div class="info-item-row">
                 <span class="info-label-text">总返利:</span>

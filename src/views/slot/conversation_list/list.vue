@@ -352,7 +352,6 @@ function onReceiveMessage() {
 
         // 复用handleMessageSent方法进行置顶操作
         const conversation = handleMessageSent(messageData)
-
         // 如果找到了会话，更新未读消息计数
         if (conversation) {
           // 如果当前打开的会话就是收到消息的会话，则将消息添加到聊天列表
@@ -368,6 +367,23 @@ function onReceiveMessage() {
             }
             conversation.unreadMessageCount += 1
           }
+        }
+        // 如果没有找到会话，创建一个新的会话并置顶
+        else {
+          // 创建新会话对象
+          const newConversation = {
+            conversationId: data.conversationId,
+            sessionId: data.sessionId,
+            username: data.username || '未命名用户',
+            avatar: data.avatar || '',
+            content: data.textContent || (data.contentType === 'image' ? '[图片]' : ''),
+            endTime: formatDateTime(data.sentAt),
+            unreadMessageCount: 1,
+            sender: data.senderRole,
+          }
+
+          // 添加到数组开头（置顶）
+          dataList.value.unshift(newConversation)
         }
       }
     }
